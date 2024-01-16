@@ -514,6 +514,7 @@ mrkta_final_gps %>% distinct(market.manual.final) %>% nrow()
 mrkta_final_gps %>% distinct(reg.ward.mrkt.final) %>% nrow()
 
 # write.csv(mrkta_final_gps, file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"), row.names = F)
+# write.csv(mrkta_geomatch_gps %>% mutate(reg.ward.mrkt.final = paste(region.name.geomatch, ward.name.geomatch, market.name.corrected, sep = "-")), file = here("data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv"), row.names = F)
 # When it comes to analysis of market survey C data, the date of survey NEEDS to be taken in to account. 
 ```
 
