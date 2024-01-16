@@ -1,0 +1,132 @@
+---
+title: "tanzania_mapping"
+output: html_document
+date: "2024-01-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+
+library(sf)
+library(here)
+library(tidyverse)
+library(RColorBrewer)
+library(lwgeom)
+library(ggpubr)
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "Times New Roman", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+plotsave <- F
+```
+
+
+# Mapping Market Survey A Locations
+
+- Load in raw market survey A data (following initial string cleaning)
+    - `r `"data/tanzania_data/mrkta_gps_tanzania_CLEAN.csv"`
+- Load Tanzania shapefile with ward boundaries
+    - `r `"data/shapefiles/tza_admbnda_adm3_20181019.shp"`
+    - Source <https://data.humdata.org/dataset/cod-ab-tza?> (ADM L3)
+- Cross-reference market location data from survey A (region-ward-village) and tanzania shapefile (region-district-ward)
+
+```{r data, include = T, warning = F, echo = F}
+
+# Load Tanzania Shapefile:
+# tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
+tregs_shp <- st_read(here("data/shapefiles/tza_admbnda_adm1_20181019.shp")) # with region boundaries
+# tdists_shp <- st_read(here("data/shapefiles/tza_admbnda_adm2_20181019.shp")) # with district boundaries
+twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) # with ward boundaries
+
+# Market A location data:
+mrkta_info <- read_csv(file = here("data/tanzania_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
+mrkta_gps <- read_csv(file = here("data/tanzania_data/mrkta_gps_tanzania_CLEAN.csv"))
+
+```
+
+
+# Tanzania Map
+- Tanzania shapefile with ward boundaries sourced from: https://data.humdata.org/dataset/cod-ab-tza? (ADM L3)
+
+```{r tanzaniaMap, include = F}
+tregs_shp <- tregs_shp %>%
+  rename(
+    "Country_N"=ADM0_EN,    
+    "Country_NSw" = ADM0_SW,
+    "Country_C"=ADM0_PCODE,
+    "Region_Nam" = ADM1_EN,
+    "Region_Cod" = ADM1_PCODE,
+  ) %>%
+  mutate(
+    "region.name" = tolower(`Region_Nam`),
+    "region.name" = gsub("[[:punct:]]", " ", `region.name`), # remove punctuation
+    "region.name" = trimws(`region.name`), #trim leading and trailing spaces
+    "region.name" = gsub("\\s+", ".", `region.name`)# replace 1+ spaces with "."
+  ) 
+  
+
+twards_shp <- twards_shp %>%
+  rename(
+    "Country_N"=ADM0_EN,    
+    "Country_NSw" = ADM0_SW,
+    "Country_C"=ADM0_PCODE,
+    "Region_Nam" = ADM1_EN,
+    "Region_Cod" = ADM1_PCODE,
+    "District_N" = ADM2_EN,
+    "District_C" = ADM2_PCODE,
+    "Ward_Name"=ADM3_EN,
+    "Ward_Code"= ADM3_PCODE
+  ) %>%
+  mutate(
+    "region.name" = tolower(`Region_Nam`),
+    "region.name" = gsub("[[:punct:]]", " ", `region.name`), # remove punctuation
+    "region.name" = trimws(`region.name`), #trim leading and trailing spaces
+    "region.name" = gsub("\\s+", ".", `region.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "district.name" = tolower(`District_N`),
+    "district.name" = gsub("[[:punct:]]", " ", `district.name`), # remove punctuation
+    "district.name" = trimws(`district.name`), #trim leading and trailing spaces
+    "district.name" = gsub("\\s+", ".", `district.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "ward.name" = tolower(`Ward_Name`),
+    "ward.name" = gsub("[[:punct:]]", " ", `ward.name`), # remove punctuation
+    "ward.name" = trimws(`ward.name`), #trim leading and trailing spaces
+    "ward.name" = gsub("\\s+", ".", `ward.name`)# replace 1+ spaces with "."
+  ) 
+
+tanzania_map <- ggplot() +
+  geom_sf(data = tregs_shp, aes(fill = Region_Nam)) +
+  # geom_sf(data = tanzania_shp, aes(fill = Region_Nam, col = factor(District_C))) +
+  geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
+  scale_fill_manual(values=tanzania_pal, guide = "none")+
+  scale_color_discrete(guide = "none")+
+  labs(title = "Tanzania map of Regions")
+
+tanzania_map
+
+twards_map <- ggplot() +
+  geom_sf(data = twards_shp, aes(fill = Region_Nam)) +
+  scale_fill_manual(values=tanzania_pal)+  
+  scale_color_discrete(guide = "none")+
+  labs(title = "Tanzania map of Regions (colour) and Ward (boundary)", fill = "Regions")
+
+twards_map
+
+# tmaps <- ggarrange(tanzania_map, twards_map, ncol = 1)
+# tmaps
+
+if(plotsave){
+  ggsave(tanzania_map, file = here("figures/tanzania_map.png"), width = 10, height = 10, units = "cm")
+  ggsave(twards_map, file = here("figures/tanzania-wards_map.png"), width = 10, height = 10, units = "cm")
+}
+```
