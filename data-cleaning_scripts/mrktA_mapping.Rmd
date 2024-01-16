@@ -517,20 +517,4 @@ mrkta_final_gps %>% distinct(reg.ward.mrkt.final) %>% nrow()
 # When it comes to analysis of market survey C data, the date of survey NEEDS to be taken in to account. 
 ```
 
-
 ## END OF REWRITE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
