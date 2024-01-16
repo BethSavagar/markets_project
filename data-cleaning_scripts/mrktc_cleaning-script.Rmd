@@ -69,6 +69,7 @@ mrktc_clean <- mrktc_general %>%
   # select fields of interest i.e. trade info: respondent role, number of markets visited, pattern of trading
   select(
     fid = `fid.see.mrktc.idtable.`,
+    date,
     country = `country.see.mrkta.lkpcountry.`,
     district.region.code = `district.region.see.mrkta.lkpregion.`,
     district.region.name,
@@ -564,6 +565,7 @@ ggplot() +
 
 mrktc_gps <- mrktc_clean3 %>% select(
   fid,
+  date,
   country,
   district.region.code,
   district.region.name,
