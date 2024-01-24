@@ -38,7 +38,7 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
     - Source <https://data.humdata.org/dataset/cod-ab-tza?> (ADM L3)
 - Cross-reference market location data from survey A (region-ward-village) and tanzania shapefile (region-district-ward)
 
-```{r data, include = T, warning = F, echo = F}
+```{r data, include = T, warning = F, echo = F, message = F}
 
 # Load Tanzania Shapefile:
 # tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
@@ -126,6 +126,7 @@ twards_map
 # tmaps
 
 ```
+
 ## Market Survey A (1) : Manual Cleaning
 
 - Map market locations based on manually cleaned string location data from market survey A
@@ -159,7 +160,7 @@ mrkta_map <- ggplot() +
        col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
 
-mrkta_map
+# mrkta_map
 
 # Map of market survey locations coloured by region (consistency with Tanzania shapefile)
 
@@ -178,7 +179,7 @@ mrkta_mapByReg <- ggplot() +
        col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
 
-mrkta_mapByReg
+# mrkta_mapByReg
 
 # mrkta-manual string-location data is consistent with tanzania shapefile for REGION of origin. 
 
@@ -193,6 +194,12 @@ mrkta_mapByReg
 # mrkta_gps %>% group_by(district.region.name, ward.name, village, market.name.corrected) %>% count() 
 
 ```
+
+```{r mapPrint}
+mrkta_map
+mrkta_mapByReg
+```
+
 
 ## Market Survey A (2) : Geo-match to Tanzania Shapefile
 
