@@ -396,11 +396,12 @@ L3)</li>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-## Rows: 85 Columns: 10
+## Rows: 85 Columns: 11
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
-## chr (6): district.region.name, ward.name, village, market.name.corrected, gp...
-## dbl (4): fid, country, district.region.code, ward.code
+## chr  (6): district.region.name, ward.name, village, market.name.corrected, g...
+## dbl  (4): fid, country, district.region.code, ward.code
+## date (1): date
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
@@ -478,16 +479,16 @@ mrkta_geomatch_gps %&gt;%
 ## 13 songwe                        2        2</code></pre>
 <pre class="r"><code>mrkta_geomatch_gps %&gt;% 
   filter(district.region.name != region.name.geomatch)</code></pre>
-<pre><code>## # A tibble: 2 × 15
-##       fid country district.region.code district.region.name ward.code ward.name
-##     &lt;dbl&gt;   &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt; &lt;chr&gt;    
-## 1 1160890       6                   64 mtwara                  640122 ndomoni  
-## 2 1162039       6                   64 mtwara                  640102 mnavira  
-## # ℹ 9 more variables: village &lt;chr&gt;, market.name.corrected &lt;chr&gt;,
-## #   gps.coordinates.of.the.market &lt;chr&gt;, unique.row.identifier.uuid. &lt;chr&gt;,
-## #   region.name.geomatch &lt;chr&gt;, district.name.geomatch &lt;chr&gt;,
-## #   ward.name.geomatch &lt;chr&gt;, region.district.ward.manual &lt;chr&gt;,
-## #   region.district.ward.geomatch &lt;chr&gt;</code></pre>
+<pre><code>## # A tibble: 2 × 16
+##       fid date       country district.region.code district.region.name ward.code
+##     &lt;dbl&gt; &lt;date&gt;       &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+## 1 1160890 2022-06-09       6                   64 mtwara                  640122
+## 2 1162039 2022-06-12       6                   64 mtwara                  640102
+## # ℹ 10 more variables: ward.name &lt;chr&gt;, village &lt;chr&gt;,
+## #   market.name.corrected &lt;chr&gt;, gps.coordinates.of.the.market &lt;chr&gt;,
+## #   unique.row.identifier.uuid. &lt;chr&gt;, region.name.geomatch &lt;chr&gt;,
+## #   district.name.geomatch &lt;chr&gt;, ward.name.geomatch &lt;chr&gt;,
+## #   region.district.ward.manual &lt;chr&gt;, region.district.ward.geomatch &lt;chr&gt;</code></pre>
 <pre class="r"><code># - Geomatch data lists two additional regions: lindi and njombe, each with one market, 
 # - It is no coincidence that in the Manual data, these two market locations are listed as in the &quot;Mtwara&quot; region (informal markets)
 
@@ -503,21 +504,21 @@ mrkta_geomatch_gps %&gt;%
   filter(n()&gt;1) %&gt;% 
   print() %&gt;% 
   nrow()</code></pre>
-<pre><code>## # A tibble: 6 × 15
+<pre><code>## # A tibble: 6 × 16
 ## # Groups:   region.district.ward.manual [3]
-##       fid country district.region.code district.region.name ward.code ward.name
-##     &lt;dbl&gt;   &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt; &lt;chr&gt;    
-## 1 1150713       6                   61 katavi                  610106 majimoto 
-## 2 1155787       6                   64 mtwara                  640113 mtandi   
-## 3 1157394       6                   64 mtwara                  640113 mtandi   
-## 4 1162037       6                   64 mtwara                  640102 mnavira  
-## 5 1162039       6                   64 mtwara                  640102 mnavira  
-## 6 1167758       6                   61 katavi                  610106 majimoto 
-## # ℹ 9 more variables: village &lt;chr&gt;, market.name.corrected &lt;chr&gt;,
-## #   gps.coordinates.of.the.market &lt;chr&gt;, unique.row.identifier.uuid. &lt;chr&gt;,
-## #   region.name.geomatch &lt;chr&gt;, district.name.geomatch &lt;chr&gt;,
-## #   ward.name.geomatch &lt;chr&gt;, region.district.ward.manual &lt;chr&gt;,
-## #   region.district.ward.geomatch &lt;chr&gt;</code></pre>
+##       fid date       country district.region.code district.region.name ward.code
+##     &lt;dbl&gt; &lt;date&gt;       &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+## 1 1150713 2022-05-22       6                   61 katavi                  610106
+## 2 1155787 2022-05-28       6                   64 mtwara                  640113
+## 3 1157394 2022-05-26       6                   64 mtwara                  640113
+## 4 1162037 2022-06-11       6                   64 mtwara                  640102
+## 5 1162039 2022-06-12       6                   64 mtwara                  640102
+## 6 1167758 2022-05-22       6                   61 katavi                  610106
+## # ℹ 10 more variables: ward.name &lt;chr&gt;, village &lt;chr&gt;,
+## #   market.name.corrected &lt;chr&gt;, gps.coordinates.of.the.market &lt;chr&gt;,
+## #   unique.row.identifier.uuid. &lt;chr&gt;, region.name.geomatch &lt;chr&gt;,
+## #   district.name.geomatch &lt;chr&gt;, ward.name.geomatch &lt;chr&gt;,
+## #   region.district.ward.manual &lt;chr&gt;, region.district.ward.geomatch &lt;chr&gt;</code></pre>
 <pre><code>## [1] 6</code></pre>
 <pre class="r"><code># - For most of the manual location data there is only 1 market survey (A) per ward (region-ward)
 # - There are 3 wards which are associated with 2 market surveys (i.e. 6 observations) in the manual location data
@@ -528,25 +529,25 @@ mrkta_geomatch_gps %&gt;%
   filter(n()&gt;1) %&gt;% 
   print() %&gt;% 
   nrow()</code></pre>
-<pre><code>## # A tibble: 10 × 15
+<pre><code>## # A tibble: 10 × 16
 ## # Groups:   region.district.ward.geomatch [5]
-##        fid country district.region.code district.region.name ward.code ward.name
-##      &lt;dbl&gt;   &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt; &lt;chr&gt;    
-##  1 1151673       6                   65 morogoro                650102 milola   
-##  2 1151696       6                   61 katavi                  610102 usevya   
-##  3 1157529       6                   65 morogoro                650101 minepa   
-##  4 1158924       6                   64 mtwara                  640109 makong.o…
-##  5 1161603       6                   64 mtwara                  640127 tulindane
-##  6 1161608       6                   64 mtwara                  640126 mtonya   
-##  7 1161674       6                   64 mtwara                  640124 luchingu 
-##  8 1161678       6                   64 mtwara                  640125 nangwala 
-##  9 1162037       6                   64 mtwara                  640102 mnavira  
-## 10 1167758       6                   61 katavi                  610106 majimoto 
-## # ℹ 9 more variables: village &lt;chr&gt;, market.name.corrected &lt;chr&gt;,
-## #   gps.coordinates.of.the.market &lt;chr&gt;, unique.row.identifier.uuid. &lt;chr&gt;,
-## #   region.name.geomatch &lt;chr&gt;, district.name.geomatch &lt;chr&gt;,
-## #   ward.name.geomatch &lt;chr&gt;, region.district.ward.manual &lt;chr&gt;,
-## #   region.district.ward.geomatch &lt;chr&gt;</code></pre>
+##       fid date       country district.region.code district.region.name ward.code
+##     &lt;dbl&gt; &lt;date&gt;       &lt;dbl&gt;                &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt;
+##  1 1.15e6 2022-05-23       6                   65 morogoro                650102
+##  2 1.15e6 2022-05-23       6                   61 katavi                  610102
+##  3 1.16e6 2022-06-01       6                   65 morogoro                650101
+##  4 1.16e6 2022-06-04       6                   64 mtwara                  640109
+##  5 1.16e6 2022-06-10       6                   64 mtwara                  640127
+##  6 1.16e6 2022-06-10       6                   64 mtwara                  640126
+##  7 1.16e6 2022-06-10       6                   64 mtwara                  640124
+##  8 1.16e6 2022-06-10       6                   64 mtwara                  640125
+##  9 1.16e6 2022-06-11       6                   64 mtwara                  640102
+## 10 1.17e6 2022-05-22       6                   61 katavi                  610106
+## # ℹ 10 more variables: ward.name &lt;chr&gt;, village &lt;chr&gt;,
+## #   market.name.corrected &lt;chr&gt;, gps.coordinates.of.the.market &lt;chr&gt;,
+## #   unique.row.identifier.uuid. &lt;chr&gt;, region.name.geomatch &lt;chr&gt;,
+## #   district.name.geomatch &lt;chr&gt;, ward.name.geomatch &lt;chr&gt;,
+## #   region.district.ward.manual &lt;chr&gt;, region.district.ward.geomatch &lt;chr&gt;</code></pre>
 <pre><code>## [1] 10</code></pre>
 <pre class="r"><code># - For most of the geomatched location data there is only 1 market survey (A) per ward (region-ward)
 # - There are 5 wards which are associated with 2 market surveys (i.e. 10 observations) in the geomatched location data</code></pre>
@@ -790,6 +791,7 @@ mrkta_final_gps &lt;- mrkta_geomatch_gps %&gt;%
                                       market.manual.final,
                                       sep = &quot;-&quot;)) %&gt;%
   select(fid,
+         date,
          country,
          region.geomatch.final,
          district.geomatch.final,
@@ -814,6 +816,7 @@ mrkta_final_gps %&gt;% distinct(region.geomatch.final) %&gt;% nrow()</code></pre
 <pre class="r"><code>mrkta_final_gps %&gt;% distinct(reg.ward.mrkt.final) %&gt;% nrow()</code></pre>
 <pre><code>## [1] 85</code></pre>
 <pre class="r"><code># write.csv(mrkta_final_gps, file = here(&quot;data/data-cleaning_data/mrkta_gps_tanzania_final.csv&quot;), row.names = F)
+# write.csv(mrkta_geomatch_gps %&gt;% mutate(reg.ward.mrkt.final = paste(region.name.geomatch, ward.name.geomatch, market.name.corrected, sep = &quot;-&quot;)), file = here(&quot;data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv&quot;), row.names = F)
 # When it comes to analysis of market survey C data, the date of survey NEEDS to be taken in to account. </code></pre>
 </div>
 </div>
