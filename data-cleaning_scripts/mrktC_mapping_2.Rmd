@@ -82,7 +82,8 @@ mrktc_gps <- read_csv(file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.
          ward.name.manual = ward.name.3A,
          village.manual = village.3A, 
          market.name.manual = market.name.3A
-         )
+         ) %>%
+  filter(!is.na(gps.coordinates.of.the.market))
 
 mrktc_gps_raw <- read_csv(file = here(
   "data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"
@@ -105,7 +106,8 @@ mrktc_gps_raw <- read_csv(file = here(
     market.name.manual = market.name.3A,
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.
-  )
+  ) %>%
+  filter(!is.na(gps.coordinates.of.the.market))
 
 ```
 
@@ -179,9 +181,9 @@ mrkta_mapByReg
 
 mrktc_mapdata <- mrktc_gps %>% 
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
-  arrange(gps.coordinates.of.the.market) %>% 
-  filter(!is.na(lat), !is.na(long))
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+  # arrange(gps.coordinates.of.the.market) %>% 
+  # filter(!is.na(lat), !is.na(long))
 
 # for now ignore rows which have na in lat or long:
 mrktc_sf <- st_as_sf(mrktc_mapdata, coords = c("long","lat"),  crs = 4326) 
@@ -234,30 +236,217 @@ mrktc_gps_raw %>% distinct(region.name.raw, ward.name.manual, market.name.manual
 
 ```{r mrktc_linkA}
 
-mrktc_gps
-
-mrktc_mapdata %>%
+# Join geomatched location data (from tanzania shapefile) to mrtka location data
+mrktc_linkA_gps <- mrktc_gps %>%
   mutate(mrktaID = st_nearest_feature(mrktc_sf, mrkta_sf)) %>% 
+  # join matched location data. by rowid (twardID)
   left_join(
     mrkta_mapdata %>%
       mutate(mrktaID = 1:nrow(.)) %>%
       select(
         mrktaID,
-        "district.region.code.A" = "district.region.code",
-        "district.region.name.A" = "district.region.name",
-        "ward.code.A" = "ward.code",
-        "ward.name.A" = "ward.name" ,
-        "village.A" = "village",
-        "market.name.A" = "market.name.corrected"
+        "region.geomatch.final.A" = "region.geomatch.final",
+        "district.geomatch.final.A" = "district.geomatch.final",
+        "ward.geomatch.final.A" = "ward.geomatch.final",
+        "village.manual.final.A" = "village.manual.final" ,
+        "market.manual.final.A" = "market.manual.final"
+        # "reg.ward.mrkt.final.A" = "reg.ward.mrkt.final"
       ),
-    by = c("mrktaID"))
+    by = c("mrktaID")) %>%
+  select(-mrktaID) 
 
+colnames(mrktc_linkA_gps)
+
+mrktc_linkA_mapdata <- mrktc_linkA_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+  # arrange(gps.coordinates.of.the.market) %>% 
+  # filter(!is.na(lat), !is.na(long))
+
+mrktc_linkA_sf <- st_as_sf(mrktc_linkA_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+## MAP
+map_plots <- list()
+regions <- mrktc_linkA_gps %>% distinct(region.geomatch.final.A) %>% pull()
+
+for(i in 1:length(regions)){
+  
+  region_i <- regions[i]
+  
+  map_plots[[i]] <- ggplot() +
+   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktc_linkA_sf %>% filter(region.geomatch.final.A %in% region_i), 
+            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region_Nam)+
+   coord_sf()+
+   labs(col = "Ward of market"
+        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+        )+
+  theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+# gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
+
+# map_plots[[1]]; map_plots[[2]]; map_plots[[3]];map_plots[[4]]; map_plots[[5]]; map_plots[[6]];
+# map_plots[[7]]; map_plots[[8]]; map_plots[[9]];map_plots[[10]]; map_plots[[11]]; map_plots[[12]];
+# map_plots[[13]]; 
+  
 
 ```
  
+
+
+###### Check linkA market C locations 
+
+
+```{r check_linkA}
+
+mrktc_linkA_check <- mrktc_linkA_gps %>%
+  left_join(mrktc_gps_raw %>% select(fid, ends_with(".raw")), by = "fid") %>%
+  # create a unique field for checking data:
+  mutate(
+    uniqueMrkt = paste(
+    region.geomatch.final.A,
+    district.geomatch.final.A,
+    # district data not included in survey
+    ward.geomatch.final.A,
+    village.manual.final.A,
+    market.manual.final.A,
+    sep = "-"
+    )
+  ) 
+
+
+# How many unique markets are found in the linkA location data?
+
+nrow(mrktc_linkA_check)
+
+mrktc_linkA_check %>%
+  distinct(region.geomatch.final.A, 
+           district.geomatch.final.A,
+           ward.geomatch.final.A, 
+           village.manual.final.A,
+           market.manual.final.A,
+           uniqueMrkt)
+
+# 83 unique market location names. 
+
+uniqueMrkt_date_summary <- mrktc_linkA_check %>%
+  # review number of survey dates associated with each market:
+  group_by(region.geomatch.final.A,
+           uniqueMrkt,
+           date.of.interview,
+           date) %>%
+  count() %>% 
+  ungroup() %>%
+  arrange(uniqueMrkt)
+```
+
+
+
+## DODOMA: 
+
+```{r dodoma_clean}
+regions[1]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "dodoma") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "dodoma") %>% select(-region.geomatch.final.A)
+
+#   uniqueMrkt                                     date.of.interview date           n
+#    <chr>                                          <date>            <date>     <int>
+#  1 dodoma-bahi-babayu-kongogo-kongogo             2022-05-11        2022-05-11    42  --> CORRECT
+#  2 dodoma-bahi-bahi-bahi.sokoni-bahi              2022-06-02        2022-06-02    44  --> CORRECT
+#  3 dodoma-bahi-ibihwa-mnkola-mnkola               2022-05-12        2022-05-12    29  --> CORRECT
+#  4 dodoma-bahi-ibugule-nkhome-nkhome              2022-05-16        2022-05-14    48  --> CORRECT
+#  5 dodoma-bahi-kigwe-kigwe-kigwe                  2022-05-13        2022-05-13    56  --> CORRECT
+#  6 dodoma-bahi-lamaiti-lamaiti-lamaiti            2022-06-07        2022-06-07    45  --> CORRECT
+#  7 dodoma-bahi-makanda-makanda-makanda            2022-05-18        2022-05-18    42  --> CORRECT
+#  8 dodoma-bahi-msisi-msisi-msisi                  2022-05-23        2022-05-23    29  --> CORRECT
+#  9 dodoma-bahi-mundemu-mundemu-mundemu            2022-06-04        2022-06-04    22  --> CORRECT
+# 10 dodoma-bahi-nondwa-nondwa-nondwa               2022-05-21        2022-05-21    27  --> CORRECT
+# 11 dodoma-bahi-zanka-mayamaya-mayamaya            2022-05-30        2022-05-25     1  --> Checked: Date Error (DoI is correct)
+# 12 dodoma-bahi-zanka-mayamaya-mayamaya            2022-05-30        2022-05-30    39  --> CORRECT
+# 13 dodoma-dodoma.urban-mpunguzi-mpunguzi-mpunguzi 2022-05-25        2022-05-25    35  --> CORRECT
+
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "dodoma-bahi-zanka-mayamaya-mayamaya") %>%
+  View()
+
+# DOUBLE CHECKING: 
+# mrktc_linkA_check %>%
+#   filter(region.geomatch.final.A == "dodoma") %>%
+#   distinct(
+#     region.name.raw,
+#     ward.name.raw,
+#     village.raw,
+#     market.name.raw,
+#     uniqueMrkt
+#   ) %>%
+#   View()
+
+
+# Update: 
+# -- Can't get this to work?!?!
+# -- NB DoI is correct
+# mrktc_linkA_check2 <- mrktc_linkA_check %>%
+#   mutate(dateCheck = ifelse(uniqueMrkt == "dodoma-bahi-zanka-mayamaya-mayamaya" & date == "2022-05-25"),"2022-05-30", date)
+```
  
  
- 
+## simiyu: 
+
+```{r simiyu_clean}
+regions[2]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "simiyu") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "simiyu") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error"
+#
+#   uniqueMrkt                                         date.of.interview date           n
+#   <chr>                                              <date>            <date>     <int>
+# 1 simiyu-bariadi-bariadi-kidinda-kidinda             2022-05-17        2022-05-17    77 --> CORRECT
+# 2 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-19        2022-05-19    84 --> CORRECT
+# 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14     2 ** --> Checked: Location Error
+# 4 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-14        2022-05-14     2 ** --> Checked: Date Error (2022-05-28)
+# 5 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-14    18 ** --> Checked: Date Error (2022-05-28)
+# 6 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-28    79 --> CORRECT
+# 7 simiyu-itilima-mwamapalala-mwamapalala-mwamapalala 2022-05-18        2022-05-18    34 --> CORRECT
+# 8 simiyu-maswa-lalago-lalago-lalago                  2022-05-16        2022-05-16    45 --> CORRECT
+
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa") %>%
+  arrange(date) %>%
+  View()
+# simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14
+# Correct to : simiyu-busega-lutubiga-mwasamba-mwasamba
+
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "simiyu-busega-lutubiga-mwasamba-mwasamba") %>%
+  arrange(date) %>%
+  View()
+# Date is incorrect, should be "2022-05-28" for all entries based on DoI and date.end.
+
+# DOUBLE CHECKING: 
+# mrktc_linkA_check %>%
+#   filter(region.geomatch.final.A == "simiyu") %>%
+#   distinct(
+#     region.name.raw,
+#     ward.name.raw,
+#     village.raw,
+#     market.name.raw,
+#     uniqueMrkt
+#   ) %>%
+#   View()
+
+
+# Update: 
+# 
+```
  
 
 2) On a region-by-region basis:
