@@ -67,9 +67,12 @@ mrktc_clean <- mrktc_general %>%
             by = c(`district.region.see.mrkta.lkpregion.` = "Code")) %>%
   # excl. fields such as: respondent age, gender, detail of disease problems
   # select fields of interest i.e. trade info: respondent role, number of markets visited, pattern of trading
+  separate(end.time, c("date.end", "time.end"), sep = " ") %>%
   select(
     fid = `fid.see.mrktc.idtable.`,
     date,
+    date.end,
+    date.of.interview,
     country = `country.see.mrkta.lkpcountry.`,
     district.region.code = `district.region.see.mrkta.lkpregion.`,
     district.region.name,
@@ -562,10 +565,15 @@ ggplot() +
 ```{r saveData}
 # write.csv(mrktc_names_post3, file = here("data/data-cleaning_data/mrktc_names_clean3-1.csv"), row.names = F)
 # write.csv(mrktc_clean3, file = here("data/data-cleaning_data/mrktc_info_clean3-1.csv"), row.names = F)
+#  mrktc_clean3 <- read_csv("data/data-cleaning_data/mrktc_info_clean3-1.csv")
 
-mrktc_gps <- mrktc_clean3 %>% select(
+mrktc_gps <- mrktc_clean3 %>% 
+  left_join(mrktc_clean %>% select(fid,date,date.end,date.of.interview), by = "fid") %>%
+  select(
   fid,
   date,
+  date.end,
+  date.of.interview,
   country,
   district.region.code,
   district.region.name,
@@ -578,6 +586,26 @@ mrktc_gps <- mrktc_clean3 %>% select(
 )
 # write.csv(mrktc_gps, file = here("data/data-cleaning_data/mrktc_gps_tanzania_CLEAN1.csv"), row.names = F)
 # write.csv(mrktc_gps, file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.csv"), row.names = F)
+```
+
+
+```{r saveData2}
+mrktc_info_raw <- mrktc_clean3 %>% 
+  left_join(mrktc_clean %>% select(fid,date,date.end,date.of.interview), by = "fid") %>%
+  select(
+  -c("village.1",
+     "market.name.1",
+     "spelling.1",
+     "check1",
+     "ward.code.2",
+     "ward.name.2",
+     "village.2",
+     "market.name.2",
+     "error.2",
+     "corrected.3A",
+     "map_check.3A")
+)
+# write.csv(mrktc_info_raw, file = here("data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"), row.names = F)
 ```
 
 ## Cleaning Checks / Summary 
