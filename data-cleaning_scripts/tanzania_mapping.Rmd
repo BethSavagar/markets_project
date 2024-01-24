@@ -8,7 +8,7 @@ date: "2024-01-16"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, include = F}
+```{r libraries, include = F, echo = F, warning = F}
 
 library(sf)
 library(here)
@@ -18,7 +18,7 @@ library(lwgeom)
 library(ggpubr)
 ```
 
-```{r theme, include = F}
+```{r theme, include = F, echo = F, warning = F}
 custom_theme <- theme_bw() + 
   theme(text = element_text(family = "Times New Roman", size = 10))
 theme_set(custom_theme)
@@ -38,7 +38,7 @@ plotsave <- F
     - Source <https://data.humdata.org/dataset/cod-ab-tza?> (ADM L3)
 - Cross-reference market location data from survey A (region-ward-village) and tanzania shapefile (region-district-ward)
 
-```{r data, include = T, warning = F, echo = F}
+```{r data, include = T, warning = F, echo = F, message = F}
 
 # Load Tanzania Shapefile:
 # tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
@@ -56,7 +56,7 @@ mrkta_gps <- read_csv(file = here("data/tanzania_data/mrkta_gps_tanzania_CLEAN.c
 # Tanzania Map
 - Tanzania shapefile with ward boundaries sourced from: https://data.humdata.org/dataset/cod-ab-tza? (ADM L3)
 
-```{r tanzaniaMap, include = F}
+```{r tanzaniaMap, include = F, echo = F, warning = F}
 tregs_shp <- tregs_shp %>%
   rename(
     "Country_N"=ADM0_EN,    
@@ -112,15 +112,11 @@ tanzania_map <- ggplot() +
   scale_color_discrete(guide = "none")+
   labs(title = "Tanzania map of Regions")
 
-tanzania_map
-
 twards_map <- ggplot() +
   geom_sf(data = twards_shp, aes(fill = Region_Nam)) +
   scale_fill_manual(values=tanzania_pal)+  
   scale_color_discrete(guide = "none")+
   labs(title = "Tanzania map of Regions (colour) and Ward (boundary)", fill = "Regions")
-
-twards_map
 
 # tmaps <- ggarrange(tanzania_map, twards_map, ncol = 1)
 # tmaps
@@ -129,4 +125,18 @@ if(plotsave){
   ggsave(tanzania_map, file = here("figures/tanzania_map.png"), width = 10, height = 10, units = "cm")
   ggsave(twards_map, file = here("figures/tanzania-wards_map.png"), width = 10, height = 10, units = "cm")
 }
+```
+
+
+```{r tanzmap, warning = F, echo = F}
+
+tanzania_map
+
+```
+
+
+```{r wardmap, warning = F, echo = F}
+
+twards_map
+
 ```
