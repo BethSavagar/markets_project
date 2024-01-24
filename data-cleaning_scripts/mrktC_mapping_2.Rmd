@@ -1,7 +1,7 @@
 ---
 title: "marketC_mapping"
 output: html_document
-date: "2024-01-09"
+date: "2024-01-24"
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +25,7 @@ custom_theme <- theme_bw() +
 theme_set(custom_theme)
 
 tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
-market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C", "#FFD700", "#1E90FF")
 ```
 
 
@@ -67,7 +67,7 @@ twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>%
   )
 
 # Market A location data:
-mrkta_gps_final <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
+mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
 mrkta_gps_join <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv")) %>%
   rename(ward.code.manual = ward.code,
          ward.name.manual = ward.name,
@@ -84,7 +84,196 @@ mrktc_gps <- read_csv(file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.
          market.name.manual = market.name.3A
          )
 
+mrktc_gps_raw <- read_csv(file = here(
+  "data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"
+)) %>%
+  select(
+    fid,
+    date,
+    date.end,
+    date.of.interview,
+    country,
+    region.code.raw = district.region.code,
+    region.name.raw = district.region.name,
+    ward.code.raw = ward.code,
+    ward.name.raw = ward.name,
+    village.raw = village,
+    market.name.raw = market.name,
+    ward.code.manual = ward.code.3A,
+    ward.name.manual = ward.name.3A,
+    village.manual = village.3A,
+    market.name.manual = market.name.3A,
+    gps.coordinates.of.the.market,
+    unique.row.identifier.uuid.
+  )
+
 ```
+
+
+## Market A Map
+- Market A data, matched to Tanzania shapefile region-district-ward locations
+- See `mrktA_mapping.Rmd`
+
+```{r mrktaMap}
+# convert mrkta location data to mapping format & map manually cleaned data:
+
+mrkta_mapdata <- mrkta_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+
+mrkta_map <- ggplot() +
+  geom_sf(data = tregs_shp, aes(fill = Region_Nam), linewidth = 0.1) +
+  scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+  geom_sf(data = mrkta_sf, aes(col = region.geomatch.final), size = 1.5)+
+  geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
+  scale_colour_manual(values = market_pal)+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+mrkta_map
+
+# Map of market survey locations coloured by region (consistency with Tanzania shapefile)
+
+Regions_Amanual <- mrkta_sf %>% pull(region.geomatch.final) %>% unique() %>% str_to_title()
+
+mrkta_mapByReg <- ggplot() +
+  geom_sf(data = tregs_shp, fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = tregs_shp %>% filter(Region_Nam %in% Regions_Amanual), aes(fill = Region_Nam), linewidth = 0.1) +
+  scale_fill_manual(values=alpha(market_pal,0.5), guide = "none")+
+  geom_sf(data = mrkta_sf, aes(col = region.geomatch.final), size = 1.5)+
+  geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
+  scale_colour_manual(values = market_pal)+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations (coloured by stringRegion)", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+mrkta_mapByReg
+
+# mrkta-manual string-location data is consistent with tanzania shapefile for REGION of origin. 
+
+# mrkta-manual Descriptive stats:
+# mrkta_gps %>% group_by(district.region.name) %>% count()
+# mrkta_gps %>% group_by(ward.name) %>% count()
+# mrkta_gps %>% group_by(ward.name) %>% count() %>% filter(n>1)
+# mrkta_gps %>% group_by(ward.name) %>% count() %>% filter(n>1)
+# mrkta_gps %>% group_by(district.region.name, ward.name) %>% count() %>% filter(n>1) # mamba only appears in ward.name unique list
+# mrkta_gps %>% filter(ward.name == "mamba")
+# mrkta_gps %>% group_by(district.region.name, ward.name, village) %>% count() 
+# mrkta_gps %>% group_by(district.region.name, ward.name, village, market.name.corrected) %>% count() 
+
+```
+
+## Market C Map (1)
+- Location of market C surveys, overlaid on market A survey locations
+
+```{r, mrktcMap_manual-cleaning}
+
+mrktc_mapdata <- mrktc_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  arrange(gps.coordinates.of.the.market) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrktc_sf <- st_as_sf(mrktc_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+mrktC_map <- ggplot() +
+  geom_sf(data = tregs_shp, aes(fill = Region_Nam), linewidth = 0.1) +
+  scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+  geom_sf(data = mrktc_sf, aes(col = district.region.name), size = 1)+
+  geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
+  scale_colour_manual(values = market_pal)+
+  coord_sf()+ 
+  labs(title = "Market survey C: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+mrktC_map
+
+mrktCA_map <- ggplot() +
+   geom_sf(data = tregs_shp, aes(fill = Region_Nam), linewidth = 0.1) +
+   scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+   geom_sf(data = mrkta_sf, aes(col = region.geomatch.final), alpha = 0.5, size = 3)+
+   geom_sf(data = mrktc_sf, aes(col = district.region.name),  shape = 17, size = 1.5)+
+  geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
+   scale_colour_manual(values = market_pal)+
+   coord_sf()+
+   labs(title = "Market Survey A-geoamtched (circles) and C-manual (triangles) data",
+        fill = "Tanzania region",
+        col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+ 
+mrktCA_map
+
+```
+
+
+```{r datacheck}
+# Check consistency between markets in mrkta_gps and mrktc_gps_raw (.manual)
+mrkta_gps %>% distinct(region.geomatch.final, ward.geomatch.final, market.manual.final)
+mrktc_gps_raw %>% distinct(region.name.raw, ward.name.manual, market.name.manual)
+
+```
+1) Market survey C - match to market survey A 
+- Use market survey C gps locations to link to market survey A geo-matched data.
+ - Each market survey C entry should be linked to a market identified in market survey A data.
+ - Compare consistency between raw/manual survey C locations and A-linked survey locations.
+ - Compare consistency between raw/manual survey C locations, overlaid on survey A locations
+ - Compare consistently between A-linked survey C locations overlaid on survey A location (should be perfect match)
+
+
+```{r mrktc_linkA}
+
+mrktc_gps
+
+mrktc_mapdata %>%
+  mutate(mrktaID = st_nearest_feature(mrktc_sf, mrkta_sf)) %>% 
+  left_join(
+    mrkta_mapdata %>%
+      mutate(mrktaID = 1:nrow(.)) %>%
+      select(
+        mrktaID,
+        "district.region.code.A" = "district.region.code",
+        "district.region.name.A" = "district.region.name",
+        "ward.code.A" = "ward.code",
+        "ward.name.A" = "ward.name" ,
+        "village.A" = "village",
+        "market.name.A" = "market.name.corrected"
+      ),
+    by = c("mrktaID"))
+
+
+```
+ 
+ 
+ 
+ 
+ 
+
+2) On a region-by-region basis:
+- Use c-geomatchA locations and group by survey date. 
+- All surveys for a given market should be completed on the same day
+- For surveys which seem to be inconsistent check the original mrktc location names etc. 
+
+
+
+
+
+
+
+
+
+
 
 # Review Location Data
 
@@ -703,10 +892,4 @@ ggplot() +
         fill = "Tanzania region",
         col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
-```
-
-
-
-```{r datasave}
-
 ```
