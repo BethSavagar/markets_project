@@ -213,6 +213,7 @@ knitr::kable(mrkt_village_distinct %>% arrange(village))
 
 mrkta_locationdata <- mrkta_clean %>% select(
   fid,
+  date,
   country,
   district.region.code,
   district.region.name,
