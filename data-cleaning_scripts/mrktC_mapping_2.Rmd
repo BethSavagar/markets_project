@@ -347,6 +347,10 @@ uniqueMrkt_date_summary <- mrktc_linkA_check %>%
 ```
 
 
+2) On a region-by-region basis:
+- Use c-geomatchA locations and group by survey date. 
+- All surveys for a given market should be completed on the same day
+- For surveys which seem to be inconsistent check the original mrktc location names etc. 
 
 ## DODOMA: 
 
@@ -411,7 +415,7 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "simiyu") %>% sele
 #   <chr>                                              <date>            <date>     <int>
 # 1 simiyu-bariadi-bariadi-kidinda-kidinda             2022-05-17        2022-05-17    77 --> CORRECT
 # 2 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-19        2022-05-19    84 --> CORRECT
-# 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14     2 ** --> Checked: Location Error
+# 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14     2 ** --> Checked: Location Error (mwasamba-mwasamba)
 # 4 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-14        2022-05-14     2 ** --> Checked: Date Error (2022-05-28)
 # 5 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-14    18 ** --> Checked: Date Error (2022-05-28)
 # 6 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-28    79 --> CORRECT
@@ -448,11 +452,327 @@ mrktc_linkA_check %>%
 # 
 ```
  
+## Mwanza: 
 
-2) On a region-by-region basis:
-- Use c-geomatchA locations and group by survey date. 
-- All surveys for a given market should be completed on the same day
-- For surveys which seem to be inconsistent check the original mrktc location names etc. 
+```{r mwanza_clean}
+regions[3]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mwanza") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mwanza") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# A tibble: 3 × 4
+#   uniqueMrkt                           date.of.interview date           n
+#   <chr>                                <date>            <date>     <int>
+# 1 mwanza-kwimba-ngudu-kakola-kakola    2022-05-21        2022-05-21    69 --> CORRECT
+# 2 mwanza-magu-nkungulu-ndagalu-kabila  2022-05-23        2022-05-23    79 --> CORRECT
+# 3 mwanza-misungwi-masasi-manawa-misasi 2022-05-25        2022-05-25    75 --> CORRECT
+
+
+# DOUBLE CHECKING: 
+# mrktc_linkA_check %>%
+#   filter(region.geomatch.final.A == "mwanza") %>%
+#   distinct(
+#     region.name.raw,
+#     ward.name.raw,
+#     village.raw,
+#     market.name.raw,
+#     uniqueMrkt
+#   ) %>%
+#   View()
+
+# Update: All correct no cleaning required.
+```
+ 
+
+## Katavi: 
+
+```{r katavi_clean}
+regions[4]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "katavi") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "katavi") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+#    uniqueMrkt                                date.of.interview date           n
+#    <chr>                                     <date>            <date>     <int>
+#  1 katavi-mlele-inyonga-kinyonga-inyonga     2022-05-25        2022-05-25    53 --> CORRECT
+#  2 katavi-mlele-itenka-itenka.a-itenka       2022-05-30        2022-05-30    40 --> CORRECT
+#  3 katavi-mlele-itenka-itenka.a-itenka       2022-06-01        2022-06-01     1 --> Checked: Location Error (rukwa-kilyamatundu)
+#  4 katavi-mlele-itenka-itenka.a-itenka       2022-06-03        2022-06-03    10 --> Checked: Location Error (minyagala)
+#  5 katavi-mlele-kibaoni-kibaoni-kibaoni      2022-05-31        2022-05-31    30 --> CORRECT
+#  6 katavi-mlele-majimoto-kitupa-majimoto.a   2022-05-22        2022-05-22    40 --> CORRECT
+#  7 katavi-mlele-mamba-kilda.kona-kilda.kona  2022-05-31        2022-05-31    20 --> CORRECT
+#  8 katavi-mlele-usevya-usevya-usevya         2022-05-23        2022-05-23    32 --> CORRECT
+#  9 katavi-mpanda-kabungu-minyagala-minyagala 2022-06-03        2022-06-03    37 --> CORRECT
+# 10 katavi-mpanda-kabungu-minyagala-minyagala 2022-06-05        2022-06-05     9 --> Checked: Unclear conclusion
+# 11 katavi-mpanda-sibwesa-sibwesa-sibwesa     2022-06-03        2022-06-03     2 --> Checked: Unclear conclusion
+# 12 katavi-mpanda-sibwesa-sibwesa-sibwesa     2022-06-05        2022-06-05    43 --> CORRECT
+
+# Check "katavi-mlele-itenka-itenka.a-itenka"
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka") %>%
+  arrange(date) %>%
+  View()
+# If date == 2022-06-01, correction to rukwa-kilyamatundu
+# If date == 2022-06-03, correction to katavi-mpanda-kabungu-minyagala-minyagala
+
+# check "katavi-mpanda-kabungu-minyagala-minyagala"
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "katavi-mpanda-kabungu-minyagala-minyagala") %>%
+  arrange(date) %>%
+  View()
+# If date == 2022-06-05 looks like correction may be: katavi-mpanda-sibwesa-sibwesa-sibwesa
+
+# check "katavi-mpanda-sibwesa-sibwesa-sibwesa"
+mrktc_linkA_check %>% 
+  filter(uniqueMrkt == "katavi-mpanda-sibwesa-sibwesa-sibwesa") %>%
+  arrange(date) %>%
+  View()
+# If date == 2022-06-03 looks like correction may be "katavi-mpanda-kabungu-minyagala-minyagala"
+
+
+# DOUBLE CHECKING: 
+# mrktc_linkA_check %>%
+#   filter(region.geomatch.final.A == "katavi") %>%
+#   distinct(
+#     region.name.raw,
+#     ward.name.raw,
+#     village.raw,
+#     market.name.raw,
+#     uniqueMrkt
+#   ) %>%
+#   View()
+
+# Update: All correct no cleaning required.
+```
+
+
+## Morogoro: 
+
+```{r morogoro_clean}
+regions[5]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "morogoro") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "morogoro") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# 
+#  1 morogoro-kilombero-idete-idandu-kikurukutu          2022-06-04        2022-06-02    21
+#  2 morogoro-kilombero-idete-idandu-kikurukutu          2022-06-06        2022-06-02     1
+#  3 morogoro-kilombero-kiberege-sagamaganga-sagamaganga 2022-06-07        2022-06-06     1
+#  4 morogoro-kilombero-kiberege-sagamaganga-sagamaganga 2022-06-07        2022-06-07    43
+#  5 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-01     2
+#  6 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-02     2
+#  7 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-06    18
+#  8 morogoro-kilosa-rudewa-gongoni-gongoni              2022-05-31        2022-05-30     1
+#  9 morogoro-kilosa-rudewa-gongoni-gongoni              2022-05-31        2022-05-31    42
+# 10 morogoro-mvomero-kanga-mziha-mziha                  2022-05-30        2022-05-29     1
+# 11 morogoro-mvomero-kanga-mziha-mziha                  2022-05-30        2022-05-30    56
+# 12 morogoro-ulanga-biro-tanga-tanga                    2022-05-25        2022-05-24     1
+# 13 morogoro-ulanga-biro-tanga-tanga                    2022-05-25        2022-05-25    37
+# 14 morogoro-ulanga-iragua-namhanga-mbenja              2022-05-28        2022-05-26     1
+# 15 morogoro-ulanga-iragua-namhanga-mbenja              2022-05-28        2022-05-28    35
+# 16 morogoro-ulanga-itete-itete-itete                   2022-06-08        2022-06-08     1
+# 17 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-08     1
+# 18 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-10   106
+# 19 morogoro-ulanga-itete-itete-itete                   2022-06-11        2022-06-10     1
+# 20 morogoro-ulanga-lukande-lukande-lukande             2022-05-26        2022-05-26    32
+# 21 morogoro-ulanga-mbuga-iputi-iputi                   2022-05-24        2022-05-24    28
+# 22 morogoro-ulanga-minepa-mavimba-mavimba              2022-01-02        2022-05-22     1
+# 23 morogoro-ulanga-minepa-mavimba-mavimba              2022-05-23        2022-05-23    48
+# 24 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-01        2022-06-01     1
+# 25 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-05-31     1
+# 26 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-06-01    53
+# 27 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-07     1
+# 28 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-08    92
+# 29 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-09        2022-06-08     11
+
+```
+ 
+
+## Mtwara: 
+
+```{r mtwara_clean}
+regions[6]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mtwara") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mtwara") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+#   uniqueMrkt                                               date.of.interview date           n
+#    <chr>                                                    <date>            <date>     <int>
+#  1 mtwara-masasi-chikolopola-chikolopola-chikolopola        2022-06-11        2022-06-11     4
+#  2 mtwara-masasi-chiungutwa-chiungutwa-chiungutwa           2022-06-02        2022-06-01     1
+#  3 mtwara-masasi-chiungutwa-chiungutwa-chiungutwa           2022-06-02        2022-06-02    41
+#  4 mtwara-masasi-chiwale-kivukoni-chiwale                   2022-06-07        2022-06-07    21
+#  5 mtwara-masasi-lukuledi-lukuledi-lukuledi                 2022-06-07        2022-06-07    19
+#  6 mtwara-masasi-mchauru-mchauru-mchauru                    2022-06-04        2022-06-04    20
+#  7 mtwara-masasi-mkundi-majembe-mkundi                      2022-06-06        2022-06-06    20
+#  8 mtwara-masasi-mnavira-mnavira-mnavira                    2022-06-11        2022-06-11     4
+#  9 mtwara-masasi-mnavira-nakarara-makong.onda               2022-06-04        2022-06-04    20
+# 10 mtwara-masasi-mwena-chibwini-mwena                       2022-06-08        2022-06-08     8
+# 11 mtwara-masasi-mwena-chibwini-mwena                       2022-06-09        2022-06-09     4
+# 12 mtwara-masasi-namalenga-nagaga-namalenga                 2022-06-06        2022-06-06    20
+# 13 mtwara-masasi-nanganga-mwongozo-nangoo                   2022-06-08        2022-06-08     8
+# 14 mtwara-masasi-nanjota-nanjota-nanjota                    2022-06-03        2022-06-03    28
+# 15 mtwara-masasi.township.authority-jida-mtandi.b-mtandi    2022-05-28        2022-05-28    30
+# 16 mtwara-masasi.township.authority-jida-mtandi.b-mtandi    2022-05-29        2022-05-28    21
+# 17 mtwara-masasi.township.authority-jida-mtandi.b-mtandi    2022-05-30        2022-05-28     1
+# 18 mtwara-masasi.township.authority-marika-mumbaka-mumbaka  2022-06-01        2022-05-30     1
+# 19 mtwara-masasi.township.authority-marika-mumbaka-mumbaka  2022-06-01        2022-06-01    32
+# 20 mtwara-masasi.township.authority-migongo-nangaya-nangaya 2022-05-26        2022-05-26    10
+# 21 mtwara-masasi.township.authority-mkuti-madeco-madeco     2022-05-26        2022-05-26     9
+# 22 mtwara-masasi.township.authority-nyasa-upanga-upanga     2022-05-25        2022-05-25     1
+# 23 mtwara-nanyumbu-nanyumbu-maneme-nanyumbu                 2022-05-29        2022-05-29     1
+# 24 mtwara-nanyumbu-nanyumbu-maneme-nanyumbu                 2022-05-30        2022-05-30    60
+# 25 mtwara-newala-kitangari-kitangari-kitangari              2022-06-10        2022-06-10     4
+# 26 mtwara-newala-luchindu-luchingu-luchingu                 2022-06-10        2022-06-10     3
+# 27 mtwara-newala-luchindu-tupendane-tulindane               2022-06-10        2022-06-10     4
+# 28 mtwara-newala-mtonya-majengo-mtonya                      2022-06-10        2022-06-10     4
+# 29 mtwara-newala-mtonya-nangwala-nangwala                   2022-06-10        2022-06-10     4
+
+```
+
+
+## Mbeya: 
+
+```{r mbeya_clean}
+regions[7]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mbeya") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mbeya") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+#    uniqueMrkt                                                    date.of.interview date           n
+#    <chr>                                                         <date>            <date>     <int>
+#  1 mbeya-chunya-mamba-mamba-shinyanga                            2022-06-14        2022-06-14    72
+#  2 mbeya-chunya-mtanila-igangwe-shauri.moyo                      2022-06-12        2022-06-12    67
+#  3 mbeya-mbarali-igava-muungano-muungano                         2022-05-28        2022-05-28    44
+#  4 mbeya-mbarali-imalilosongwe-imalilosongwe-imalilosongwe       2022-05-29        2022-05-29    70
+#  5 mbeya-mbarali-madibira-chalisuka-madibira                     2022-05-26        2022-05-26    39
+#  6 mbeya-mbarali-miyombweni-mapogoro-mapogoro                    2022-05-27        2022-05-27    26
+#  7 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-27        2022-05-27     1
+#  8 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-29        2022-05-29     7
+#  9 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-06-04        2022-06-04    52
+# 10 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-27        2022-05-27     2
+# 11 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-28        2022-05-28    11
+# 12 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-29        2022-05-29     1
+# 13 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-06-07        2022-06-07    59
+
+```
+
+
+## Rukwa: 
+
+```{r rukwa_clean}
+regions[8]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "rukwa") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "rukwa") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# A tibble: 5 × 4
+#   uniqueMrkt                                        date.of.interview date           n
+#   <chr>                                             <date>            <date>     <int>
+# 1 rukwa-nkasi-kate-ntalamila-ntalamila              2022-05-26        2022-05-26     1 --> Incorrect Date
+# 2 rukwa-nkasi-kate-ntalamila-ntalamila              2022-05-27        2022-05-27    41
+# 3 rukwa-nkasi-nkomolo-isunta-isunta                 2022-06-02        2022-06-02    55
+# 4 rukwa-sumbawanga-kipeta-kilyamatundu-kilyamatundu 2022-06-01        2022-06-01    49
+# 5 rukwa-sumbawanga-muze-muze-muze                   2022-05-26        2022-05-26    42
+
+```
+
+## Iringa: 
+
+```{r iringa_clean}
+regions[9]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "iringa") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "iringa") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# # A tibble: 3 × 4
+#   uniqueMrkt                                date.of.interview date           n
+#   <chr>                                     <date>            <date>     <int>
+# 1 iringa-iringa-itunundu-kimande-kimande    2022-06-03        2022-06-03    54
+# 2 iringa-mufindi-ihowanza-ihowanza-ihowanza 2022-06-01        2022-05-31     1 --> incorrect date.
+# 3 iringa-mufindi-ihowanza-ihowanza-ihowanza 2022-06-01        2022-06-01    42
+
+```
+
+## Njombe: 
+
+```{r njombe_clean}
+regions[10]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "njombe") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "njombe") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# A tibble: 2 × 4
+#   uniqueMrkt                                                 date.of.interview date           n
+#   <chr>                                                      <date>            <date>     <int>
+# 1 njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe 2022-06-01        2022-06-01     2 --> Correct to iringa ihowanza
+# 2 njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe 2022-06-06        2022-06-06    62
+
+```
+
+
+## Songwe: 
+
+```{r songwe_clean}
+regions[11]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "songwe") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "songwe") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# # A tibble: 2 × 4
+#   uniqueMrkt                         date.of.interview date           n
+#   <chr>                              <date>            <date>     <int>
+# 1 songwe-mbozi-iyula-idiwili-idiwili 2022-06-09        2022-06-09    38
+# 2 songwe-momba-ivuna-ntungwa-mbao    2022-06-02        2022-06-02    49
+
+```
+
+
+
+
+## Lindi: 
+
+```{r lindi_clean}
+regions[12]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "lindi") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "lindi") %>% select(-region.geomatch.final.A)
+# 
+# Error Codes: "Checked: Date Error", "Checked: Location Error"
+# # A tibble: 1 × 4
+#   uniqueMrkt                               date.of.interview date           n
+#   <chr>                                    <date>            <date>     <int>
+# 1 lindi-nachingwea-ndomoni-ndomoni-ndomoni 2022-06-09        2022-06-09     8
+
+```
+
+
+## Ruvuma: 
+
+```{r ruvuma_clean}
+regions[13]
+
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "ruvuma") %>% View()
+uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "ruvuma") %>% select(-region.geomatch.final.A)
+# 
+# # A tibble: 1 × 4
+#   uniqueMrkt                            date.of.interview date           n
+#   <chr>                                 <date>            <date>     <int>
+# 1 ruvuma-tunduru-muhuwesi-muhesi-muhesi 2022-06-12        2022-06-12     4
+
+```
+
+
+
 
 
 
