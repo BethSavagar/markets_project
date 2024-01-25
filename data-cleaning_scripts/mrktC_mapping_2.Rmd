@@ -68,12 +68,6 @@ twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>%
 
 # Market A location data:
 mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
-mrkta_gps_join <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv")) %>%
-  rename(ward.code.manual = ward.code,
-         ward.name.manual = ward.name,
-         village.manual = village, 
-         market.name.manual = market.name.corrected
-         )
 
 # Market C location data:
 # mrktc_clean3 <- read_csv(file = here("data/data-cleaning_data/mrktc_info_clean3-1.csv"))
@@ -498,7 +492,7 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "simiyu") %>% sele
 #   <chr>                                              <date>            <date>     <int>
 # 1 simiyu-bariadi-bariadi-kidinda-kidinda             2022-05-17        2022-05-17    77 --> CORRECT
 # 2 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-19        2022-05-19    84 --> CORRECT
-# 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14     2 ** --> Checked: Location Error (mwasamba-mwasamba)
+# 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa         2022-05-28        2022-05-14     2 ** --> Checked: Date Error (mwasamba-mwasamba)
 # 4 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-14        2022-05-14     2 ** --> Checked: Date Error (2022-05-28)
 # 5 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-14    18 ** --> Checked: Date Error (2022-05-28)
 # 6 simiyu-busega-lutubiga-mwasamba-mwasamba           2022-05-28        2022-05-28    79 --> CORRECT
@@ -547,8 +541,8 @@ mrktc_linkA_check %>%
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "simiyu", uniqueMrkt, uniqueMrkt.check),
-    uniqueMrkt.check = ifelse(uniqueMrkt == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa" & date == "2022-05-14", "simiyu-busega-lutubiga-mwasamba-mwasamba", uniqueMrkt.check),
     date.check = ifelse(region.geomatch.final.A == "simiyu", as.character(date), date.check),
+    date.check = ifelse(uniqueMrkt.check == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa", "2022-05-19", date.check),
     date.check = ifelse(uniqueMrkt.check == "simiyu-busega-lutubiga-mwasamba-mwasamba", "2022-05-28", date.check))
 
 mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(date.check, uniqueMrkt.check) %>% count()
@@ -1172,4 +1166,8 @@ map_checks[[13]]
 
 ## NEXT STEPS:
 Review number of markets, number of surveys per market etc.
+```{r savedata}
 
+write_csv(mrktc_gps_check, file = here("data/data-cleaning_data/mrktc_gps_tanzania_final.csv"))
+write_csv(mrktc_gps_check, file = here("data/tanzania_data/mrktc_gps_tanzania_final.csv"))
+```
