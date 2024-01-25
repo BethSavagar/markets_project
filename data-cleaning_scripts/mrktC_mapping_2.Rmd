@@ -290,14 +290,89 @@ for(i in 1:length(regions)){
 }
 
 # gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
-
-# map_plots[[1]]; map_plots[[2]]; map_plots[[3]];map_plots[[4]]; map_plots[[5]]; map_plots[[6]];
-# map_plots[[7]]; map_plots[[8]]; map_plots[[9]];map_plots[[10]]; map_plots[[11]]; map_plots[[12]];
-# map_plots[[13]]; 
-  
-
 ```
- 
+
+## Regions {.tabset}
+
+### Dodoma
+
+```{r dodomareg}
+map_plots[[1]]
+```
+
+### Simiyu
+
+```{r simiyureg}
+map_plots[[2]]
+```
+
+### Mwanza
+
+```{r mwanzareg}
+map_plots[[3]]
+```
+
+### Katavi
+
+```{r katavireg}
+map_plots[[4]]
+```
+
+### Morogoro
+
+```{r morogororeg}
+map_plots[[5]]
+```
+
+### Mtwara
+
+```{r mtwarareg}
+map_plots[[6]]
+```
+
+### Mbeya
+
+```{r mbeyareg}
+map_plots[[7]]
+```
+
+### Rukwa
+
+```{r}
+map_plots[[8]]
+```
+
+### Iringa
+
+```{r}
+map_plots[[9]]
+```
+
+### Songwe
+
+```{r}
+map_plots[[10]]
+```
+
+### Njombe
+
+```{r}
+map_plots[[11]]
+```
+
+### Lindi
+
+```{r}
+map_plots[[12]]
+```
+
+### Ruvuma
+
+```{r}
+map_plots[[13]]
+```
+
+
 
 
 ###### Check linkA market C locations 
@@ -357,7 +432,7 @@ uniqueMrkt_date_summary <- mrktc_linkA_check %>%
 ```{r dodoma_clean}
 regions[1]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "dodoma") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "dodoma")
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "dodoma") %>% select(-region.geomatch.final.A)
 
 #   uniqueMrkt                                     date.of.interview date           n
@@ -377,8 +452,7 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "dodoma") %>% sele
 # 13 dodoma-dodoma.urban-mpunguzi-mpunguzi-mpunguzi 2022-05-25        2022-05-25    35  --> CORRECT
 
 mrktc_linkA_check %>% 
-  filter(uniqueMrkt == "dodoma-bahi-zanka-mayamaya-mayamaya") %>%
-  View()
+  filter(uniqueMrkt == "dodoma-bahi-zanka-mayamaya-mayamaya")
 
 # DOUBLE CHECKING: 
 # mrktc_linkA_check %>%
@@ -395,12 +469,12 @@ mrktc_linkA_check %>%
 # Update: 
 
 mrktc_linkA_check2 <- mrktc_linkA_check %>%
-  mutate(dateCheck = NA,
-         uniqueMrktCheck = NA,
-         dateCheck = ifelse(region.geomatch.final.A == "dodoma", as.character(date.of.interview), NA),
-         uniqueMrktCheck = ifelse(region.geomatch.final.A == "dodoma", uniqueMrkt, NA))
+  mutate(date.check = NA,
+         uniqueMrkt.check = NA,
+         date.check = ifelse(region.geomatch.final.A == "dodoma", as.character(date.of.interview), NA),
+         uniqueMrkt.check = ifelse(region.geomatch.final.A == "dodoma", uniqueMrkt, NA))
 
-# mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="dodoma") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
+# mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="dodoma") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
  
@@ -410,7 +484,7 @@ mrktc_linkA_check2 <- mrktc_linkA_check %>%
 ```{r simiyu_clean}
 regions[2]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "simiyu") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "simiyu") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "simiyu") %>% select(-region.geomatch.final.A)
 
 # Error Codes: "Checked: Date Error"
@@ -431,8 +505,8 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "simiyu") %>% sele
 # 3 simiyu-bariadi-dutwa-igaganulwa-igaganulwa
 mrktc_linkA_check %>% 
   filter(uniqueMrkt == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa") %>%
-  arrange(date) %>%
-  View()
+  arrange(date)
+  
 # simiyu-bariadi-dutwa-igaganulwa-igaganulwa / 2022-05-28 DoI / 2022-05-14
 # Correct to : simiyu-busega-lutubiga-mwasamba-mwasamba / 2022-05-28 DoI / 2022-05-28
 
@@ -440,8 +514,8 @@ mrktc_linkA_check %>%
 # 4 simiyu-busega-lutubiga-mwasamba-mwasamba
 mrktc_linkA_check %>% 
   filter(uniqueMrkt == "simiyu-busega-lutubiga-mwasamba-mwasamba") %>%
-  arrange(date) %>%
-  View()
+  arrange(date)
+  
 # 4 simiyu-busega-lutubiga-mwasamba-mwasamba  / 2022-05-14 / 2022-05-14
 # 5 simiyu-busega-lutubiga-mwasamba-mwasamba  / 2022-05-28 / 2022-05-14 
 # Correct to : simiyu-busega-lutubiga-mwasamba-mwasamba / 2022-05-28 DoI / 2022-05-28
@@ -456,7 +530,7 @@ mrktc_linkA_check %>%
 #     market.name.raw,
 #     uniqueMrkt
 #   ) %>%
-#   View()
+#   
 
 
 # Update all simiyu markets to uniqueMrkt
@@ -465,12 +539,12 @@ mrktc_linkA_check %>%
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "simiyu", uniqueMrkt, uniqueMrktCheck),
-    uniqueMrktCheck = ifelse(uniqueMrkt == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa" & date == "2022-05-14", "simiyu-busega-lutubiga-mwasamba-mwasamba", uniqueMrktCheck),
-    dateCheck = ifelse(region.geomatch.final.A == "simiyu", as.character(date), dateCheck),
-    dateCheck = ifelse(uniqueMrktCheck == "simiyu-busega-lutubiga-mwasamba-mwasamba", "2022-05-28", dateCheck))
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "simiyu", uniqueMrkt, uniqueMrkt.check),
+    uniqueMrkt.check = ifelse(uniqueMrkt == "simiyu-bariadi-dutwa-igaganulwa-igaganulwa" & date == "2022-05-14", "simiyu-busega-lutubiga-mwasamba-mwasamba", uniqueMrkt.check),
+    date.check = ifelse(region.geomatch.final.A == "simiyu", as.character(date), date.check),
+    date.check = ifelse(uniqueMrkt.check == "simiyu-busega-lutubiga-mwasamba-mwasamba", "2022-05-28", date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 ```
  
 ## Mwanza: 
@@ -478,7 +552,7 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(da
 ```{r mwanza_clean}
 regions[3]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "mwanza") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mwanza") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mwanza") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -507,11 +581,11 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mwanza") %>% sele
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "mwanza", uniqueMrkt, uniqueMrktCheck),
-    dateCheck = ifelse(region.geomatch.final.A == "mwanza", as.character(date), dateCheck))
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "mwanza", uniqueMrkt, uniqueMrkt.check),
+    date.check = ifelse(region.geomatch.final.A == "mwanza", as.character(date), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="mwanza") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="mwanza") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
  
@@ -538,7 +612,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
   
 regions[4]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "katavi") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "katavi") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "katavi") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -560,23 +634,23 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "katavi") %>% sele
 # Check "katavi-mlele-itenka-itenka.a-itenka"
 mrktc_linkA_check %>% 
   filter(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka") %>%
-  arrange(date) %>%
-  View()
+  arrange(date)
+  
 # If date == 2022-06-01, correction to rukwa-kilyamatundu
 # If date == 2022-06-03, correction to katavi-mpanda-kabungu-minyagala-minyagala
 
 # check "katavi-mpanda-kabungu-minyagala-minyagala"
 mrktc_linkA_check %>% 
   filter(uniqueMrkt == "katavi-mpanda-kabungu-minyagala-minyagala") %>%
-  arrange(date) %>%
-  View()
+  arrange(date)
+  
 # If date == 2022-06-05 looks like correction may be: katavi-mpanda-sibwesa-sibwesa-sibwesa
 
 # check "katavi-mpanda-sibwesa-sibwesa-sibwesa"
 mrktc_linkA_check %>% 
   filter(uniqueMrkt == "katavi-mpanda-sibwesa-sibwesa-sibwesa") %>%
-  arrange(date) %>%
-  View()
+  arrange(date)
+  
 # If date == 2022-06-03 looks like correction may be "katavi-mpanda-kabungu-minyagala-minyagala"
 
 
@@ -595,14 +669,14 @@ mrktc_linkA_check %>%
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "katavi", uniqueMrkt, uniqueMrktCheck),
-    uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrktCheck),
-    uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mpanda-kabungu-minyagala-minyagala" & date == "2022-06-05", "katavi-mpanda-sibwesa-sibwesa-sibwesa", uniqueMrktCheck),
-    uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mpanda-sibwesa-sibwesa-sibwesa" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrktCheck),
-    dateCheck = ifelse(region.geomatch.final.A == "katavi", as.character(date), dateCheck),
-    dateCheck = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-01", as.character("2022-05-30"), dateCheck))
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "katavi", uniqueMrkt, uniqueMrkt.check),
+    uniqueMrkt.check = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrkt.check),
+    uniqueMrkt.check = ifelse(uniqueMrkt == "katavi-mpanda-kabungu-minyagala-minyagala" & date == "2022-06-05", "katavi-mpanda-sibwesa-sibwesa-sibwesa", uniqueMrkt.check),
+    uniqueMrkt.check = ifelse(uniqueMrkt == "katavi-mpanda-sibwesa-sibwesa-sibwesa" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrkt.check),
+    date.check = ifelse(region.geomatch.final.A == "katavi", as.character(date), date.check),
+    date.check = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-01", as.character("2022-05-30"), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="katavi") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="katavi") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
@@ -612,68 +686,88 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="katavi") %>% group_by(da
 ```{r morogoro_clean}
 regions[5]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "morogoro") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "morogoro") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "morogoro") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
 # 
 #  1 morogoro-kilombero-idete-idandu-kikurukutu          2022-06-04        2022-06-02    21 --> CORRECT
-#  2 morogoro-kilombero-idete-idandu-kikurukutu          2022-06-06        2022-06-02     1 --> CORRECT (date correct, D.o.I incorrect)
-#  3 morogoro-kilombero-kiberege-sagamaganga-sagamaganga 2022-06-07        2022-06-06     1 --> CORRECT (date incorrect, D.o.I correct)
+#  2 morogoro-kilombero-idete-idandu-kikurukutu          2022-06-06        2022-06-02     1 --> Date Error: (date correct, D.o.I incorrect)
+#  3 morogoro-kilombero-kiberege-sagamaganga-sagamaganga 2022-06-07        2022-06-06     1 --> Date Error (date incorrect, D.o.I correct)
 #  4 morogoro-kilombero-kiberege-sagamaganga-sagamaganga 2022-06-07        2022-06-07    43 --> CORRECT 
-#  5 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-01     2 --> CORRECT (date incorrect, D.o.I correct)
-#  6 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-02     2 --> CORRECT (date incorrect, D.o.I correct)
+#  5 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-01     2 --> Date Error (date incorrect, D.o.I correct)
+#  6 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-02     2 --> Date Error (date incorrect, D.o.I correct)
 #  7 morogoro-kilombero-mofu-miyomboni-mofu              2022-06-06        2022-06-06    18 --> CORRECT 
-#  8 morogoro-kilosa-rudewa-gongoni-gongoni              2022-05-31        2022-05-30     1 --> CORRECT (date incorrect, D.o.I correct)
+#  8 morogoro-kilosa-rudewa-gongoni-gongoni              2022-05-31        2022-05-30     1 --> Date Error (date incorrect, D.o.I correct)
 #  9 morogoro-kilosa-rudewa-gongoni-gongoni              2022-05-31        2022-05-31    42 --> CORRECT 
-# 10 morogoro-mvomero-kanga-mziha-mziha                  2022-05-30        2022-05-29     1 --> CORRECT (date incorrect, D.o.I correct)
+# 10 morogoro-mvomero-kanga-mziha-mziha                  2022-05-30        2022-05-29     1 --> Date Error (date incorrect, D.o.I correct)
 # 11 morogoro-mvomero-kanga-mziha-mziha                  2022-05-30        2022-05-30    56 --> CORRECT 
-# 12 morogoro-ulanga-biro-tanga-tanga                    2022-05-25        2022-05-24     1 --> CORRECT (date incorrect, D.o.I correct)
+# 12 morogoro-ulanga-biro-tanga-tanga                    2022-05-25        2022-05-24     1 --> Date Error (date incorrect, D.o.I correct)
 # 13 morogoro-ulanga-biro-tanga-tanga                    2022-05-25        2022-05-25    37 --> CORRECT 
-# 14 morogoro-ulanga-iragua-namhanga-mbenja              2022-05-28        2022-05-26     1 --> CORRECT (date incorrect, D.o.I correct)
+# 14 morogoro-ulanga-iragua-namhanga-mbenja              2022-05-28        2022-05-26     1 --> Date Error (date incorrect, D.o.I correct)
 # 15 morogoro-ulanga-iragua-namhanga-mbenja              2022-05-28        2022-05-28    35 --> CORRECT 
-# 16 morogoro-ulanga-itete-itete-itete                   2022-06-08        2022-06-08     1 --> Date Error
-# 17 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-08     1 --> CORRECT (date incorrect, D.o.I correct)
-# 18 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-10   106 --> Correct
-# 19 morogoro-ulanga-itete-itete-itete                   2022-06-11        2022-06-10     1 --> CORRECT (date correct, D.o.I incorrect)
-# 20 morogoro-ulanga-lukande-lukande-lukande             2022-05-26        2022-05-26    32
-# 21 morogoro-ulanga-mbuga-iputi-iputi                   2022-05-24        2022-05-24    28
+# 16 morogoro-ulanga-itete-itete-itete                   2022-06-08        2022-06-08     1 --> Date Error: "2022-06-10"
+# 17 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-08     1 --> Date Error (date incorrect, D.o.I correct)
+# 18 morogoro-ulanga-itete-itete-itete                   2022-06-10        2022-06-10   106 --> CORRECT 
+# 19 morogoro-ulanga-itete-itete-itete                   2022-06-11        2022-06-10     1 --> Date Error (date correct, D.o.I incorrect)
+# 20 morogoro-ulanga-lukande-lukande-lukande             2022-05-26        2022-05-26    32 --> CORRECT 
+# 21 morogoro-ulanga-mbuga-iputi-iputi                   2022-05-24        2022-05-24    28 --> CORRECT 
 # 22 morogoro-ulanga-minepa-mavimba-mavimba              2022-01-02        2022-05-22     1 --> Date Error (2022-05-23 )
-# 23 morogoro-ulanga-minepa-mavimba-mavimba              2022-05-23        2022-05-23    48
-# 24 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-01        2022-06-01     1
-# 25 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-05-31     1  --> Date Error (2022-06-01 )
-# 26 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-06-01    53
-# 27 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-07     1  --> Date Error (2022-05-08 )
-# 28 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-08    92
-# 29 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-09        2022-06-08     11
+# 23 morogoro-ulanga-minepa-mavimba-mavimba              2022-05-23        2022-05-23    48 --> CORRECT 
+# 24 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-01        2022-06-01     1 --> Date Error (date correct, D.o.I incorrect)
+# 25 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-05-31     1 --> Date Error (2022-06-01 )
+# 26 morogoro-ulanga-minepa-mbuyuni-mbuyuni              2022-06-02        2022-06-01    53 --> CORRECT
+# 27 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-07     1 --> Date Error (2022-05-08 )
+# 28 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-08    92 --> CORRECT
+# 29 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-09        2022-06-08     11  --> Date Error (date correct, D.o.I incorrect)
 
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
-  mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "mbeya", uniqueMrkt, uniqueMrktCheck),
-    # uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrktCheck),
-    # uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mpanda-kabungu-minyagala-minyagala" & date == "2022-06-05", "katavi-mpanda-sibwesa-sibwesa-sibwesa", uniqueMrktCheck),
-    # uniqueMrktCheck = ifelse(uniqueMrkt == "katavi-mpanda-sibwesa-sibwesa-sibwesa" & date == "2022-06-03", "katavi-mpanda-kabungu-minyagala-minyagala", uniqueMrktCheck),
-    dateCheck = ifelse(region.geomatch.final.A == "mbeya", as.character(date.of.interview), dateCheck),
-    #dateCheck = ifelse(uniqueMrkt == "katavi-mlele-itenka-itenka.a-itenka" & date == "2022-06-01", as.character("2022-05-30"), dateCheck)
-    )
-
-
-mrktc_linkA_check2 %>%
     mutate(
-        uniqueMrktCheck = ifelse(region.geomatch.final.A == "mbeya", uniqueMrkt, uniqueMrktCheck),
-        dateCheck = ifelse(region.geomatch.final.A == "mbeya", as.character(date.of.interview), dateCheck),
-        dateCheck = ifelse(uniqueMrkt == "morogoro-kilombero-idete-idandu-kikurukutu", as.character("2022-06-02"), dateCheck)
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "morogoro", uniqueMrkt, uniqueMrkt.check),
+        date.check = ifelse(region.geomatch.final.A == "morogoro", as.character(date), date.check),
+        date.check = ifelse(uniqueMrkt == "morogoro-kilombero-idete-idandu-kikurukutu", as.character(date), date.check), #2022-06-02
+        date.check = ifelse(uniqueMrkt == "morogoro-kilombero-kiberege-sagamaganga-sagamaganga", as.character(date.of.interview), date.check), #2022-06-07 
+        date.check = ifelse(uniqueMrkt == "morogoro-kilombero-mofu-miyomboni-mofu", as.character(date.of.interview), date.check), #2022-06-06 
+        date.check = ifelse(uniqueMrkt == "morogoro-kilosa-rudewa-gongoni-gongoni", as.character(date.of.interview), date.check), #2022-05-31  
+        date.check = ifelse(uniqueMrkt == "morogoro-mvomero-kanga-mziha-mziha", as.character(date.of.interview), date.check), #2022-05-30
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-biro-tanga-tanga", as.character(date.of.interview), date.check), #2022-05-25 
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-iragua-namhanga-mbenja", as.character(date.of.interview), date.check), #2022-05-28
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-itete-itete-itete", as.character("2022-06-10"), date.check), #"2022-06-10"
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-minepa-mavimba-mavimba", as.character("2022-05-23"), date.check), #"2022-05-23"
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-minepa-mbuyuni-mbuyuni", as.character("2022-06-01"), date.check), #"2022-06-01"
+        date.check = ifelse(uniqueMrkt == "morogoro-ulanga-usangule-kiswago-salamiti", as.character("2022-06-08"), date.check) #2022-06-08
     ) 
+
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="morogoro") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+
 ```
  
 
 ## Mtwara: 
 
 ```{r mtwara_clean}
+
+  region_i <- "mtwara"
+  ggplot() +
+   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktc_linkA_sf %>% filter(region.geomatch.final.A == region_i), 
+            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+    # scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region_Nam)+
+   # coord_sf(ylim = c(-10.9,-10.6), xlim = c(38.6,39.3))+
+    coord_sf()+
+   labs(col = "Ward of market"
+        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+        )+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
 regions[6]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "mtwara") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mtwara") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mtwara") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -709,6 +803,11 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mtwara") %>% sele
 # 28 mtwara-newala-mtonya-majengo-mtonya                      2022-06-10        2022-06-10     4
 # 29 mtwara-newala-mtonya-nangwala-nangwala                   2022-06-10        2022-06-10     4
 
+
+mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
+    mutate(
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mtwara", uniqueMrkt, uniqueMrkt.check),
+        date.check = ifelse(region.geomatch.final.A == "mtwara", as.character(date), date.check))
 ```
 
 
@@ -717,25 +816,43 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mtwara") %>% sele
 ```{r mbeya_clean}
 regions[7]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "mbeya") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "mbeya") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mbeya") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
 #    uniqueMrkt                                                    date.of.interview date           n
 #    <chr>                                                         <date>            <date>     <int>
-#  1 mbeya-chunya-mamba-mamba-shinyanga                            2022-06-14        2022-06-14    72
-#  2 mbeya-chunya-mtanila-igangwe-shauri.moyo                      2022-06-12        2022-06-12    67
-#  3 mbeya-mbarali-igava-muungano-muungano                         2022-05-28        2022-05-28    44
-#  4 mbeya-mbarali-imalilosongwe-imalilosongwe-imalilosongwe       2022-05-29        2022-05-29    70
-#  5 mbeya-mbarali-madibira-chalisuka-madibira                     2022-05-26        2022-05-26    39
-#  6 mbeya-mbarali-miyombweni-mapogoro-mapogoro                    2022-05-27        2022-05-27    26
-#  7 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-27        2022-05-27     1
-#  8 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-29        2022-05-29     7
-#  9 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-06-04        2022-06-04    52
-# 10 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-27        2022-05-27     2
-# 11 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-28        2022-05-28    11
-# 12 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-29        2022-05-29     1
-# 13 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-06-07        2022-06-07    59
+#  1 mbeya-chunya-mamba-mamba-shinyanga                            2022-06-14        2022-06-14    72 --> Correct
+#  2 mbeya-chunya-mtanila-igangwe-shauri.moyo                      2022-06-12        2022-06-12    67 --> Correct
+#  3 mbeya-mbarali-igava-muungano-muungano                         2022-05-28        2022-05-28    44 --> Correct
+#  4 mbeya-mbarali-imalilosongwe-imalilosongwe-imalilosongwe       2022-05-29        2022-05-29    70 --> Correct
+#  5 mbeya-mbarali-madibira-chalisuka-madibira                     2022-05-26        2022-05-26    39 --> Correct
+#  6 mbeya-mbarali-miyombweni-mapogoro-mapogoro                    2022-05-27        2022-05-27    26 --> Correct
+#  7 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-27        2022-05-27     1 --> mapogoro.
+#  8 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-05-29        2022-05-29     7 --> imalilosongwe.
+#  9 mbeya-mbarali-rujewa-ihanga-rujewa                            2022-06-04        2022-06-04    52 --> Correct
+# 10 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-27        2022-05-27     2 --> mapogoro.
+# 11 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-28        2022-05-28    11 --> muungano.
+# 12 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-29        2022-05-29     1 --> imalilosongwe.
+# 13 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-06-07        2022-06-07    59 --> Correct
+
+
+
+mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
+    mutate(
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya", uniqueMrkt, uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-05-26", "mbeya-mbarali-madibira-chalisuka-madibira", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-05-27", "mbeya-mbarali-miyombweni-mapogoro-mapogoro", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-06-04", "mbeya-mbarali-rujewa-ihanga-rujewa", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-06-07", "mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-05-28", "mbeya-mbarali-igava-muungano-muungano", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == " 2022-05-29", "mbeya-mbarali-imalilosongwe-imalilosongwe-imalilosongwe", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-06-12", "mbeya-chunya-mtanila-igangwe-shauri.moyo", uniqueMrkt.check),
+        uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya" & date == "2022-06-14", "mbeya-chunya-mamba-mamba-shinyanga", uniqueMrkt.check),
+        date.check = ifelse(region.geomatch.final.A == "mbeya", as.character(date), date.check)
+    ) 
+
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="mbeya") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
@@ -745,7 +862,7 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mbeya") %>% selec
 ```{r rukwa_clean}
 regions[8]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "rukwa") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "rukwa") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "rukwa") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -760,12 +877,12 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "rukwa") %>% selec
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "rukwa", uniqueMrkt, uniqueMrktCheck),
-    dateCheck = ifelse(region.geomatch.final.A == "rukwa", as.character(date), dateCheck),
-    dateCheck = ifelse(uniqueMrkt == "rukwa-nkasi-kate-ntalamila-ntalamila" & date == "2022-05-26", as.character("2022-05-27"), dateCheck))
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "rukwa", uniqueMrkt, uniqueMrkt.check),
+    date.check = ifelse(region.geomatch.final.A == "rukwa", as.character(date), date.check),
+    date.check = ifelse(uniqueMrkt == "rukwa-nkasi-kate-ntalamila-ntalamila" & date == "2022-05-26", as.character("2022-05-27"), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="rukwa") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="rukwa") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 ```
 
 ## Iringa: 
@@ -773,7 +890,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View
 ```{r iringa_clean}
 regions[9]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "iringa") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "iringa") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "iringa") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -787,12 +904,12 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "iringa") %>% sele
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "iringa", uniqueMrkt, uniqueMrktCheck),
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "iringa", uniqueMrkt, uniqueMrkt.check),
     # date of interview field is correct for all locations>>>
-    dateCheck = ifelse(region.geomatch.final.A == "iringa", as.character(date.of.interview), dateCheck))
+    date.check = ifelse(region.geomatch.final.A == "iringa", as.character(date.of.interview), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="iringa") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="iringa") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 
 ```
 
@@ -801,7 +918,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View
 ```{r njombe_clean}
 regions[10]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "njombe") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "njombe") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "njombe") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -814,13 +931,13 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "njombe") %>% sele
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "njombe", uniqueMrkt, uniqueMrktCheck),
-    uniqueMrktCheck = ifelse(uniqueMrktCheck == "njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe" & date == "2022-06-01", "iringa-mufindi-ihowanza-ihowanza-ihowanza", uniqueMrktCheck),
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "njombe", uniqueMrkt, uniqueMrkt.check),
+    uniqueMrkt.check = ifelse(uniqueMrkt.check == "njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe" & date == "2022-06-01", "iringa-mufindi-ihowanza-ihowanza-ihowanza", uniqueMrkt.check),
     # date of interview field is correct for all locations>>>
-    dateCheck = ifelse(region.geomatch.final.A == "njombe", as.character(date.of.interview), dateCheck))
+    date.check = ifelse(region.geomatch.final.A == "njombe", as.character(date.of.interview), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="njombe") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="njombe") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 
 ```
 
@@ -830,7 +947,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View
 ```{r songwe_clean}
 regions[11]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "songwe") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "songwe") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "songwe") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -843,12 +960,12 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "songwe") %>% sele
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "songwe", uniqueMrkt, uniqueMrktCheck),
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "songwe", uniqueMrkt, uniqueMrkt.check),
     # date of interview field is correct for all locations>>>
-    dateCheck = ifelse(region.geomatch.final.A == "songwe", as.character(date), dateCheck))
+    date.check = ifelse(region.geomatch.final.A == "songwe", as.character(date), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="songwe") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="songwe") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 
 ```
 
@@ -860,7 +977,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View
 ```{r lindi_clean}
 regions[12]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "lindi") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "lindi") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "lindi") %>% select(-region.geomatch.final.A)
 # 
 # Error Codes: "Checked: Date Error", "Checked: Location Error"
@@ -872,12 +989,12 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "lindi") %>% selec
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "lindi", uniqueMrkt, uniqueMrktCheck),
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "lindi", uniqueMrkt, uniqueMrkt.check),
     # date of interview field is correct for all locations>>>
-    dateCheck = ifelse(region.geomatch.final.A == "lindi", as.character(date.of.interview), dateCheck))
+    date.check = ifelse(region.geomatch.final.A == "lindi", as.character(date.of.interview), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="lindi") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="lindi") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 
 ```
 
@@ -886,7 +1003,7 @@ mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View
 ```{r ruvuma_clean}
 regions[13]
 
-mrktc_linkA_check %>% filter(region.geomatch.final.A == "ruvuma") %>% View()
+mrktc_linkA_check %>% filter(region.geomatch.final.A == "ruvuma") 
 uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "ruvuma") %>% select(-region.geomatch.final.A)
 # 
 # # A tibble: 1 × 4
@@ -896,19 +1013,71 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "ruvuma") %>% sele
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
-    uniqueMrktCheck = ifelse(region.geomatch.final.A == "ruvuma", uniqueMrkt, uniqueMrktCheck),
+    uniqueMrkt.check = ifelse(region.geomatch.final.A == "ruvuma", uniqueMrkt, uniqueMrkt.check),
     # date of interview field is correct for all locations>>>
-    dateCheck = ifelse(region.geomatch.final.A == "ruvuma", as.character(date.of.interview), dateCheck))
+    date.check = ifelse(region.geomatch.final.A == "ruvuma", as.character(date.of.interview), date.check))
 
-mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="ruvuma") %>% group_by(dateCheck, uniqueMrktCheck) %>% count()
-mrktc_linkA_check2 %>% group_by(dateCheck, uniqueMrktCheck) %>% count() %>% View()
+mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="ruvuma") %>% group_by(date.check, uniqueMrkt.check) %>% count()
+mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 ```
 
+# Clean GPS data:
 
+```{r mrktc_linkA_cleangps}
+
+mrktc_gps_check <- mrktc_linkA_check2 %>% 
+  # copy mrktCheck for splitting
+  mutate(uniqueMrktSep = uniqueMrkt.check) %>% 
+  # split uniqueMrkt variable into component locations: 
+  separate(uniqueMrktSep, c("region.check", "district.check", "ward.check", "village.check", "market.check"), sep = "-") %>%
+  # check code: 
+  select(fid, date, date.check, country, uniqueMrkt.check, contains(".check"), gps.coordinates.of.the.market, unique.row.identifier.uuid.)
+
+```
 
 ## NEXT STEPS:
-
-Update dates/locations for survey C entries which have errors
 Review number of markets, number of surveys per market etc.
 
 
+```{r mrktc_linkACheck}
+
+mrktc_mapdata_check <- mrktc_gps_check %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+  # arrange(gps.coordinates.of.the.market) %>% 
+  # filter(!is.na(lat), !is.na(long))
+
+mrktc_sf_check <- st_as_sf(mrktc_mapdata_check, coords = c("long","lat"),  crs = 4326) 
+
+## MAP
+map_checks <- list()
+regions <- mrktc_gps_check %>% distinct(region.check) %>% pull()
+
+for(i in 1:length(regions)){
+  
+  region_i <- regions[i]
+  
+  map_checks[[i]] <- ggplot() +
+   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktc_sf_check %>% filter(region.check %in% region_i), 
+            aes(col = ward.check),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region_Nam)+
+   coord_sf()+
+   labs(col = "Ward of market"
+        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+        )+
+  theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+# gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
+
+map_checks[[1]]; map_checks[[2]]; map_checks[[3]];map_checks[[4]]; map_checks[[5]]; # map_checks[[6]]; == mtwara (not cleaned!)
+map_checks[[7]]; map_checks[[8]]; map_checks[[9]];map_checks[[10]]; map_checks[[11]]; map_checks[[12]];
+map_checks[[13]];
+
+
+```
