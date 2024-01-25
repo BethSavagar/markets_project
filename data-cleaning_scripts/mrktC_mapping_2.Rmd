@@ -39,7 +39,7 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C", "#FFD70
     - `r `"data/shapefiles/tza_admbnda_adm3_20181019.shp"`
     - Source <https://data.humdata.org/dataset/cod-ab-tza?> (ADM L3)
 
-```{r data, include = T, warning = F, echo = F}
+```{r data, include = F, warning = F, echo = F}
 
 # Load Tanzania Shapefile:
 # tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
@@ -111,12 +111,12 @@ mrktc_gps_raw <- read_csv(file = here(
 
 ```
 
+## Market A Maps: 
 
-## Market A Map
 - Market A data, matched to Tanzania shapefile region-district-ward locations
 - See `mrktA_mapping.Rmd`
 
-```{r mrktaMap}
+```{r mrktaMap, warning = F}
 # convert mrkta location data to mapping format & map manually cleaned data:
 
 mrkta_mapdata <- mrkta_gps %>% 
@@ -141,6 +141,10 @@ mrkta_map <- ggplot() +
 
 mrkta_map
 
+```
+
+
+```{r mrktaMapReg, echo = F, warning = F}
 # Map of market survey locations coloured by region (consistency with Tanzania shapefile)
 
 Regions_Amanual <- mrkta_sf %>% pull(region.geomatch.final) %>% unique() %>% str_to_title()
@@ -160,24 +164,13 @@ mrkta_mapByReg <- ggplot() +
 
 mrkta_mapByReg
 
-# mrkta-manual string-location data is consistent with tanzania shapefile for REGION of origin. 
-
-# mrkta-manual Descriptive stats:
-# mrkta_gps %>% group_by(district.region.name) %>% count()
-# mrkta_gps %>% group_by(ward.name) %>% count()
-# mrkta_gps %>% group_by(ward.name) %>% count() %>% filter(n>1)
-# mrkta_gps %>% group_by(ward.name) %>% count() %>% filter(n>1)
-# mrkta_gps %>% group_by(district.region.name, ward.name) %>% count() %>% filter(n>1) # mamba only appears in ward.name unique list
-# mrkta_gps %>% filter(ward.name == "mamba")
-# mrkta_gps %>% group_by(district.region.name, ward.name, village) %>% count() 
-# mrkta_gps %>% group_by(district.region.name, ward.name, village, market.name.corrected) %>% count() 
-
 ```
 
-## Market C Map (1)
-- Location of market C surveys, overlaid on market A survey locations
+## Market Survey C Map (1): 
 
-```{r, mrktcMap_manual-cleaning}
+- Market **Survey C** survey locations (manually cleaned), overlaid on Market **Survey A** locations (geo-matched)
+
+```{r mrktcManual_only, warning = F}
 
 mrktc_mapdata <- mrktc_gps %>% 
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
@@ -195,13 +188,16 @@ mrktC_map <- ggplot() +
   geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
   scale_colour_manual(values = market_pal)+
   coord_sf()+ 
-  labs(title = "Market survey C: survey locations", 
+  labs(title = "Market Survey C: survey locations (manual)", 
        fill = "Tanzania region",
        col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
 
 mrktC_map
+```
 
+
+```{r mrktcManual_overA, warning = F}
 mrktCA_map <- ggplot() +
    geom_sf(data = tregs_shp, aes(fill = Region_Nam), linewidth = 0.1) +
    scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
@@ -210,7 +206,7 @@ mrktCA_map <- ggplot() +
   geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
    scale_colour_manual(values = market_pal)+
    coord_sf()+
-   labs(title = "Market Survey A-geoamtched (circles) and C-manual (triangles) data",
+   labs(title = "Market Survey C (manual) over Market Survey A (geomatched)",
         fill = "Tanzania region",
         col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
@@ -220,19 +216,20 @@ mrktCA_map
 ```
 
 
-```{r datacheck}
+```{r datacheck, eval = F}
 # Check consistency between markets in mrkta_gps and mrktc_gps_raw (.manual)
 mrkta_gps %>% distinct(region.geomatch.final, ward.geomatch.final, market.manual.final)
 mrktc_gps_raw %>% distinct(region.name.raw, ward.name.manual, market.name.manual)
 
 ```
-1) Market survey C - match to market survey A 
-- Use market survey C gps locations to link to market survey A geo-matched data.
- - Each market survey C entry should be linked to a market identified in market survey A data.
- - Compare consistency between raw/manual survey C locations and A-linked survey locations.
- - Compare consistency between raw/manual survey C locations, overlaid on survey A locations
- - Compare consistently between A-linked survey C locations overlaid on survey A location (should be perfect match)
 
+
+## Market Survey C Clean (1): geo-link A
+
+Use market survey C gps locations to link to market survey A geo-matched data.
+
+ - Each market survey C entry should be linked to a market identified in market survey A data.
+ - Linked market survey C locations to nearest market survey A locations
 
 ```{r mrktc_linkA}
 
@@ -292,7 +289,12 @@ for(i in 1:length(regions)){
 # gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
 ```
 
-## Regions {.tabset}
+
+## Market Survey C Map (2): geo-link A {.tabset}
+
+- Market survey C locations linked to nearest market survey A location
+- Should be a perfect match for C and A location data: 
+
 
 ### Dodoma
 
@@ -373,12 +375,15 @@ map_plots[[13]]
 ```
 
 
+## Market Survey C Clean (1): check geo-link A data:
 
+For each region, check consistency between:
 
-###### Check linkA market C locations 
+  - geolinkA survey locations, date-of-survey and raw data. 
+  - Each survey in a given location should occur on the same date (?)
+  - Where there are inconsistencies in geolinkA data and survey dates, check raw & manual data matching to check.
 
-
-```{r check_linkA}
+```{r check_linkA, warning = F, echo = F}
 
 mrktc_linkA_check <- mrktc_linkA_gps %>%
   left_join(mrktc_gps_raw %>% select(fid, ends_with(".raw")), by = "fid") %>%
@@ -394,7 +399,6 @@ mrktc_linkA_check <- mrktc_linkA_gps %>%
     sep = "-"
     )
   ) 
-
 
 # How many unique markets are found in the linkA location data?
 
@@ -427,9 +431,10 @@ uniqueMrkt_date_summary <- mrktc_linkA_check %>%
 - All surveys for a given market should be completed on the same day
 - For surveys which seem to be inconsistent check the original mrktc location names etc. 
 
-## DODOMA: 
+### Dodoma: 
 
-```{r dodoma_clean}
+```{r dodoma_clean, eval = F}
+
 regions[1]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "dodoma")
@@ -465,7 +470,9 @@ mrktc_linkA_check %>%
 #     uniqueMrkt
 #   ) %>%
 #   View()
+```
 
+```{r dodomaUpdate, warning = F, results = "hide"}
 # Update: 
 
 mrktc_linkA_check2 <- mrktc_linkA_check %>%
@@ -475,13 +482,11 @@ mrktc_linkA_check2 <- mrktc_linkA_check %>%
          uniqueMrkt.check = ifelse(region.geomatch.final.A == "dodoma", uniqueMrkt, NA))
 
 # mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="dodoma") %>% group_by(date.check, uniqueMrkt.check) %>% count()
-
 ```
  
- 
-## simiyu: 
+## Simiyu: 
 
-```{r simiyu_clean}
+```{r simiyu_clean, eval = F}
 regions[2]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "simiyu") 
@@ -531,7 +536,9 @@ mrktc_linkA_check %>%
 #     uniqueMrkt
 #   ) %>%
 #   
+```
 
+```{r simiyuUpdate, warning = F, results = "hide"}
 
 # Update all simiyu markets to uniqueMrkt
 # Update "simiyu-bariadi-dutwa-igaganulwa-igaganulwa" & date == "2022-05-14" to "simiyu-busega-lutubiga-mwasamba-mwasamba"
@@ -547,9 +554,9 @@ mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
 mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 ```
  
-## Mwanza: 
+### Mwanza: 
 
-```{r mwanza_clean}
+```{r mwanza_clean, eval = F}
 regions[3]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "mwanza") 
@@ -577,7 +584,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mwanza") %>% sele
 #   View()
 
 # Update: All correct no cleaning required.
+```
 
+```{r mwanzaUpdate, warning =F, results = "hide"}
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
@@ -590,26 +599,9 @@ mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 ```
  
 
-## Katavi: 
+### Katavi: 
 
-```{r katavi_clean}
-
-
-  region_i <- "katavi"
-  ggplot() +
-   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
-    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
-            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
-    geom_sf(data = mrktc_linkA_sf %>% filter(ward.geomatch.final.A == "itenka"), 
-            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
-    scale_colour_manual(values = rep(market_pal,2))+
-    facet_wrap(~Region_Nam)+
-   coord_sf()+
-   labs(col = "Ward of market"
-        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
-        )+
-  theme(legend.position = "right", legend.box = "horizontal")
-  
+```{r katavi_clean, eval = F}
 regions[4]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "katavi") 
@@ -665,8 +657,26 @@ mrktc_linkA_check %>%
 #     uniqueMrkt
 #   ) %>%
 #   View()
+```
 
+```{r kataviUpdate, warning =F, results = "hide"}
+# Map Check
+region_i <- "katavi"
+ggplot() +
+  geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+  geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+          aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+  geom_sf(data = mrktc_linkA_sf %>% filter(ward.geomatch.final.A == "itenka"), 
+          aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+  scale_colour_manual(values = rep(market_pal,2))+
+  facet_wrap(~Region_Nam)+
+  coord_sf()+
+  labs(col = "Ward of market"
+      #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+      )+
+  theme(legend.position = "right", legend.box = "horizontal")
 
+# Update
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "katavi", uniqueMrkt, uniqueMrkt.check),
@@ -681,9 +691,9 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="katavi") %>% group_by(da
 ```
 
 
-## Morogoro: 
+### Morogoro: 
 
-```{r morogoro_clean}
+```{r morogoro_clean, eval = F}
 regions[5]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "morogoro") 
@@ -720,7 +730,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "morogoro") %>% se
 # 27 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-07     1 --> Date Error (2022-05-08 )
 # 28 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-08        2022-06-08    92 --> CORRECT
 # 29 morogoro-ulanga-usangule-kiswago-salamiti           2022-06-09        2022-06-08     11  --> Date Error (date correct, D.o.I incorrect)
+```
 
+```{r morogoroUpdate, warning = F, results = "hide"}
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
     mutate(
@@ -744,26 +756,9 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="morogoro") %>% group_by(
 ```
  
 
-## Mtwara: 
+### Mtwara: 
 
-```{r mtwara_clean}
-
-  region_i <- "mtwara"
-  ggplot() +
-   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
-    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
-            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
-    geom_sf(data = mrktc_linkA_sf %>% filter(region.geomatch.final.A == region_i), 
-            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
-    # scale_colour_manual(values = rep(market_pal,2))+
-    facet_wrap(~Region_Nam)+
-   # coord_sf(ylim = c(-10.9,-10.6), xlim = c(38.6,39.3))+
-    coord_sf()+
-   labs(col = "Ward of market"
-        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
-        )+
-  theme(legend.position = "right", legend.box = "horizontal")
-
+```{r mtwara_clean, eval = F, }
 
 regions[6]
 
@@ -802,7 +797,24 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mtwara") %>% sele
 # 27 mtwara-newala-luchindu-tupendane-tulindane               2022-06-10        2022-06-10     4
 # 28 mtwara-newala-mtonya-majengo-mtonya                      2022-06-10        2022-06-10     4
 # 29 mtwara-newala-mtonya-nangwala-nangwala                   2022-06-10        2022-06-10     4
+```
 
+
+```{r mtwaraUpdate, warning = F, results = "hide"}
+region_i <- "mtwara"
+ggplot() +
+  geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+  geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+          aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+  geom_sf(data = mrktc_linkA_sf %>% filter(region.geomatch.final.A == region_i), 
+          aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+  # scale_colour_manual(values = rep(market_pal,2))+
+  facet_wrap(~Region_Nam)+
+  # coord_sf(ylim = c(-10.9,-10.6), xlim = c(38.6,39.3))+
+  coord_sf()+
+  labs(col = "Ward of market" #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+      )+
+  theme(legend.position = "right", legend.box = "horizontal")
 
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
     mutate(
@@ -810,10 +822,9 @@ mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
         date.check = ifelse(region.geomatch.final.A == "mtwara", as.character(date), date.check))
 ```
 
+### Mbeya: 
 
-## Mbeya: 
-
-```{r mbeya_clean}
+```{r mbeya_clean, eval = F, results = "hide"}
 regions[7]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "mbeya") 
@@ -835,9 +846,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "mbeya") %>% selec
 # 11 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-28        2022-05-28    11 --> muungano.
 # 12 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-05-29        2022-05-29     1 --> imalilosongwe.
 # 13 mbeya-mbarali-utengule.usangu-utengule.usangu-utengule.usangu 2022-06-07        2022-06-07    59 --> Correct
+```
 
-
-
+```{r mbeyaUpdate, warning =F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
     mutate(
         uniqueMrkt.check = ifelse(region.geomatch.final.A == "mbeya", uniqueMrkt, uniqueMrkt.check),
@@ -856,10 +867,9 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="mbeya") %>% group_by(dat
 
 ```
 
+### Rukwa: 
 
-## Rukwa: 
-
-```{r rukwa_clean}
+```{r rukwa_clean, eval = F, results = "hide"}
 regions[8]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "rukwa") 
@@ -874,7 +884,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "rukwa") %>% selec
 # 3 rukwa-nkasi-nkomolo-isunta-isunta                 2022-06-02        2022-06-02    55
 # 4 rukwa-sumbawanga-kipeta-kilyamatundu-kilyamatundu 2022-06-01        2022-06-01    49
 # 5 rukwa-sumbawanga-muze-muze-muze                   2022-05-26        2022-05-26    42
+```
 
+```{r rukwaUpdate, warning=F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "rukwa", uniqueMrkt, uniqueMrkt.check),
@@ -885,9 +897,9 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="rukwa") %>% group_by(dat
 mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 ```
 
-## Iringa: 
+### Iringa: 
 
-```{r iringa_clean}
+```{r iringa_clean, eval =F}
 regions[9]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "iringa") 
@@ -900,8 +912,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "iringa") %>% sele
 # 1 iringa-iringa-itunundu-kimande-kimande    2022-06-03        2022-06-03    54
 # 2 iringa-mufindi-ihowanza-ihowanza-ihowanza 2022-06-01        2022-05-31     1 --> incorrect date.
 # 3 iringa-mufindi-ihowanza-ihowanza-ihowanza 2022-06-01        2022-06-01    42
+```
 
-
+```{r iringaUpdate, warning=F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "iringa", uniqueMrkt, uniqueMrkt.check),
@@ -913,9 +926,9 @@ mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
-## Njombe: 
+### Njombe: 
 
-```{r njombe_clean}
+```{r njombe_clean, eval =F}
 regions[10]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "njombe") 
@@ -927,8 +940,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "njombe") %>% sele
 #   <chr>                                                      <date>            <date>     <int>
 # 1 njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe 2022-06-01        2022-06-01     2 --> Correct to iringa ihowanza
 # 2 njombe-wanging.ombe-wanging.ombe-wanging.ombe-wanging.ombe 2022-06-06        2022-06-06    62
+```
 
-
+```{r njombeUpdate, warning =F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "njombe", uniqueMrkt, uniqueMrkt.check),
@@ -941,10 +955,9 @@ mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
+### Songwe: 
 
-## Songwe: 
-
-```{r songwe_clean}
+```{r songwe_clean, eval =F}
 regions[11]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "songwe") 
@@ -956,8 +969,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "songwe") %>% sele
 #   <chr>                              <date>            <date>     <int>
 # 1 songwe-mbozi-iyula-idiwili-idiwili 2022-06-09        2022-06-09    38
 # 2 songwe-momba-ivuna-ntungwa-mbao    2022-06-02        2022-06-02    49
+```
 
-
+```{r songweUpdate, warning =F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "songwe", uniqueMrkt, uniqueMrkt.check),
@@ -969,12 +983,9 @@ mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
+### Lindi: 
 
-
-
-## Lindi: 
-
-```{r lindi_clean}
+```{r lindi_clean, eval =F}
 regions[12]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "lindi") 
@@ -985,8 +996,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "lindi") %>% selec
 #   uniqueMrkt                               date.of.interview date           n
 #   <chr>                                    <date>            <date>     <int>
 # 1 lindi-nachingwea-ndomoni-ndomoni-ndomoni 2022-06-09        2022-06-09     8
+```
 
-
+```{r lindiUpdate, warning=F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "lindi", uniqueMrkt, uniqueMrkt.check),
@@ -998,9 +1010,9 @@ mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count()
 
 ```
 
-## Ruvuma: 
+### Ruvuma: 
 
-```{r ruvuma_clean}
+```{r ruvuma_clean, eval =F}
 regions[13]
 
 mrktc_linkA_check %>% filter(region.geomatch.final.A == "ruvuma") 
@@ -1010,7 +1022,9 @@ uniqueMrkt_date_summary %>% filter(region.geomatch.final.A == "ruvuma") %>% sele
 #   uniqueMrkt                            date.of.interview date           n
 #   <chr>                                 <date>            <date>     <int>
 # 1 ruvuma-tunduru-muhuwesi-muhesi-muhesi 2022-06-12        2022-06-12     4
+```
 
+```{r ruvumaUpdate, warning = F, results = "hide"}
 mrktc_linkA_check2 <- mrktc_linkA_check2 %>%
   mutate(
     uniqueMrkt.check = ifelse(region.geomatch.final.A == "ruvuma", uniqueMrkt, uniqueMrkt.check),
@@ -1021,9 +1035,11 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="ruvuma") %>% group_by(da
 mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 ```
 
-# Clean GPS data:
+## Market Survey C Clean GPS Data
 
-```{r mrktc_linkA_cleangps}
+Use cleaned survey C (geo-linked A) locations to update market survey C gps data. 
+
+```{r mrktc_linkA_cleangps, warning = F}
 
 mrktc_gps_check <- mrktc_linkA_check2 %>% 
   # copy mrktCheck for splitting
@@ -1035,11 +1051,8 @@ mrktc_gps_check <- mrktc_linkA_check2 %>%
 
 ```
 
-## NEXT STEPS:
-Review number of markets, number of surveys per market etc.
 
-
-```{r mrktc_linkACheck}
+```{r mrktc_linkACheck, warning = F}
 
 mrktc_mapdata_check <- mrktc_gps_check %>% 
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
@@ -1073,11 +1086,90 @@ for(i in 1:length(regions)){
   
 }
 
-# gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
-
-map_checks[[1]]; map_checks[[2]]; map_checks[[3]];map_checks[[4]]; map_checks[[5]]; # map_checks[[6]]; == mtwara (not cleaned!)
-map_checks[[7]]; map_checks[[8]]; map_checks[[9]];map_checks[[10]]; map_checks[[11]]; map_checks[[12]];
-map_checks[[13]];
-
-
 ```
+
+
+## Regions Checked {.tabset}
+
+### Dodoma
+
+```{r dodomacheck}
+map_checks[[1]]
+```
+
+### Simiyu
+
+```{r simiyucheck}
+map_checks[[2]]
+```
+
+### Mwanza
+
+```{r mwanzacheck}
+map_checks[[3]]
+```
+
+### Katavi
+
+```{r katavicheck}
+map_checks[[4]]
+```
+
+### Morogoro
+
+```{r morogorocheck}
+map_checks[[5]]
+```
+
+### Mtwara-Unchecked
+
+```{r mtwaracheck}
+map_checks[[6]]
+```
+
+### Mbeya
+
+```{r mbeyacheck}
+map_checks[[7]]
+```
+
+### Rukwa
+
+```{r rukwacheck}
+map_checks[[8]]
+```
+
+### Iringa
+
+```{r iringacheck}
+map_checks[[9]]
+```
+
+### Songwe
+
+```{r songwecheck}
+map_checks[[10]]
+```
+
+### Njombe
+
+```{r njombecheck}
+map_checks[[11]]
+```
+
+### Lindi
+
+```{r lindicheck}
+map_checks[[12]]
+```
+
+### Ruvuma
+
+```{r ruvumacheck}
+map_checks[[13]]
+```
+
+
+## NEXT STEPS:
+Review number of markets, number of surveys per market etc.
+
