@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 .DS_Store
-data-analysis_scripts
+.png
+.csv
