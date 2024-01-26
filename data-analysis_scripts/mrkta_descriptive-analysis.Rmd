@@ -498,7 +498,7 @@ give.n <- function(x){
 
 ggplot(sales %>% filter(species == "SR.sales.day"),
        # reorder(Species, Sepal.Width, FUN = median)
-       aes(x=reorder(region.geomatch.final,-sales,FUN=median, desc.=F) %>% str_to_title(), y=sales))+
+       aes(x=reorder(region.geomatch.final,-sales,FUN=median, desc.=F), y=sales))+
   geom_boxplot(aes(fill = region.geomatch.final), alpha = 0.5)+
   geom_jitter(position = position_dodge(width = 0))+
   scale_fill_manual(values = rep(market_pal,2))+
