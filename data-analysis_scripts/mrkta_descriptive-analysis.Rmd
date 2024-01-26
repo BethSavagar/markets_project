@@ -3,8 +3,11 @@ title: "Tanzania Market Survey A: Descriptive Analysis"
 author: "Beth Savagar"
 date: "2024-01-25"
 output:
-  html_document: default
-  pdf_document: default
+  html_document: 
+    toc: true
+    toc_depth: 2
+    df_print: paged
+
 ---
 
 ```{r setup, include=FALSE}
@@ -81,7 +84,7 @@ mrkta_info <- left_join(
 
 ```
 
-# Map of Survey A Locations:
+# Map of Survey A Locations
 - Circles indicate market survey A locations
 
 ```{r tanzaniaMap, include = F}
@@ -114,7 +117,7 @@ mrkta_mapByReg <- ggplot() +
 mrkta_mapByReg
 ```
 
-# Market Survey A Data: Overview:
+# Market Survey A Data: Overview
 
 - Market survey A is the key informant interview. 
 - There is one row (survey) per market. 
@@ -128,7 +131,10 @@ mrkta_mapByReg
 - At each market, the field team will identify and arrange to meet with the market manager/person in-charge to introduce the project and obtain permission to collect data, and then conduct a short interview
 <br>
 
-## 1) What fields are contained in the cleaned survey data?
+### Sections:
+- 1) Fields (#fields)
+
+## 1) What fields are contained in the cleaned survey data? {#fields}
 
 - Market survey identifiers: date, location data
 - Market info: SR sales per day, trade patterns (origin-destination, seasonality)
@@ -376,7 +382,7 @@ mtwara_multiward
 ```
 
 
-## 5) Type of Market
+## 6) Type of Market
 
 *All markets are given as Type 1: Primary Markets (note the buyer-seller questionnaire is not consistent with this)*
 
@@ -398,7 +404,7 @@ mrkta_info %>%
 ```
 
 
-## 5) Small Ruminant Sales {.tabset}
+## 7) Small Ruminant Sales {.tabset}
 
 ### Sheep and Goat sales per day
 - The total number of sheep and goats sold across all markets
@@ -462,7 +468,7 @@ shgt_scatter <- ggplot(mrkta_info,
 shgt_scatter
 ```
 
-## 6) Small Ruminant Sales by Region {.tabset}
+## 8) Small Ruminant Sales by Region {.tabset}
 
 ### Sales-Region (table)
 ```{r salesReg, echo = F}
@@ -481,9 +487,25 @@ sales %>%
 
 ### Sales-Region (boxplot)
 ```{r salesRegBox, echo = F}
-ggplot(sales %>% filter(species == "SR.sales.day"), aes(x=region.geomatch.final, y=sales))+
+
+# function for number of observations 
+give.n <- function(x){
+  return(c(y = max(x)*1.1, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+# plot
+
+ggplot(sales %>% filter(species == "SR.sales.day"),
+       # reorder(Species, Sepal.Width, FUN = median)
+       aes(x=reorder(region.geomatch.final,-sales,FUN=median, desc.=F) %>% str_to_title(), y=sales))+
   geom_boxplot(aes(fill = region.geomatch.final), alpha = 0.5)+
-  scale_fill_manual(values = rep(market_pal,2))
+  geom_jitter(position = position_dodge(width = 0))+
+  scale_fill_manual(values = rep(market_pal,2))+
+  stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+  labs(x="Region", y = "Small ruminant sales")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
 
 ```
 
@@ -498,48 +520,41 @@ ggplot(sales %>% filter(species =="SR.sales.day"), aes(x=sales, group = region.g
   labs(x = "All Small Ruminant Sales per Day",
        y = "Count",
        main = "All Small Ruminant Sales per Day")+
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 
 ```
 
+## 9) Small Ruminant trade patterns: {.tabset}
 
+### Seasonal Variation in Trade
 
+```{r seasonal_trade, echo = F}
 
-<!-- *Small Ruminant Sales interpretation* -->
-<!-- - .... -->
+mrkta_info %>%
+  group_by(`4.seasonal.variation.in.trade`) %>%
+  count() %>%
+  mutate(
+    YN = ifelse(`4.seasonal.variation.in.trade` == 0, "N", "Y"),
+    proportion = round(n/nrow(mrkta_info), digits = 2)) %>%
+  ungroup() %>%
+  select("Seasonal trade" = YN, "Number markets" =n, "Proportion markets" =proportion) %>%
+  kable()
+```
 
-<!-- ### Is there seasonal variation in trade? -->
+### Seasonal Trade Patterns
+- *Translate the below*
+```{r seasonal_trade_ans, echo = F, warning = F}
+# translate this:
+mrkta_info %>% filter(`4.seasonal.variation.in.trade` ==1) %>% select(`4.if.yes.describe`) %>% head(n=4) %>% kable()
+```
 
-<!-- ```{r seasonal_trade, echo = F} -->
+### Origins and Destinations
 
-<!-- mrkta_info %>% -->
-<!--   group_by(`4.seasonal.variation.in.trade`) %>% -->
-<!--   count() %>% -->
-<!--   mutate( -->
-<!--     YN = ifelse(`4.seasonal.variation.in.trade` == 0, "N", "Y"), -->
-<!--     proportion = n/nrow(mrkta_info)) %>% -->
-<!--   select(`4.seasonal.variation.in.trade`, YN, n, proportion) %>% -->
-<!--   kable() -->
-<!-- ``` -->
+```{r buysell_location, echo = F, warning=F}
+# colnames(mrkta_info)
 
+mrkta_info %>%
+  select(fid, market.manual.final,`1.location.brought.from`, `2.location.taken.to.`) %>% head() %>% knitr::kable()
 
-<!-- For those which state seasonal variation what details are provided? -->
-<!-- - *Translate the below* -->
-<!-- ```{r seasonal_trade_ans, echo = F, warning = F} -->
-<!-- # translate this: -->
-<!-- mrkta_info %>% select(`4.seasonal.variation.in.trade`, `4.if.yes.describe`) %>% head() %>% kable() -->
-<!-- ``` -->
-
-<!-- ### What does the market A data look like for locations brought from and to? -->
-
-<!-- ```{r buysell_location, echo = F, warning=F} -->
-<!-- # colnames(mrkta_info) -->
-
-<!-- buysell_locations <- mrkta_info %>% -->
-<!--   select(fid, country, district.region.code, region.geomatch.final, ward.code, ward.name, village, market.name, -->
-<!--          `1.location.brought.from`, `2.location.taken.to.`, `gps.coordinates.of.the.market`) -->
-
-<!-- buysell_locations %>% select(market.name,`1.location.brought.from`, `2.location.taken.to.`) %>% head() %>% knitr::kable() -->
-
-<!-- ``` -->
+```
 
