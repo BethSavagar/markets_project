@@ -68,9 +68,12 @@ twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>%
 
 # Market A location data:
 mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
+# Market A locations gps lookup:
+mrkta_gps_manualgeomatchlkp <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"))
 
 # Market C location data:
-# mrktc_clean3 <- read_csv(file = here("data/data-cleaning_data/mrktc_info_clean3-1.csv"))
+# - with manually cleaned location names (based on survey A named data)
+# market C surveys with gps locations for geomatching:
 mrktc_gps <- read_csv(file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.csv")) %>%
   rename(ward.code.manual = ward.code.3A,
          ward.name.manual = ward.name.3A,
@@ -79,6 +82,16 @@ mrktc_gps <- read_csv(file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.
          ) %>%
   filter(!is.na(gps.coordinates.of.the.market))
 
+# market C surveys with NO gps locations for manual matching (to survey A):
+mrktc_nogps <- read_csv(file = here("data/tanzania_data/mrktc_gps_tanzania_CLEAN1.csv")) %>%
+  rename(ward.code.manual = ward.code.3A,
+         ward.name.manual = ward.name.3A,
+         village.manual = village.3A, 
+         market.name.manual = market.name.3A
+         ) %>%
+  filter(is.na(gps.coordinates.of.the.market))
+
+# For checking linked data:
 mrktc_gps_raw <- read_csv(file = here(
   "data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"
 )) %>%
@@ -100,10 +113,10 @@ mrktc_gps_raw <- read_csv(file = here(
     market.name.manual = market.name.3A,
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.
-  ) %>%
-  filter(!is.na(gps.coordinates.of.the.market))
+  ) 
 
 ```
+
 
 ## Market A Maps: 
 
@@ -160,8 +173,9 @@ mrkta_mapByReg
 
 ```
 
-## Market Survey C Map (1): 
+## Market Survey C Map (1): {.tabset}
 
+### C survey locations only
 - Market **Survey C** survey locations (manually cleaned), overlaid on Market **Survey A** locations (geo-matched)
 
 ```{r mrktcManual_only, warning = F}
@@ -190,6 +204,7 @@ mrktC_map <- ggplot() +
 mrktC_map
 ```
 
+### C linked to A (manually)
 
 ```{r mrktcManual_overA, warning = F}
 mrktCA_map <- ggplot() +
@@ -282,8 +297,6 @@ for(i in 1:length(regions)){
 
 # gridExtra::grid.arrange(grobs = map_plots, ncol = 3)
 ```
-
-
 ## Market Survey C Map (2): geo-link A {.tabset}
 
 - Market survey C locations linked to nearest market survey A location
@@ -369,12 +382,12 @@ map_plots[[13]]
 ```
 
 
-## Market Survey C Clean (1): check geo-link A data:
+## Market Survey C Clean (2): check geo-link A data. {.tabset}
 
 For each region, check consistency between:
 
-  - geolinkA survey locations, date-of-survey and raw data. 
-  - Each survey in a given location should occur on the same date (?)
+  - geolinkA survey locations, date-of-survey and raw location data. 
+  - Each survey in a given location should occur on the same date.
   - Where there are inconsistencies in geolinkA data and survey dates, check raw & manual data matching to check.
 
 ```{r check_linkA, warning = F, echo = F}
@@ -418,12 +431,6 @@ uniqueMrkt_date_summary <- mrktc_linkA_check %>%
   ungroup() %>%
   arrange(uniqueMrkt)
 ```
-
-
-2) On a region-by-region basis:
-- Use c-geomatchA locations and group by survey date. 
-- All surveys for a given market should be completed on the same day
-- For surveys which seem to be inconsistent check the original mrktc location names etc. 
 
 ### Dodoma: 
 
@@ -478,7 +485,7 @@ mrktc_linkA_check2 <- mrktc_linkA_check %>%
 # mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="dodoma") %>% group_by(date.check, uniqueMrkt.check) %>% count()
 ```
  
-## Simiyu: 
+### Simiyu: 
 
 ```{r simiyu_clean, eval = F}
 regions[2]
@@ -1029,7 +1036,7 @@ mrktc_linkA_check2 %>% filter(region.geomatch.final.A=="ruvuma") %>% group_by(da
 mrktc_linkA_check2 %>% group_by(date.check, uniqueMrkt.check) %>% count() 
 ```
 
-## Market Survey C Clean GPS Data
+## Market Survey C Clean (3): Clean GPS Data
 
 Use cleaned survey C (geo-linked A) locations to update market survey C gps data. 
 
@@ -1170,4 +1177,66 @@ Review number of markets, number of surveys per market etc.
 
 write_csv(mrktc_gps_check, file = here("data/data-cleaning_data/mrktc_gps_tanzania_final.csv"))
 write_csv(mrktc_gps_check, file = here("data/tanzania_data/mrktc_gps_tanzania_final.csv"))
+
+```
+
+# Market survey C: No GPS
+
+```{r mrktcNogps}
+# rows of data:
+mrktc_nogps %>% nrow()
+
+# colnames for matching link manual location data from C_nogps to A, to join gps data for each market
+colnames(mrktc_nogps); colnames(mrkta_gps_manualgeomatchlkp)
+
+mrktc_nogps_linkA <- mrktc_nogps %>%
+  rename(region.manual = district.region.name,
+         ward.manual = ward.name.manual,
+         market.manual = market.name.manual) %>%
+  select(-c(gps.coordinates.of.the.market)) %>% # no gps for C data
+  left_join(
+    mrkta_gps_manualgeomatchlkp %>% select(-c(fid, country, unique.row.identifier.uuid.)),
+    by = c("date","region.manual", "ward.manual","village.manual","market.manual")
+  )
+
+mrktc_nogps_linkA_check <- mrktc_nogps_linkA %>%
+  left_join(mrktc_gps_raw %>% select(fid, ends_with(".raw")), by = "fid") %>%
+  # create a unique field for checking data:
+  mutate(
+    uniqueMrkt = paste(
+    region.geomatch.final,
+    district.geomatch.final,
+    # district data not included in survey
+    ward.geomatch.final,
+    village.manual.final,
+    market.manual.final,
+    sep = "-"
+    )
+  )
+
+# Unmatched mtwara-mbuyuni
+# MTAWARA-MBUYUN matches to CHIUNGUTWA
+unmatchedfid <- mrktc_nogps_linkA %>% 
+  filter(is.na(gps.coordinates.of.the.market)) %>% 
+  select(fid) %>% 
+  bind_cols(
+    mrkta_gps %>% filter(ward.geomatch.final == "chiungutwa") %>% 
+      select(
+        contains("final"),
+        gps.coordinates.of.the.market)
+  )
+
+mrktc_nogps_linkA <- mrktc_nogps_linkA %>%
+  left_join(unmatchedfid, by = c("fid"), suffix = c("_A", "_B")) %>%
+  mutate(
+    "region.geomatch.final" = coalesce(region.geomatch.final_A, region.geomatch.final_B),
+    "district.geomatch.final" = coalesce(district.geomatch.final_A, district.geomatch.final_B),
+    "ward.geomatch.final" = coalesce(ward.geomatch.final_A, ward.geomatch.final_B),
+    "village.manual.final" = coalesce(village.manual.final_A, village.manual.final_B),
+    "market.manual.final" = coalesce(market.manual.final_A, market.manual.final_B),
+    "reg.ward.mrkt.final" = coalesce(reg.ward.mrkt.final_A, reg.ward.mrkt.final_B),
+    "gps.coordinates.of.the.market" = coalesce(gps.coordinates.of.the.market_A, gps.coordinates.of.the.market_B)
+  ) %>%
+  select(-ends_with("_A"), -ends_with("_B"))
+  
 ```
