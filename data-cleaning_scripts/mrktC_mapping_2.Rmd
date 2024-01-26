@@ -1238,5 +1238,33 @@ mrktc_nogps_linkA <- mrktc_nogps_linkA %>%
     "gps.coordinates.of.the.market" = coalesce(gps.coordinates.of.the.market_A, gps.coordinates.of.the.market_B)
   ) %>%
   select(-ends_with("_A"), -ends_with("_B"))
-  
+
+mrktc_gps_check %>% colnames()
+mrktc_nogps_check <- mrktc_nogps_linkA %>% 
+  mutate(uniqueMrkt.check = paste(region.geomatch.final,district.geomatch.final,ward.geomatch.final,village.manual.final,market.manual.final, sep = "-"),
+         date.check = as.character(date)) %>%
+  select(fid,
+         date,
+         date.check, 
+         country,
+         uniqueMrkt.check, 
+         region.check = region.geomatch.final,
+         district.check = district.geomatch.final,
+         ward.check = ward.geomatch.final,
+         village.check = village.manual.final,
+         market.check = market.manual.final,
+         gps.coordinates.of.the.market,
+         unique.row.identifier.uuid.)
+
+mrktc_allgps_check <- bind_rows(mrktc_gps_check,mrktc_nogps_check)
 ```
+
+## NEXT STEPS:
+Review number of markets, number of surveys per market etc.
+```{r savedata2}
+
+write_csv(mrktc_allgps_check, file = here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+write_csv(mrktc_allgps_check, file = here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+
+```
+
