@@ -51,19 +51,12 @@ mrkta_lkpward <- read_csv(here("data/ecopprmarketscsvs/mrkta_lkpward.csv"))
 
 ### 1) Refine the Market A survey data to fields of interest:
 
-
 ```{r mrkta_fields, echo = F, warning = F}
 
 # Fields contained in market A data:
 colnames(mrkta) %>% kable()
 
-## cleaning of colnames
-  # rename_with(tolower) %>% # all lowercase
-  # rename_with(~gsub("[[:punct:]]", " ", .x)) %>% # replace all punctuation with space " " 
-  # rename_with(~gsub("\\s+", ".", .x)) %>% # replace any space with single "."
-
-
-# Select only the fields of interest (location data, SR sale data)
+# Select fields of interest: market location, small ruminant sales
 mrkta_clean <- mrkta %>%
   left_join(mrkta_lkpward %>% select("Code", ward.name = "Description"),
             by = c(`ward.see.mrkta.lkpward.` = "Code")) %>%
@@ -131,7 +124,6 @@ mrkta_clean <-
     "village" = gsub("\\s+", ".", `village`)
   )
   
-
 # head(mrkta_clean, n = 1) %>% kable()
 colnames(mrkta_clean) %>% kable()
 
@@ -143,7 +135,6 @@ mrktnames <- mrkta_clean %>%
 # 
 # write.csv(mrktnames, "data/data-cleaning_data/mrkta_names_clean.csv", row.names = F)
 ```
-
 
 3) Identify any duplicate entries
 
@@ -160,13 +151,19 @@ mrktnames <- mrkta_clean %>%
 # Is the market name variable unique, does it correspond to market id variable?
 mrkta_clean %>% distinct(fid) # every entry has unique id
 mrkta_clean %>% group_by(market.name) %>% count() # 2 entries have the same market name
+mrkta_clean %>% group_by(district.region.name, ward.name, village, market.name) %>% count() # 2 entries have the same market name
 
-# 2 markets appeared twice: Dutwa and Majimoto
-# Filter dataframe to understand whether these are duplicates or an entry error
-duplicate.markets <- mrkta_clean %>% group_by(market.name) %>% count() %>% filter(n>1) %>% pull(market.name)
-duplicate.entries <- mrkta_clean %>% filter(market.name %in% duplicate.markets)
+# 1 market location (region-ward-village-market) appears twice: Majimoto
+mrkta_clean %>% group_by(district.region.name, ward.name, village, market.name) %>% count() %>% filter(n>1)
 
-# Dutwa appears to be a common name for two different markets, here replace the market name with the village name (distinct for the two entries)
+# In addition there are 2 markets which have the same name - Dutwa - but originate from different regions.
+mrkta_clean %>% group_by(market.name) %>% count() %>% filter(n>1)
+
+# Update: 
+# - Dutwa: two different markets with the same name
+# - Majimoto: 
+#     - surveys have different end time, but the same date and key informant. 
+#     - The survey answers are quite different for no. animals traded.
 
 mrkta_clean <- mrkta_clean %>%
   mutate(market.name.corrected = ifelse(market.name == "dutwa" & village == "kakola", "kakola", 
@@ -193,7 +190,6 @@ mrktnames <- mrkta_clean %>%
 - In most cases - yes - the market name is the village name
 - Below is a list of markets which have names distinct to the village name (29 examples)
 - In all cases it seems that the market and village names are distinct i.e. not due to typos.
-
 
 ```{r market_village, echo = F, warning = F}
 

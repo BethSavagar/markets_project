@@ -53,6 +53,7 @@ mrkta_gps <- read_csv(file = here("data/tanzania_data/mrkta_gps_tanzania_CLEAN.c
 ```
 
 
+
 # Tanzania Map
 - Tanzania shapefile with ward boundaries sourced from: https://data.humdata.org/dataset/cod-ab-tza? (ADM L3)
 
@@ -72,7 +73,6 @@ tregs_shp <- tregs_shp %>%
     "region.name" = gsub("\\s+", ".", `region.name`)# replace 1+ spaces with "."
   ) 
   
-
 twards_shp <- twards_shp %>%
   rename(
     "Country_N"=ADM0_EN,    
@@ -522,8 +522,58 @@ mrkta_final_gps %>% distinct(market.manual.final) %>% nrow()
 mrkta_final_gps %>% distinct(reg.ward.mrkt.final) %>% nrow()
 
 # write.csv(mrkta_final_gps, file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"), row.names = F)
+```
+
+
+```{r manualgeomatchsave}
+
+mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
+  # append manual to identify manually cleaned location data:
+  mutate(region.manual = district.region.name,
+         # district.manual =NA,
+         ward.manual = ward.name,
+         village.manual = village,
+         market.manual = market.name.corrected,
+         reg.ward.mrkt.manual = paste(region.manual,
+                                      ward.manual,
+                                      market.manual,
+                                      sep = "-")) %>%
+  # append final to identify geomatch & finalised location data:
+  mutate(region.geomatch.final = region.name.geomatch,
+         district.geomatch.final = district.name.geomatch,
+         ward.geomatch.final = ward.name.geomatch,
+         village.manual.final = village,
+         market.manual.final = market.name.corrected,
+         reg.ward.mrkt.final = paste(region.geomatch.final,
+                                      ward.geomatch.final,
+                                      market.manual.final,
+                                      sep = "-")) %>%
+  select(fid,
+         date,
+         country,
+         
+         # manual location data:
+         ward.manual,
+         village.manual,
+         market.manual,
+         reg.ward.mrkt.manual,
+        
+         # final-geomatched location data:
+         region.geomatch.final,
+         district.geomatch.final,
+         ward.geomatch.final,
+         village.manual.final,
+         market.manual.final,
+         reg.ward.mrkt.final,
+         gps.coordinates.of.the.market,
+         unique.row.identifier.uuid.)
+
+# Save geomatch dataframe: 
 # write.csv(mrkta_geomatch_gps %>% mutate(reg.ward.mrkt.final = paste(region.name.geomatch, ward.name.geomatch, market.name.corrected, sep = "-")), file = here("data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv"), row.names = F)
-# When it comes to analysis of market survey C data, the date of survey NEEDS to be taken in to account. 
+
+# Save location data with manual and geomatched names and gps location:
+# write.csv(mrkta_gps_manualgeomatch_lkp, file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"), row.names = F)
+# write.csv(mrkta_gps_manualgeomatch_lkp, file = here("data/tanzania_data/mrkta_gps_manualgeomatchlkp.csv"), row.names = F)
 ```
 
 ## END OF REWRITE
