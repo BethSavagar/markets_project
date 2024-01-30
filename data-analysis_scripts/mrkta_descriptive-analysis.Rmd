@@ -23,7 +23,7 @@ library(here)
 library(knitr)
 library(ggpubr)
 library(RColorBrewer)
-
+library(rmarkdown)
 ```
 
 ```{r theme, include = F}
@@ -216,7 +216,7 @@ regions <- data.frame(
   )
 )
 
-regions %>% kable()
+regions %>% paged_table(options = list(rows.print = 15))
 ```
 
 
@@ -234,7 +234,7 @@ mrktregion_count <- mrkta_info %>% group_by(region.geomatch.final) %>% count() %
 
 mrktregion_count %>% 
   select(region.geomatch.final, target, n) %>% 
-  kable()
+  paged_table(options = list(rows.print = 15))
 
 ```
 
@@ -262,7 +262,7 @@ print(paste("There were ", tot_dist, "districts surveyed in total."))
 
 ### Districts per Region:
 ```{r distperReg, echo = F}
-mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% kable()
+mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% paged_table(options = list(rows.print = 15))
 ```
 
 ### Surveys per District:
@@ -275,7 +275,7 @@ mrktdist_count <- mrkta_info %>% group_by(region.geomatch.final, district.geomat
 mrktdist_count %>% 
   select(region.geomatch.final,  district.geomatch.final, target, n) %>% 
   arrange(target, region.geomatch.final, n) %>%
-  kable()
+  paged_table(options = list(rows.print = 15))
 ```
 
 ### Surveys per District (Plot):
@@ -302,7 +302,7 @@ print(paste("There were ", tot_wards, "wards surveyed in total."))
 
 ### Wards per Region:
 ```{r wardsReg, echo = F}
-mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final, ward.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% kable()
+mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final, ward.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% paged_table(options = list(rows.print = 15))
 ```
 
 ### Markets per Ward:
@@ -319,7 +319,7 @@ multiwards <- mrkta_info %>%
 mrkta_info %>% filter(ward.geomatch.final %in% multiwards) %>% 
   select(fid,date,region.geomatch.final,district.geomatch.final,ward.geomatch.final,village.manual.final,market.manual.final) %>%
   arrange(ward.geomatch.final) %>%
-  kable()
+  paged_table(options = list(rows.print = 15))
 ```
 
 ```{r mapMultiWards, include = F}
@@ -365,19 +365,33 @@ mtwara_multiward <- ggplot() +
 
 ### Katavi Map
 
-```{r katavimultiward}
+- 2 markets seem to occur in the same location, on different (consecutive) days (22nd and 23rd May)
+- Survey responses (e.g. respondent name, no. animals sold) are different.
+- *Survey C data does not contain ANY matches for majimoto.b, C surveys match to majimoto.a market in majimoto ward on 22/05 OR usevya market in usevya ward on 23/05*
+
+```{r katavimultiward, layout="l-body-outset", echo = F}
+mrkta_info %>% filter(region.geomatch.final == "katavi", ward.geomatch.final %in% multiwards) %>% arrange(ward.geomatch.final) %>% paged_table()
 katavi_multiward
 ```
 
 ### Morogoro Map
 
-```{r morogoromultiward}
+- 2 markets seem to occur in different villages, in the same ward on different days (23rd May, Monday, and 1st June, Wednesday)
+- Survey responses (e.g. respondent name, no. animals sold) are similar
+-  *Survey C data contains multiple surveys for each location, with matching survey location and survey dates, indicating true distinct markets*
+
+```{r morogoromultiward, layout="l-body-outset", echo = F}
+mrkta_info %>% filter(region.geomatch.final == "morogoro", ward.geomatch.final %in% multiwards) %>% arrange(ward.geomatch.final) %>% paged_table()
 morogoro_multiward
 ```
 
 ### Mtwara Map
 
-```{r mtwaramultiward}
+- Markets occurred in different villages, some on the same day, others on different days
+- Small number of small ruminants were traded - reflective of informal markets within the region?
+
+```{r mtwaramultiward, layout="l-body-outset", echo = F}
+mrkta_info %>% filter(region.geomatch.final == "mtwara", ward.geomatch.final %in% multiwards) %>% arrange(ward.geomatch.final) %>% paged_table()
 mtwara_multiward
 ```
 
@@ -399,7 +413,7 @@ mtwara_multiward
 mrkta_info %>%
   group_by(market.type) %>%
   count() %>%
-  kable() # all markets are type 1
+  paged_table() # all markets are type 1
 
 ```
 
@@ -428,7 +442,7 @@ tot.sales <- sales %>%
          Total_Sales = tot, 
          Prop_Sales = prop)
 
-kable(tot.sales)
+paged_table(tot.sales)
 ```
 
 ### All Sales Hist
@@ -478,11 +492,11 @@ sales %>%
   summarise(
     markets = n(),
     median = median(sales), 
-    mean = mean(sales), 
+    mean = round(mean(sales), digits = 1), 
     min = min(sales), 
     max = max(sales), 
   ) %>% 
-  kable()
+  paged_table(options = list(rows.print = 15))
 ```
 
 ### Sales-Region (boxplot)
@@ -538,14 +552,14 @@ mrkta_info %>%
     proportion = round(n/nrow(mrkta_info), digits = 2)) %>%
   ungroup() %>%
   select("Seasonal trade" = YN, "Number markets" =n, "Proportion markets" =proportion) %>%
-  kable()
+  paged_table(options = list(rows.print = 15))
 ```
 
 ### Seasonal Trade Patterns
 - *Translate the below*
 ```{r seasonal_trade_ans, echo = F, warning = F}
 # translate this:
-mrkta_info %>% filter(`4.seasonal.variation.in.trade` ==1) %>% select(`4.if.yes.describe`) %>% head(n=4) %>% kable()
+mrkta_info %>% filter(`4.seasonal.variation.in.trade` ==1) %>% select(`4.if.yes.describe`) %>% head(n=4) %>% paged_table(options = list(rows.print = 15))
 ```
 
 ### Origins and Destinations
@@ -554,7 +568,7 @@ mrkta_info %>% filter(`4.seasonal.variation.in.trade` ==1) %>% select(`4.if.yes.
 # colnames(mrkta_info)
 
 mrkta_info %>%
-  select(fid, market.manual.final,`1.location.brought.from`, `2.location.taken.to.`) %>% head() %>% knitr::kable()
+  select(fid, market.manual.final,`1.location.brought.from`, `2.location.taken.to.`) %>% head() %>% paged_table(options = list(rows.print = 15))
 
 ```
 

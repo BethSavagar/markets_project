@@ -1,0 +1,229 @@
+---
+title: "Tanzania Market Survey C: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+Use cleaned market survey C gps data to produce final "General Info" and "Market Activities" datasets
+
+```{r dataload}
+
+filesave <- F
+
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrktc_info_CLEAN <-  read_csv(here("data/tanzania_data/mrktc_generalinfo_tanzania_CLEAN.csv")) %>% select(-c("...1"))
+
+mrktc_activities_raw <- read_csv(here("data/tanzania_data/mrktc_mrktactivities_tanzania.csv"))
+```
+
+```{r actvtylkp}
+
+lkp_mrktactvty <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpmrkt_actvty.csv")) %>%
+  mutate(
+    Code = as.character(Code),
+    `1.mrkt.activity.lkp` = case_match(
+      Code,
+      "-66" ~ "Other",
+      "1" ~ "Selling",
+      "2" ~ "Middleman",
+      "3" ~ "Trader",
+      "4" ~ "Buying"
+    )
+  )
+
+lkp_sellplacetype <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_placetype.csv")) %>%
+  mutate(
+    Code = as.character(Code),
+    `2.sell.placetype.lkp` = case_match(
+      Code,
+      "-66" ~ "Other",
+      "1" ~ "Village",
+      "2" ~ "Towncentre",
+      "3" ~ "Market",
+      "4" ~ "Abattoir"
+    )
+  )
+
+lkp_selltransport <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_trans.csv")) %>%
+  mutate(
+    Code = as.character(Code),
+    `4.sell.transport.lkp` = case_match(
+      Code,
+      "-77" ~ "Unknown",
+      "-66" ~ "Other",
+      "1" ~ "Foot",
+      "2" ~ "Vehicle",
+      "3" ~ "Cart"
+    )
+  )
+
+lkp_buyplacetype <- lkp_sellplacetype
+
+lkp_buytransport <- lkp_selltransport
+
+```
+
+```{r infoClean}
+
+# link mrktc Info to clean gps data and retain only variables of interest
+mrktc_info <- left_join(
+  mrktc_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), contains("village"))),
+  mrktc_gps %>% select(-c(country, uniqueMrkt.check)),
+  by = c("fid","date", "unique.row.identifier.uuid.")) %>% # can't join by "gps.coordinates.of.the.market" as some rows of original data have no location.
+  select(
+    fid,
+    date,
+    date.end,
+    date.of.interview,
+    date.final = date.check,
+    country,
+    region.final = region.check,
+    distict.final = district.check,
+    ward.final = ward.check,
+    village.final = village.check,
+    market.final = market.check,
+    market.type, 
+    respondent.role,
+    other.market.visited,
+    number.markets.visited,
+    trader,
+    trade.pattern,
+    gps.coordinates.of.the.market.final = gps.coordinates.of.the.market.y,
+    unique.row.identifier.uuid.
+  )
+
+```
+
+```{r activitiesClean}
+
+colnames(mrktc_activities_raw)
+
+mrktc_activities_clean1 <- mrktc_activities_raw %>%
+  select(
+    fid = fid.see.mrktc.generalinfo.,
+    # unique.row.id.see.mrktc.generalinfo. # set to 1 for all rows
+    # unique.row.id # set to 1 for all rows,
+    "1.mrkt.activity" = "1.what.are.the.activities.that.you.are.doing.in.this.market.today.",
+    "1.mrkt.activity.other" = "if.other.specify.5",
+    "2.sell.placetype.code" = "type.of.place.see.mrktc.lkpsell.placetype.",
+    "2.sell.placetype.other" ="if.other.specify",
+    "2.sell.place.name" = "name.of.place.8",
+    "2.sell.place.ward" = "ward.9",
+    "2.sell.place.district" = "district.10",
+    # "3.sell.reason"="3.what.is.your.main.reason.for.selling.these.sheep.and.or.goats.",
+    # "3.sell.reason.specify"="if.other.specify.12",
+    "4.sell.transport.type"="4.how.were.sheep.goats.transported.to.the.market.see.mrktc.lkpsell.trans.",
+    "4.sell.transport.other" = "if.other.specify.14",
+    # "5.sell.other.species."="5.do.you.also.sell.other.animal.species.apart.from.sheep.and.goats.",
+    # "5.sell.species.most"="if.yes.out.of.all.the.species.that.you.sell.which.species.do.you.sell.the.most.",
+    # "5.specify.sell.species.most"="if.other.specify.17",
+    "6.buy.placetype.code"="type.of.place.see.mrktc.lkpplacetype.",
+    "6.buy.placetype.other"="if.other.specify.20",
+    "6.buy.place.name" ="name.of.place.21",
+    "6.buy.place.ward"="ward.22",
+    "6.buy.place.district"="district.23",
+    # "7.buy.reason"="7.what.is.your.main.reason.for.buying.these.small.ruminants.",
+    # "7.specify.buy.reason" = "if.other.specify.25",
+    "6.buy.transport.yesno" = "will.you.transport.the.sheep.goats.you.are.buying.today.",
+    "8.buy.transport.type"="8.how.will.you.transport.these.small.ruminants.that.you.are.buying.see.mrktc.lkpsell.trans.",
+    "8.buy.transport.other"="if.other.specify.27",
+    # "9.buy.criteria"="9.what.criteria.do.you.use.to.decide.which.small.ruminants.to.buy.",
+    # "9.specify.buy.criteria"="if.other.specify.29",
+    # "10.buy.species.preference"="10.what.other.species.of.animals.do.you.buy.apart.from.sheep.and.goats.",
+    # "10.buy.species.preference.specify"="if.other.specify.31",
+    # "11.buy.price.increase" = "11.if.the.prices.of.sheep.and.goats.increase.for.some.reason.e.g.a.shortage.of.animals.due.to.disease.will.you.still.buy.them.",
+    # "11.buy.species.alternative" = "if.no.which.other.species.will.you.consider.instead.",
+    # "11.buy.species.alternative.specify"="if.other.specify.34",
+    # "11.buy.price.increase.details" = "if.yes.how.much.of.an.increase.in.the.current.price.of.sheep.and.goat.unit.price.of.live.animal.will.cause.you.to.change.your.purchasing.behaviour.to.another.animal.species",
+    "12.buy.sell.per.month" = "12.how.many.times.in.a.month.do.you.buy.or.sell.sheep.and.or.goats.in.this.market.",
+    "unique.row.identifier.uuid."   
+  )
+
+```
+
+```{r activitiesDetails}
+# For fields which contain coded data, use lookups to populate. 
+
+mrktc_activities_clean1 %>% group_by(`1.mrkt.activity`) %>% count()
+
+
+
+
+
+
+mrktc_activities_clean2 <- mrktc_activities_clean1 %>%
+  
+  # market activities:
+  # mutate(`1.mrkt.activity` = replace_na(`1.mrkt.activity`, "-66")) %>% # recode NAs as other
+  left_join(lkp_mrktactvty %>% select(Code, "1.mrkt.activity.lkp"), by = c(`1.mrkt.activity` = "Code")) %>%
+  
+  # sell placetype:
+  mutate(`2.sell.placetype.code` = as.character(replace_na(`2.sell.placetype.code`, -66))) %>% # recode NAs as other
+  left_join(lkp_sellplacetype %>% select(Code, "2.sell.placetype.lkp"), by = c(`2.sell.placetype.code` = "Code")) %>%
+  
+  # sell transport:
+  mutate(`4.sell.transport.type` = as.character(replace_na(`4.sell.transport.type`, -77))) %>% # recode NAs as unknown
+  left_join(lkp_selltransport %>% select(Code, "4.sell.transport.lkp"), by = c(`4.sell.transport.type` = "Code")) %>%
+
+  # buy placetype:
+  mutate(`6.buy.placetype.code` = as.character(replace_na(`6.buy.placetype.code`, -66))) %>% # recode NAs as other
+  left_join(lkp_sellplacetype %>% select(Code, "6.buy.placetype.lkp"=`2.sell.placetype.lkp`), by = c(`6.buy.placetype.code` = "Code")) %>%
+  
+  # buy transport:
+  mutate(`8.buy.transport.type` = as.character(replace_na(`8.buy.transport.type`, -77))) %>% # recode NAs as unknown
+  left_join(lkp_selltransport %>% select(Code, "8.buy.transport.lkp"= `4.sell.transport.lkp`), by = c(`8.buy.transport.type` = "Code"))
+
+```
+
+<!-- # what activities take place at market? -->
+<!-- multiple.activities <- mrktc_activities_clean1 %>% distinct(`1.mrkt.activity`) %>% filter(!`1.mrkt.activity` %in% c("1","2","3","4","-66")) %>% pull() %>% sort() -->
+
+<!-- activities.recode <- strsplit(multiple.activities, " ") %>% -->
+<!--   lapply(.,sort) %>% -->
+<!--   sapply(., function(x) -->
+<!--     paste(x, collapse = '.') -->
+<!--   ) -->
+
+<!-- activities_recode <- data.frame(multiple.activities, activities.recode) -->
+
+<!-- # recode activities so that multiple activities are coded as e.g. 1.2, -66.2.4 etc -->
+<!-- mrktactivities_recode <- mrktc_activities_clean1 %>%  -->
+<!--   left_join(activities_recode %>%  -->
+<!--               rename(`1.mrkt.activity` = multiple.activities, -->
+<!--                      `1.activities.recode` = activities.recode)) %>% -->
+<!--   mutate(`1.activities.recode` = ifelse(is.na(`1.activities.recode`), `1.mrkt.activity`,`1.activities.recode`)) # %>% -->
+<!-- # select(`1.activities.at.market`, `1.activities.recode`) -->
+
+<!-- mrktactivities_recode %>% group_by(`1.activities.recode`) %>% count() -->
+
+
+```{r saveInfo}
+if(filesave){
+  write_csv(mrktc_info, file = here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+}
+
+```
+
+
