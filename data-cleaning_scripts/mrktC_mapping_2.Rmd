@@ -1174,9 +1174,11 @@ map_checks[[13]]
 ## NEXT STEPS:
 Review number of markets, number of surveys per market etc.
 ```{r savedata}
+if(filesave){
+  write_csv(mrktc_gps_check, file = here("data/data-cleaning_data/mrktc_gps_tanzania_final.csv"))
+  write_csv(mrktc_gps_check, file = here("data/tanzania_data/mrktc_gps_tanzania_final.csv"))
+}
 
-write_csv(mrktc_gps_check, file = here("data/data-cleaning_data/mrktc_gps_tanzania_final.csv"))
-write_csv(mrktc_gps_check, file = here("data/tanzania_data/mrktc_gps_tanzania_final.csv"))
 
 ```
 
@@ -1247,7 +1249,7 @@ mrktc_nogps_check <- mrktc_nogps_linkA %>%
          date,
          date.check, 
          country,
-         uniqueMrkt.check, 
+         uniqueMrkt.check = uniqueMrkt.check, 
          region.check = region.geomatch.final,
          district.check = district.geomatch.final,
          ward.check = ward.geomatch.final,
@@ -1256,15 +1258,24 @@ mrktc_nogps_check <- mrktc_nogps_linkA %>%
          gps.coordinates.of.the.market,
          unique.row.identifier.uuid.)
 
-mrktc_allgps_check <- bind_rows(mrktc_gps_check,mrktc_nogps_check)
+mrktc_allgps_check <- bind_rows(mrktc_gps_check,mrktc_nogps_check) %>%
+  rename(
+    date.final = date.check,
+    uniqueMrkt.final = uniqueMrkt.check,
+    region.final = region.check,
+    district.final = district.check,
+    ward.final = ward.check,
+    village.final = village.check,
+    market.final = market.check
+  )
 ```
 
 ## NEXT STEPS:
 Review number of markets, number of surveys per market etc.
 ```{r savedata2}
-
-write_csv(mrktc_allgps_check, file = here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
-write_csv(mrktc_allgps_check, file = here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
-
+if(filesave){
+  write_csv(mrktc_allgps_check, file = here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+  write_csv(mrktc_allgps_check, file = here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+}
 ```
 

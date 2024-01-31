@@ -7,8 +7,13 @@ output:
     toc: true
     toc_depth: 2
     df_print: paged
-
 ---
+
+<style type="text/css">
+   .main-container {max-width: 100%;}
+   .row {display: flex;}
+   .column {flex: 50%;}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -23,6 +28,7 @@ library(here)
 library(knitr)
 library(ggpubr)
 library(RColorBrewer)
+library(rmarkdown)
 
 ```
 
@@ -62,26 +68,44 @@ twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>%
   )
 
 mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
-mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+#mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
 
 # mrkta_generalinfo, need to link to cleaned update market location data
-mrktc_info_CLEAN <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"))
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+mrktc_gps <-  mrktc_info %>% select(
+  fid, 
+  date, 
+  date.final,
+  country, 
+  region.final,
+  district.final,
+  ward.final,
+  village.final,
+  market.final,
+  gps.coordinates.of.the.market = gps.coordinates.of.the.market.final,
+  unique.row.identifier.uuid.
+)
 
-# link mrktc Info to clean gps data and retain only variables of interest
-mrktc_info <- left_join(
-  mrktc_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), contains("village"))),
-  mrktc_gps %>% select(-c(country, uniqueMrkt.check)),
-  by = c("fid","date", "unique.row.identifier.uuid.")) %>% # can't join by "gps.coordinates.of.the.market" as some rows of original data have no location.
-  select(
-    fid,
-    contains("date"),
-    country,
-    ends_with(".check"),
-    everything(),
-    gps.coordinates.of.the.market.check = gps.coordinates.of.the.market.y,
-    unique.row.identifier.uuid.
-  )
 
+# # link mrktc Info to clean gps data and retain only variables of interest
+# mrktc_info <- left_join(
+#   mrktc_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), contains("village"))),
+#   mrktc_gps %>% select(-c(country, uniqueMrkt.check)),
+#   by = c("fid","date", "unique.row.identifier.uuid.")) %>% # can't join by "gps.coordinates.of.the.market" as some rows of original data have no location.
+#   select(
+#     fid,
+#     contains("date"),
+#     country,
+#     ends_with(".check"),
+#     everything(),
+#     gps.coordinates.of.the.market.check = gps.coordinates.of.the.market.y,
+#     unique.row.identifier.uuid.
+#   )
+
+```
+
+```{r lookups, include = F, eval = T}
+lkp_mrkttype<- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpmrkt_type.csv"))
 ```
 
 # Map of Survey C Locations
@@ -106,13 +130,13 @@ mrktc_mapdata <- mrktc_gps %>%
 
 mrktc_sf <- st_as_sf(mrktc_mapdata, coords = c("long","lat"),  crs = 4326)
 
-Regions_Cmanual <- mrktc_sf %>% pull(region.check) %>% unique() %>% str_to_title()
+Regions_Cmanual <- mrktc_sf %>% pull(region.final) %>% unique() %>% str_to_title()
 
 mrktc_mapByReg <- ggplot() +
   geom_sf(data = tregs_shp, fill = "grey", alpha = 0.5, linewidth = 0.1) +
   geom_sf(data = tregs_shp %>% filter(Region_Nam %in% Regions_Cmanual), aes(fill = Region_Nam),alpha = 0.5, linewidth = 0.1) +
   geom_sf(data = mrkta_sf, aes(col = region.geomatch.final), alpha = 0.5, size = 3)+
-   geom_sf(data = mrktc_sf, aes(col = region.check),  shape = 17, size = 1.5)+
+   geom_sf(data = mrktc_sf, aes(col = region.final),  shape = 17, size = 1.5)+
   geom_sf_text(data = tregs_shp, aes(label = Region_Nam), size = 2)+
   scale_fill_manual(values=rep(market_pal,2), guide = "none")+
   scale_colour_manual(values = rep(market_pal,2))+
@@ -139,11 +163,10 @@ mrktc_mapByReg
 
 - Questionnaire by face-to-face interview with individual people who are buying and/or selling animals in the market, about the sources and destinations of the animals, the reasons for buying and/or selling, transport method, trading patterns and disease problems.
 
-**Methods**
+**Data Collection Method**
+
 - A minimum of 20 people should be interviewed, or 10% of the people buying and/or selling in the market, whichever is greater, depending on the size of the market. 
-- The people to be interviewed should be selected randomly or
-systematically to obtain a representative sample of all types of buyer and
-sellers and to avoid bias. 
+- The people to be interviewed should be selected randomly or systematically to obtain a representative sample of all types of buyer and sellers and to avoid bias. 
     - The research team for each country should discuss how their markets are laid out and make a plan of how to obtain an unbiased sample. 
     - If the markets are laid out in a rectangular enclosure, then the field team should walk a transect from one corner of the market, diagonally across the market area to the opposite corner, interviewing every person buying and selling that they meet along the transect. Having completed one transect, if more interviews are required, a second transect can be made starting in a different corner. 
     - If the market is circular with all the people buying and selling arranged around the edge with very few in the middle, then the team can start at one point and move around the edge of the circle, interviewing everyone that they meet. 
@@ -171,11 +194,11 @@ colnames(mrktc_info)
 ```{r num_mrkts, echo =F, warning=F}
 
 # Check market names are unique:
-# mrktc_info %>% distinct(region.check,district.check,ward.check,village.check,market.check) %>% nrow()
-# mrktc_info %>% distinct(market.check) %>% nrow()
+# mrktc_info %>% distinct(region.final,district.final,ward.final,village.final,market.final) %>% nrow()
+# mrktc_info %>% distinct(market.final) %>% nrow()
 
 mrktc_info <- mrktc_info %>%
-  mutate(uniqueMrkt = paste(region.check,district.check,ward.check,village.check,market.check, sep = "-"))
+  mutate(uniqueMrkt = paste(region.final,district.final,ward.final,village.final,market.final, sep = "-"))
 
 num_srvy <- nrow(mrktc_info)
 print(paste("There are ", num_srvy, " rows of data corresponding to unique surveys."))
@@ -187,33 +210,58 @@ print(paste("There are ", num_mrkt, " unique markets"))
 ```
 
 ## 3) Surveys per Market {.tabset}
+
 *How many surveys were completed at each Market?*
 
-### Surveys per Market:
+### Surveys per Market (All)
+
 - According to field design there should be a minimum of 20 surveys conducted at each market.
 - This is true for most markets except those in Mtwara, Ruvuma and Lindi
   - Ruvuma and Lindi markets are on boundary/visited due to vicinity to Mtwara. 
 
-```{r srvypermrkt}
+```{r srvymrkt, echo = F}
 
-srvyCount <- mrktc_info %>% group_by(region.check, uniqueMrkt) %>% count() 
+srvyCount <- mrktc_info %>% group_by(region.final, uniqueMrkt) %>% count() 
 srvyCount %>% paged_table()
 
-mrktc_info %>% group_by(region,uniqueMrkt) %>% count() %>% filter(n<20) %>% paged_table()
+```
 
+### Surveys per Market (<20)
+
+- Markets with fewer than 20 surveys:
+
+```{r srvymrkt20, echo = F}
+
+mrktc_info %>% group_by(region.final, uniqueMrkt) %>% count() %>% filter(n<20) %>% paged_table()
+```
+
+### Surveys per Market (Histogram)
+
+- Histogram of number of surveys at each market location
+
+```{r srvyhist, echo = F}
 
 # distribution of surveys at each market
 ggplot(srvyCount, aes(x=n))+
-  geom_histogram(binwidth = 5)
+  geom_histogram(binwidth = 5, boundary = 0, col = "black", alpha = 0.5)+
+  labs(x = "Surveys per market", y = "Count")
+```
+
+### Surveys per Market (No Mtwara)
+
+- Histogram of number of surveys at each market location **excluding** informal Mtwara markets
+
+```{r srvyhistNOMtwara, echo = F}
 
 # excluding mtwara:
-ggplot(srvyCount %>% filter(region.check != "mtwara"), aes(x=n))+
-  geom_histogram(binwidth = 5)
+ggplot(srvyCount %>% filter(region.final != "mtwara"), aes(x=n))+
+  geom_histogram(binwidth = 5, boundary = 0, col = "black", alpha = 0.5)+
+  labs(x = "Surveys per market", y = "Count")
 ```
 
 
-### Surveys per Market - byRegion (boxplot)
-```{r salesRegBox, echo = F}
+### Market Surveys - by Region (boxplot)
+```{r salesRegBox, echo = F, warning = F}
 
 # function for number of observations
 give.n <- function(x){
@@ -226,8 +274,8 @@ give.n <- function(x){
 
 ggplot(srvyCount,
        # reorder(Species, Sepal.Width, FUN = median)
-       aes(x=reorder(region.check,-n,FUN=median, desc.=F), y=n))+
-  geom_boxplot(aes(fill = region.check), alpha = 0.5)+
+       aes(x=reorder(region.final,-n,FUN=median, desc.=F), y=n))+
+  geom_boxplot(aes(fill = region.final), alpha = 0.5)+
   geom_jitter(position = position_dodge(width = 0))+
   geom_hline(yintercept = 20, linetype = "dashed")+
   scale_fill_manual(values = rep(market_pal,2))+
@@ -238,342 +286,292 @@ ggplot(srvyCount,
 
 ```
 
-<!-- ### Surveys per Region: -->
-<!--   - NB: first 6 regions are targeted regions: -->
-<!--   - *Why is the number of surveys so uneven?* -->
-<!--     - DM suggested that the different number of surveys in each region just reflects the different number of markets in those regions (some have many, others have few) -->
-
-<!-- ```{r mrkt_region, echo = F} -->
-
-<!-- mrktregion_count <- mrkta_info %>% group_by(region.geomatch.final) %>% count() %>%  -->
-<!--   mutate("target" = ifelse(`region.geomatch.final` %in% c("katavi", "simiyu", "mbeya", "mtwara", "morogoro", "dodoma"), "target","no_target")) %>% -->
-<!--   mutate(target = ordered(target, levels = c("target", "no_target"))) %>% -->
-<!--   arrange(target, desc(n)) -->
-
-<!-- mrktregion_count %>%  -->
-<!--   select(region.geomatch.final, target, n) %>%  -->
-<!--   kable() -->
-
-<!-- ``` -->
-
-<!-- ### Surveys per Region (plot) -->
-<!-- ```{r srvyregBar, echo = F} -->
-
-<!-- srvyRegion_bar <- ggplot(mrktregion_count, aes(x = reorder(region.geomatch.final,-n), y=n))+ -->
-<!--   geom_bar(stat = "identity",aes(fill = target, ), alpha = 0.75)+ -->
-<!--   geom_text(aes(label=n), vjust=-1)+ -->
-<!--   scale_fill_brewer(palette = "Set1", direction = -1)+ -->
-<!--   labs(x="Region", y = "Number of Surveys", fill = "Target")+ -->
-<!--   theme(axis.text.x = element_text(angle = -45, vjust=0, hjust=0)) -->
-
-<!-- srvyRegion_bar -->
-<!-- ``` -->
-
-<!-- ## 4) Surveys per District {.tabset} -->
-
-<!-- ```{r srvyDist, echo = F} -->
-
-<!-- # Total Districts:  -->
-<!-- tot_dist <- mrkta_info %>% distinct(district.geomatch.final) %>% nrow() -->
-<!-- print(paste("There were ", tot_dist, "districts surveyed in total.")) -->
-<!-- ``` -->
-
-<!-- ### Districts per Region: -->
-<!-- ```{r distperReg, echo = F} -->
-<!-- mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% kable() -->
-<!-- ``` -->
-
-<!-- ### Surveys per District: -->
-<!-- ```{r mrktsperDist, echo = F} -->
-<!-- mrktdist_count <- mrkta_info %>% group_by(region.geomatch.final, district.geomatch.final) %>% count() %>%  -->
-<!--   mutate("target" = ifelse(`region.geomatch.final` %in% c("katavi", "simiyu", "mbeya", "mtwara", "morogoro", "dodoma"), "target","no_target")) %>% -->
-<!--   mutate(target = ordered(target, levels = c("target", "no_target"))) %>% -->
-<!--   arrange(target, desc(n)) -->
-
-<!-- mrktdist_count %>%  -->
-<!--   select(region.geomatch.final,  district.geomatch.final, target, n) %>%  -->
-<!--   arrange(target, region.geomatch.final, n) %>% -->
-<!--   kable() -->
-<!-- ``` -->
-
-<!-- ### Surveys per District (Plot): -->
-<!-- ```{r mrktsDistPlot, echo = F} -->
-<!-- srvyDist_bar <- ggplot(mrktdist_count, aes(x = reorder(district.geomatch.final,-n), y=n))+ -->
-<!--   geom_bar(stat = "identity",aes(fill = target, ), alpha = 0.75)+ -->
-<!--   geom_text(aes(label=n), vjust=-1)+ -->
-<!--   scale_fill_brewer(palette = "Set1", direction = -1)+ -->
-<!--   labs(x="District", y = "Number of Surveys", fill = "Target")+ -->
-<!--   theme(axis.text.x = element_text(angle = -45, vjust=0, hjust=0)) -->
-
-<!-- srvyDist_bar -->
-<!-- ``` -->
-
-<!-- ## 5) Surveys per Ward: {.tabset} -->
-<!-- - A ward is the administrative level above a village, how many markets were surveyed in each Ward? -->
-<!-- - In most wards only one market was surveyed -->
-
-<!-- ```{r market_ward, echo = F, warning = F} -->
-<!-- # Total Wards:  -->
-<!-- tot_wards <- mrkta_info %>% distinct(ward.geomatch.final) %>% nrow() -->
-<!-- print(paste("There were ", tot_wards, "wards surveyed in total.")) -->
-<!-- ``` -->
-
-<!-- ### Wards per Region: -->
-<!-- ```{r wardsReg, echo = F} -->
-<!-- mrkta_info %>% distinct(region.geomatch.final, district.geomatch.final, ward.geomatch.final) %>% group_by(region.geomatch.final) %>% count() %>% arrange(desc(n)) %>% kable() -->
-<!-- ``` -->
-
-<!-- ### Markets per Ward: -->
-<!-- - Most wards are associated with only 1 market -->
-<!-- - Wards with more than 1 market in Regions: Mtwara, Morogoro, Katavi -->
-<!-- ```{r mrktPerWard, echo = F} -->
-<!-- # Do any wards have more than 1 market? -->
-<!-- multiwards <- mrkta_info %>%  -->
-<!--   group_by(region.geomatch.final, ward.geomatch.final) %>%  -->
-<!--   count() %>%  -->
-<!--   filter(n>1) %>% -->
-<!--   pull(ward.geomatch.final) -->
-
-<!-- mrkta_info %>% filter(ward.geomatch.final %in% multiwards) %>%  -->
-<!--   select(fid,date,region.geomatch.final,district.geomatch.final,ward.geomatch.final,village.manual.final,market.manual.final) %>% -->
-<!--   arrange(ward.geomatch.final) %>% -->
-<!--   kable() -->
-<!-- ``` -->
-
-<!-- ```{r mapMultiWards, include = F} -->
-
-<!-- katavi_multiward<-ggplot() + -->
-<!--   geom_sf(data = twards_shp %>% filter(Region_Nam %in% c("Katavi")), fill = "grey", alpha = 0.5, linewidth = 0.1) + -->
-<!--   scale_fill_manual(values=rep(market_pal,2), guide = "none")+ -->
-<!--   geom_sf(data = mrkta_sf %>% filter(region.geomatch.final == "katavi", ward.geomatch.final %in% multiwards), aes(col = ward.geomatch.final), size = 1.5)+ -->
-<!--   scale_colour_manual(values = rep(market_pal,2))+ -->
-<!--   facet_wrap(~Region_Nam)+ -->
-<!--   coord_sf()+ -->
-<!--   labs(title = "Market survey A locations",  -->
-<!--        fill = "Tanzania region", -->
-<!--        col = "Market region")+ -->
-<!--   theme(legend.position = "right", legend.box = "horizontal") -->
-
-<!-- morogoro_multiward <- ggplot() + -->
-<!--   geom_sf(data = twards_shp %>% filter(Region_Nam %in% c("Morogoro")), fill = "grey", alpha = 0.5, linewidth = 0.1) + -->
-<!--   scale_fill_manual(values=rep(market_pal,2), guide = "none")+ -->
-<!--   geom_sf(data = mrkta_sf %>% filter(region.geomatch.final == "morogoro", ward.geomatch.final %in% multiwards), aes(col = ward.geomatch.final), size = 1.5)+ -->
-<!--   scale_colour_manual(values = rep(market_pal,2))+ -->
-<!--   facet_wrap(~Region_Nam)+ -->
-<!--   coord_sf()+ -->
-<!--   labs(title = "Market survey A locations",  -->
-<!--        fill = "Tanzania region", -->
-<!--        col = "Market region")+ -->
-<!--   theme(legend.position = "right", legend.box = "horizontal") -->
 
 
-<!-- mtwara_multiward <- ggplot() + -->
-<!--   geom_sf(data = twards_shp %>% filter(Region_Nam %in% c("Mtwara")), fill = "grey", alpha = 0.5, linewidth = 0.1) + -->
-<!--   scale_fill_manual(values=rep(market_pal,2), guide = "none")+ -->
-<!--   geom_sf(data = mrkta_sf %>% filter(region.geomatch.final == "mtwara", ward.geomatch.final %in% multiwards), aes(col = ward.geomatch.final), size = 1.5)+ -->
-<!--   scale_colour_manual(values = rep(market_pal,2))+ -->
-<!--   facet_wrap(~Region_Nam)+ -->
-<!--   coord_sf()+ -->
-<!--   labs(title = "Market survey A locations",  -->
-<!--        fill = "Tanzania region", -->
-<!--        col = "Market region")+ -->
-<!--   theme(legend.position = "right", legend.box = "horizontal") -->
+## Market Type: {.tabset}
+
+- Each respondent is asked the type of market. This question is also asked in market survey A (all reported as primary market)
+- Theoretically all respondents at a given market should respond with the same market type designation
+- This is not the case so this data is not very reliable.
+
+**Market Type Definitions**
+
+- Primary market: located close to the place of production or rearing of small ruminants, usually located within villages or small towns.
+-	Secondary market: usually found in suburbs, animals are transported some distance from their place of production/rearing to the market.
+-	Tertiary or final consumption market: generally located in towns or populated areas to supply urban populations, animals are transported quite a long-distance from their place of production/rearing.
+
+### Market Type (Overall)
+
+```{r mrkt_type, echo = F}
+mrktc_info %>% 
+  left_join(lkp_mrkttype %>% select(market.type.lkp = Description, market.type = Code), by = "market.type") %>%
+  group_by(market.type.lkp) %>% 
+    count() %>% 
+    paged_table()
+
+```
+
+### Market Type (Regional)
+
+```{r mrkt_typeReg, echo = F}
+typeReg_tally <- mrktc_info %>% 
+  left_join(lkp_mrkttype %>% select(market.type.lkp = Description, market.type = Code), by = "market.type") %>%
+  group_by(region.final, market.type.lkp) %>% 
+  count() %>%
+  ungroup %>%
+  complete(region.final, market.type.lkp,
+           fill = list(n = 0)) 
+
+paged_table(typeReg_tally %>% spread(key = market.type.lkp, value = n, fill = 0))
+
+```
+### Market Type (Regional) - Hist
+
+```{r mrkt_typeRegplot, echo = F}
+
+ggplot(typeReg_tally, aes(x=region.final, y = n, group = market.type.lkp))+
+  geom_col(position = position_dodge(), aes(fill = market.type.lkp), alpha = 0.5, col = "black")
+
+```
+
+<!-- ## Respondent Role: -->
+
+<!-- - Respondent role is reported in Swahili, free-type box -->
+<!-- - Translate into English? -->
+
+<!-- ```{r roles, echo = F} -->
+
+<!-- # identify unique roles and concatenate into a string: -->
+
+<!-- roles_lkp <- mrktc_info %>%  -->
+<!--   distinct(respondent.role) %>% -->
+<!--   mutate(respondent.role = tolower(respondent.role), # lowercase -->
+<!--           respondent.role = gsub("[[:punct:]]", " ", `respondent.role`), # remove punctuation -->
+<!--     "respondent.role" = trimws(`respondent.role`), -->
+<!--     "respondent.role" = gsub("\\s+", " ", `respondent.role`)) %>% -->
+<!--   pull() %>%  -->
+<!--   paste(collapse = "; ") -->
+
+<!-- # Translate using chatGPT? -->
 
 <!-- ``` -->
 
-<!-- ### Katavi Map -->
+## Trade & Market Attendance {.tabset}
 
-<!-- ```{r katavimultiward} -->
-<!-- mrkta_info %>% filter(region.geomatch.final == "katavi", ward.geomatch.final %in% multiwards) -->
-<!-- katavi_multiward -->
-<!-- ``` -->
+- Number/proportion of tradespeople attending a market can be useful in determining the "type" of that market.
 
-<!-- ### Morogoro Map -->
+*The total proportion of tradespeople in the data:*
 
-<!-- ```{r morogoromultiward} -->
-<!-- morogoro_multiward -->
-<!-- ``` -->
+```{r tradersAll, echo = F, warning = F}
+tradeprop <- round((sum(mrktc_info$trader)*100)/nrow(mrktc_info), digits = 2)
+print(paste("Overall", tradeprop, "% of respondents identified as Traders (", sum(mrktc_info$trader), "out of", nrow(mrktc_info), "respondents)"))
 
-<!-- ### Mtwara Map -->
+# Traders total:
 
-<!-- ```{r mtwaramultiward} -->
-<!-- mtwara_multiward -->
-<!-- ``` -->
+mrktc_info %>% 
+  group_by(trader) %>% 
+  count() %>%
+  ungroup() %>%
+  mutate(prop = round(n/sum(n), digits = 2)) %>%
+  paged_table()
+
+```
+
+### Traders per Market (Hist)
+
+- The number of traders per market:
+
+<div class = "row">
+<div class = "column">
+```{r mrktTradersFig, echo = F, warning = F}
+tradersbymrkt <- mrktc_info %>% 
+  group_by(region.final, market.final, trader) %>% 
+  count() %>%
+  ungroup() %>%
+  group_by(market.final) %>%
+  mutate(prop = round(n/sum(n), digits = 2))
+
+ggplot(tradersbymrkt %>% filter(trader == 1), aes(x=n))+
+  geom_histogram(binwidth = 2, alpha = 0.5, col = "black", position = "dodge")+
+  scale_x_continuous(breaks = seq(0,70,10), labels = seq(0,70,10))+
+  labs(x = "Number of Traders", y = "Count", title = "All")
+
+```
+</div>
+
+<div class = "column">
+```{r mrktTraders2Fig, echo = F, warning = F}
+
+ggplot(tradersbymrkt %>% filter(trader == 1, region.final != "mtwara"), aes(x=n))+
+  geom_histogram(binwidth = 2, alpha = 0.5, col = "black", position = "dodge")+
+  scale_x_continuous(breaks = seq(0,70,10), labels = seq(0,70,10))+
+  labs(x = "Number of Traders", y = "Count", title = "Excluding Mtwara")
+
+```
+</div>
+</div>
+
+### Traders per market (table)
+
+- The number and proportion of traders at each market:
+
+```{r mrktTradersTab, echo = F, warning = F}
+
+paged_table(tradersbymrkt)
+```
+
+### Proportion traders per market (hist)
+
+- The proportion of traders at each market:
+<div class = "row">
+<div class = "column">
+```{r mrktTradersPFig, echo = F, warning = F}
+
+ggplot(tradersbymrkt %>% filter(trader == 1), aes(x=prop))+
+  geom_histogram(binwidth = 0.05, alpha = 0.5, col = "black", position = "dodge")+
+  #scale_x_continuous(breaks = seq(0,70,10), labels = seq(0,70,10))+
+  labs(x = "Proportion of Traders", y = "Count", title = "All")
+```
+</div>
+<div class = "column">
+```{r mrktTradersP2Fig, echo = F, warning = F}
+ggplot(tradersbymrkt %>% filter(trader == 1, region.final != "mtwara"), aes(x=prop))+
+  geom_histogram(binwidth = 0.05, alpha = 0.5, col = "black", position = "dodge")+
+  #scale_x_continuous(breaks = seq(0,70,10), labels = seq(0,70,10))+
+  labs(x = "Proportion of Traders", y = "Count", title = "Excluding Mtwara")
+
+```
+</div>
+</div>
+
+### Traders per market - by Region
+
+```{r mrktTradeReg, echo = F, warning = F}
+ggplot(tradersbymrkt %>% filter(trader == 1), 
+       aes(x=reorder(region.final,-prop,FUN=median, desc.=F),y = prop, group = region.final))+
+  geom_boxplot(aes(fill = region.final), alpha = 0.5)+
+  scale_fill_manual(values = rep(market_pal, 2))+
+  labs(x = "Region", y = "Proportion traders per market")+
+  theme(legend.position = "none")
+
+```
 
 
-<!-- ## 6) Type of Market -->
-
-<!-- *All markets are given as Type 1: Primary Markets (note the buyer-seller questionnaire is not consistent with this)* -->
-
-<!-- - Possible Market Type: -->
-<!--   - *Primary market* - located close to the place of production or rearing of small ruminants, usually located within villages or small towns. -->
-<!--   - *Secondary market* - usually found in suburbs, animals are transported some distance from their place of production/rearing to the market. -->
-<!--   - *Tertiary or final consumption market* - generally located in towns or populated areas to supply urban populations, animals are transported quite a long-distance from their place of production/rearing. -->
-
-
-<!-- ```{r market.type, echo = F} -->
-
-<!-- ##################### -->
-<!-- # markets by TYPE: -->
-<!-- mrkta_info %>% -->
-<!--   group_by(market.type) %>% -->
-<!--   count() %>% -->
-<!--   kable() # all markets are type 1 -->
-
-<!-- ``` -->
+```{r tradersperregion, include = F}
+# Traders by region
+# 
+# mrktc_info %>% 
+#   group_by(region.final, trader) %>% 
+#   count() %>%
+#   ungroup() %>%
+#   group_by(region.final) %>%
+#   mutate(prop = round(n/sum(n), digits = 2))
+```
 
 
-<!-- ## 7) Small Ruminant Sales {.tabset} -->
+## Other Market Attendance {.tabset}
 
-<!-- ### Sheep and Goat sales per day -->
-<!-- - The total number of sheep and goats sold across all markets -->
-<!-- - NB: More goats sold than sheep. -->
+### Other Market Attendance (All)
 
-<!-- ```{r tot_sales, echo = F} -->
+Attendance at other markets by respondents to buyer-seller questionnaire
 
-<!-- sales <- mrkta_info %>% -->
-<!--   mutate(SR.sales.day = `3a.no.sheep.sold.per.day`+`3b.no.goats.sold.per.day`) %>% -->
-<!--   rename(sheep.sales.day =`3a.no.sheep.sold.per.day`, goat.sales.day =`3b.no.goats.sold.per.day`) %>% -->
-<!--   select(fid,contains(".final"), contains(".sales")) %>% -->
-<!--   gather(key = species, value = sales, -c(fid, region.geomatch.final, district.geomatch.final, ward.geomatch.final, village.manual.final, market.manual.final)) -->
+<div class = "row">
+<div class = "column">
+```{r othermrktTab, echo = F, warning = F}
 
-<!-- # total reported sheep and goat sales per day of market -->
-<!-- tot.sales <- sales %>% -->
-<!--   group_by(species) %>% -->
-<!--   summarise(tot = sum(sales)) %>% -->
-<!--   arrange(tot) %>% -->
-<!--   mutate(prop = round(tot/max(tot), digits = 2)) %>% -->
-<!--   rename(Species = species, -->
-<!--          Total_Sales = tot,  -->
-<!--          Prop_Sales = prop) -->
+mrktc_info %>% group_by(number.markets.visited) %>% count() %>% paged_table()
+```
+</div>
 
-<!-- kable(tot.sales) -->
-<!-- ``` -->
+<div class = "column">
+```{r othermrktFig, echo = F, warning = F}
+ggplot(mrktc_info, aes(x=number.markets.visited))+
+  geom_histogram(binwidth = 1, alpha = 0.5, col = "black", position = "dodge")+
+  scale_x_continuous(breaks = seq(0,10,1), labels = seq(0,10,1))+
+  labs(x = "Other markets visited", y = "Count")
+```
+</div>
+</div>
 
-<!-- ### All Sales Hist -->
+### Other Market Attendance (Trader)
 
-<!-- ```{r allSales_hist, echo = F} -->
+- Market attendance grouped by trader
 
-<!-- allSales_plot <- ggplot(sales %>% filter(species =="SR.sales.day"), aes(x=sales))+ -->
-<!--   geom_histogram(aes(x=sales), binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+ -->
-<!--   scale_x_continuous(breaks = seq(0,650,50), labels = seq(0,650,50))+ -->
-<!--   labs(x = "All Small Ruminant Sales per Day", -->
-<!--        y = "Count", -->
-<!--        main = "All Small Ruminant Sales per Day") -->
-<!-- allSales_plot -->
-<!-- ``` -->
+<div class = "row">
+<div class = "column">
+```{r othermrktTrader, echo = F, warning = F}
+mrktc_info %>% group_by(number.markets.visited, trader) %>% count() %>% paged_table()
+```
+</div>
 
-<!-- ### Sales by Species -->
-<!-- ```{r spSales_hist, echo = F} -->
-<!-- spSales_plot <- ggplot(sales %>% filter(species!="SR.sales.day"), aes(x=sales, group = species, fill = species))+ -->
-<!--   geom_histogram(aes(x=sales), binwidth = 10, alpha = 0.5, col = "black", boundary = 0, position = "dodge")+ -->
-<!--   scale_x_continuous(breaks = seq(0,650,50), labels = seq(0,650,50))+ -->
-<!--   labs(x = "Sales per Day", -->
-<!--        y = "Count", -->
-<!--        main = "Sales per Day")+ -->
-<!--   facet_wrap(~species) -->
-<!-- spSales_plot -->
-<!-- ``` -->
+<div class = "column">
+```{r othermrktTraderPlot, echo = F, warning = F}
+ggplot(mrktc_info, aes(x=number.markets.visited, group = trader, fill = as.factor(trader)))+
+  geom_histogram(binwidth = 1, alpha = 0.5, col = "black", position = "dodge")+
+  scale_x_continuous(breaks = seq(0,10,1), labels = seq(0,10,1))+
+  labs(x = "Other markets visited", y = "Count", fill = "Trader")
 
-<!-- ### Species sales correlation -->
-<!-- ```{r spSales_scatter, echo = F} -->
-<!-- shgt_scatter <- ggplot(mrkta_info, -->
-<!--                        aes(x = `3a.no.sheep.sold.per.day`, -->
-<!--                            y = `3b.no.goats.sold.per.day`)) + -->
-<!--   geom_point(aes(col = region.geomatch.final)) + -->
-<!--   scale_colour_manual(values = rep(market_pal,2))+ -->
-<!--   labs(x = "Sheep sales per day", -->
-<!--        y = "Goat sales per day") -->
-<!-- shgt_scatter -->
-<!-- ``` -->
+```
+</div>
+</div>
 
-<!-- ## 8) Small Ruminant Sales by Region {.tabset} -->
+### Market attendance by region
 
-<!-- ### Sales-Region (table) -->
-<!-- ```{r salesReg, echo = F} -->
-<!-- sales %>%  -->
-<!--   filter(species == "SR.sales.day") %>% -->
-<!--   group_by(region.geomatch.final) %>% -->
-<!--   summarise( -->
-<!--     markets = n(), -->
-<!--     median = median(sales),  -->
-<!--     mean = mean(sales),  -->
-<!--     min = min(sales),  -->
-<!--     max = max(sales),  -->
-<!--   ) %>%  -->
-<!--   kable() -->
-<!-- ``` -->
+```{r mrktReg, echo = F, warning = F}
 
-<!-- ### Sales-Region (boxplot) -->
-<!-- ```{r salesRegBox, echo = F} -->
+ggplot(mrktc_info, aes(x=factor(region.final), y = number.markets.visited, fill = as.factor(trader)))+
+  geom_boxplot(alpha = 0.5, position = "dodge")+
+  labs(x = "Regions", y = "Market Attendance", fill = "Trader")
+```
 
-<!-- # function for number of observations  -->
-<!-- give.n <- function(x){ -->
-<!--   return(c(y = max(x)*1.1, label = length(x)))  -->
-<!--   # experiment with the multiplier to find the perfect position -->
-<!-- } -->
+### Market attendance by region (Traders) - boxplot
 
-<!-- # plot -->
+- Boxplot of number of markets visited, by trader, in each region
 
-<!-- ggplot(sales %>% filter(species == "SR.sales.day"), -->
-<!--        # reorder(Species, Sepal.Width, FUN = median) -->
-<!--        aes(x=reorder(region.geomatch.final,-sales,FUN=median, desc.=F), y=sales))+ -->
-<!--   geom_boxplot(aes(fill = region.geomatch.final), alpha = 0.5)+ -->
-<!--   geom_jitter(position = position_dodge(width = 0))+ -->
-<!--   scale_fill_manual(values = rep(market_pal,2))+ -->
-<!--   stat_summary(fun.data = give.n, geom = "text", fun.y = max)+ -->
-<!--   labs(x="Region", y = "Small ruminant sales")+ -->
-<!--   theme(axis.text.x = element_text(angle = 45, hjust = 1), -->
-<!--         legend.position = "none") -->
+```{r mrktRegtrader, echo = F, warning = F}
+# Only traders
+ggplot(mrktc_info %>% filter(trader==1), 
+       aes(x=factor(reorder(region.final, -number.markets.visited, FUN = median, desc.=F)), y = number.markets.visited))+
+  geom_boxplot(alpha = 0.5, position = "dodge", fill = "grey")+
+  labs(x = "Regions", y = "Number markets visited")
 
-<!-- ``` -->
+```
 
-<!-- ### Sales-Region (histogram) -->
-<!-- ```{r salesRegBar, echo = F} -->
+### Market attendance by region (Traders) - histogram
 
-<!-- ggplot(sales %>% filter(species =="SR.sales.day"), aes(x=sales, group = region.geomatch.final, fill = region.geomatch.final))+ -->
-<!--   geom_histogram(aes(x=sales), binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+ -->
-<!--   scale_x_continuous(breaks = seq(0,650,50), labels = seq(0,650,50))+ -->
-<!--   facet_wrap(~region.geomatch.final, ncol = 3)+ -->
-<!--   scale_fill_manual(values = rep(market_pal,2))+ -->
-<!--   labs(x = "All Small Ruminant Sales per Day", -->
-<!--        y = "Count", -->
-<!--        main = "All Small Ruminant Sales per Day")+ -->
-<!--   theme(legend.position = "none") -->
+- Number markets visited grouped, by trader, in each region
 
-<!-- ``` -->
+```{r othermrktRegionPlot, echo = F, warning = F}
 
-<!-- ## 9) Small Ruminant trade patterns: {.tabset} -->
+ggplot(mrktc_info, aes(x=number.markets.visited, group = trader, fill = as.factor(trader)))+
+  geom_histogram(binwidth = 1, alpha = 0.5, col = "black", position = "dodge")+
+  scale_x_continuous(breaks = seq(0,10,1), labels = seq(0,10,1))+
+  labs(x = "Other markets visited", y = "Count", fill = "Trader")+
+  facet_wrap(~region.final)
 
-<!-- ### Seasonal Variation in Trade -->
+```
 
-<!-- ```{r seasonal_trade, echo = F} -->
 
-<!-- mrkta_info %>% -->
-<!--   group_by(`4.seasonal.variation.in.trade`) %>% -->
-<!--   count() %>% -->
-<!--   mutate( -->
-<!--     YN = ifelse(`4.seasonal.variation.in.trade` == 0, "N", "Y"), -->
-<!--     proportion = round(n/nrow(mrkta_info), digits = 2)) %>% -->
+<!-- - Comparison of the proportion of traders at a market, and the number of other markets visited.  -->
+
+<!-- ```{r trademrktscatter, echo = F, warning = F} -->
+<!-- # Dataframe which contains the proportion of traders, and the median other markets visited for each market: -->
+<!-- tradermrkts <- tradersbymrkt %>%  -->
 <!--   ungroup() %>% -->
-<!--   select("Seasonal trade" = YN, "Number markets" =n, "Proportion markets" =proportion) %>% -->
-<!--   kable() -->
-<!-- ``` -->
+<!--   filter(trader == 1) %>% -->
+<!--   left_join( -->
+<!--     mrktc_info %>% group_by(region.final, market.final) %>% summarise(median.mrkts.visited = median(number.markets.visited), -->
+<!--                                                                       tot.mrkts.visited = sum(number.markets.visited)), -->
+<!--     by = c("region.final", "market.final") -->
+<!--   ) %>% -->
+<!--   select(-c(trader)) %>% -->
+<!--   rename("number.traders" = n,  -->
+<!--          "proportion.traders" = prop) -->
 
-<!-- ### Seasonal Trade Patterns -->
-<!-- - *Translate the below* -->
-<!-- ```{r seasonal_trade_ans, echo = F, warning = F} -->
-<!-- # translate this: -->
-<!-- mrkta_info %>% filter(`4.seasonal.variation.in.trade` ==1) %>% select(`4.if.yes.describe`) %>% head(n=4) %>% kable() -->
-<!-- ``` -->
+<!-- ggplot(tradermrkts, aes(x=proportion.traders, y = tot.mrkts.visited))+ -->
+<!--   geom_point() -->
 
-<!-- ### Origins and Destinations -->
-
-<!-- ```{r buysell_location, echo = F, warning=F} -->
-<!-- # colnames(mrkta_info) -->
-
-<!-- mrkta_info %>% -->
-<!--   select(fid, market.manual.final,`1.location.brought.from`, `2.location.taken.to.`) %>% head() %>% knitr::kable() -->
 
 <!-- ``` -->
+
 

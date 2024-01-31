@@ -90,20 +90,20 @@ lkp_buytransport <- lkp_selltransport
 # link mrktc Info to clean gps data and retain only variables of interest
 mrktc_info <- left_join(
   mrktc_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), contains("village"))),
-  mrktc_gps %>% select(-c(country, uniqueMrkt.check)),
+  mrktc_gps %>% select(-c(country, uniqueMrkt.final)),
   by = c("fid","date", "unique.row.identifier.uuid.")) %>% # can't join by "gps.coordinates.of.the.market" as some rows of original data have no location.
   select(
     fid,
     date,
     date.end,
     date.of.interview,
-    date.final = date.check,
+    date.final,
     country,
-    region.final = region.check,
-    distict.final = district.check,
-    ward.final = ward.check,
-    village.final = village.check,
-    market.final = market.check,
+    region.final,
+    district.final,
+    ward.final,
+    village.final,
+    market.final,
     market.type, 
     respondent.role,
     other.market.visited,
@@ -112,7 +112,9 @@ mrktc_info <- left_join(
     trade.pattern,
     gps.coordinates.of.the.market.final = gps.coordinates.of.the.market.y,
     unique.row.identifier.uuid.
-  )
+  ) %>%
+  mutate(number.markets.visited = replace_na(number.markets.visited, 0)) %>% # For number.markets.visited replace NA with 0 
+  mutate(trader = replace_na(trader, 0))
 
 ```
 
