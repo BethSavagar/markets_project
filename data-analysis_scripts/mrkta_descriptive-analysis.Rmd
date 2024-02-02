@@ -445,6 +445,34 @@ tot.sales <- sales %>%
 paged_table(tot.sales)
 ```
 
+### Summarise sales (boxplot, table)
+```{r salessummary,echo = F, warning = F}
+sales %>% 
+  select(species, sales) %>% 
+  group_by(species) %>% 
+  summarise( min = min(sales), 
+             lq = quantile(sales,0.25),
+             median = median(sales),
+             mean = mean(sales), 
+             uq = quantile(sales,0.75),
+             max = max(sales)) %>% 
+  paged_table()
+
+
+ggplot(sales,
+       # reorder(Species, Sepal.Width, FUN = median)
+       aes(x=reorder(species,-sales,FUN=median, desc.=F), y=sales))+
+  geom_boxplot(aes(fill = species), alpha = 0.5)+
+  geom_jitter(position = position_dodge(width = 0))+
+  scale_fill_manual(values = rep(market_pal,2))+
+  facet_wrap(~species, scales = "free")+
+  # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+  labs(x="Species", y = "Small ruminant sales")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+```
+
 ### All Sales Hist
 
 ```{r allSales_hist, echo = F}
@@ -500,7 +528,10 @@ sales %>%
 ```
 
 ### Sales-Region (boxplot)
-```{r salesRegBox, echo = F}
+
+- Small ruminant sales per market, grouped by region:
+
+```{r salesRegBox, echo = F, warning = F}
 
 # function for number of observations 
 give.n <- function(x){

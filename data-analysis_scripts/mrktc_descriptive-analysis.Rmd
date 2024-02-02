@@ -186,6 +186,7 @@ colnames(mrktc_info)
 ```
 
 ## 2) How many surveys are there, in total?
+
 - How many surveys were completed?
 - How many surveys were completed at each market?
 - *Each row of data corresponds to a unique market survey (C)*
@@ -208,6 +209,19 @@ num_mrkt <- mrktc_info %>% distinct(uniqueMrkt) %>% nrow()
 print(paste("There are ", num_mrkt, " unique markets"))
 
 ```
+
+- Market survey A has 85 markets, 2 markets from survey A do not appear in survey C:
+
+```{r AmissingC, echo = F, warning = F}
+
+anti_join(mrkta_gps %>% mutate(uniqueMrktId = paste(region.geomatch.final, district.geomatch.final, ward.geomatch.final, village.manual.final, market.manual.final, sep = "-")) %>% select(uniqueMrktId),
+          mrktc_gps %>% mutate(uniqueMrktId = paste(region.final, district.final, ward.final, village.final, market.final, sep = "-")) %>% select(uniqueMrktId),
+          by = "uniqueMrktId") %>%
+  paged_table()
+
+```
+
+
 
 ## 3) Surveys per Market {.tabset}
 
@@ -447,9 +461,13 @@ ggplot(tradersbymrkt %>% filter(trader == 1, region.final != "mtwara"), aes(x=pr
 ### Traders per market - by Region
 
 ```{r mrktTradeReg, echo = F, warning = F}
+# tradersbymrkt %>% group_by(region.final, market.final) %>% mutate(nsrvy = sum(n)) %>% ungroup() filter(trader == 1)
+
+
 ggplot(tradersbymrkt %>% filter(trader == 1), 
        aes(x=reorder(region.final,-prop,FUN=median, desc.=F),y = prop, group = region.final))+
   geom_boxplot(aes(fill = region.final), alpha = 0.5)+
+  geom_jitter(position = position_dodge(width = 0), alpha = 0.5)+
   scale_fill_manual(values = rep(market_pal, 2))+
   labs(x = "Region", y = "Proportion traders per market")+
   theme(legend.position = "none")

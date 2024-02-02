@@ -83,6 +83,10 @@ lkp_buyplacetype <- lkp_sellplacetype
 
 lkp_buytransport <- lkp_selltransport
 
+lkp_sellreason <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_reason.csv"))
+
+lkp_buyreason <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpbuy_reason.csv"))
+
 ```
 
 ```{r infoClean}
@@ -135,7 +139,7 @@ mrktc_activities_clean1 <- mrktc_activities_raw %>%
     "2.sell.place.ward" = "ward.9",
     "2.sell.place.district" = "district.10",
     # "3.sell.reason"="3.what.is.your.main.reason.for.selling.these.sheep.and.or.goats.",
-    # "3.sell.reason.specify"="if.other.specify.12",
+    # "3.sell.reason.other"="if.other.specify.12",
     "4.sell.transport.type"="4.how.were.sheep.goats.transported.to.the.market.see.mrktc.lkpsell.trans.",
     "4.sell.transport.other" = "if.other.specify.14",
     # "5.sell.other.species."="5.do.you.also.sell.other.animal.species.apart.from.sheep.and.goats.",
@@ -147,7 +151,7 @@ mrktc_activities_clean1 <- mrktc_activities_raw %>%
     "6.buy.place.ward"="ward.22",
     "6.buy.place.district"="district.23",
     # "7.buy.reason"="7.what.is.your.main.reason.for.buying.these.small.ruminants.",
-    # "7.specify.buy.reason" = "if.other.specify.25",
+    # "7.buy.reason.other" = "if.other.specify.25",
     "6.buy.transport.yesno" = "will.you.transport.the.sheep.goats.you.are.buying.today.",
     "8.buy.transport.type"="8.how.will.you.transport.these.small.ruminants.that.you.are.buying.see.mrktc.lkpsell.trans.",
     "8.buy.transport.other"="if.other.specify.27",
