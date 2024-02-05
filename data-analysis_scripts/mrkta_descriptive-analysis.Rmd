@@ -65,22 +65,23 @@ twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>%
 # read in CLEAN tanzania market data 
 
 mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
+mrkta_info <- read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv"))
 
-# mrkta_generalinfo, need to link to cleaned update market location data
-mrkta_info_CLEAN <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
-
-# link mrkta Info to clean gps data and retain only variables of interest
-mrkta_info <- left_join(
-  mrkta_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), village)),
-  mrkta_gps %>% select(-c(country, reg.ward.mrkt.final)),
-  by = c("fid","date", "gps.coordinates.of.the.market", "unique.row.identifier.uuid.")) %>%
-  select(
-    fid, 
-    date, 
-    country,
-    ends_with(".final"),
-    everything()
-  )
+# # mrkta_generalinfo, need to link to cleaned update market location data
+# mrkta_info_CLEAN <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
+# 
+# # link mrkta Info to clean gps data and retain only variables of interest
+# mrkta_info <- left_join(
+#   mrkta_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), village)),
+#   mrkta_gps %>% select(-c(country, reg.ward.mrkt.final)),
+#   by = c("fid","date", "gps.coordinates.of.the.market", "unique.row.identifier.uuid.")) %>%
+#   select(
+#     fid, 
+#     date, 
+#     country,
+#     ends_with(".final"),
+#     everything()
+#   )
 
 ```
 
