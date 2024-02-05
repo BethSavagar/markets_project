@@ -1,0 +1,136 @@
+---
+title: 'Tanzania Market Survey C: Descriptive Analysis'
+author: "Beth Savagar"
+date: "2024-01-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+```{r load-data, include = F}
+
+
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+  rename(region.final = region.geomatch.final, 
+         district.final = district.geomatch.final,
+         ward.final = ward.geomatch.final, 
+         village.final = village.manual.final,
+         market.final = market.manual.final)
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv")) %>%
+  rename(region.final = region.geomatch.final, 
+         district.final = district.geomatch.final,
+         ward.final = ward.geomatch.final, 
+         village.final = village.manual.final,
+         market.final = market.manual.final)
+
+
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+```
+
+
+## 1) Market Survey A
+
+- For purpose of market type definition and MVA, market survey A provides:
+    - Reference database for market locations
+    - Summary of number animals sold
+
+```{r mrkta}
+
+head(mrkta_info)
+
+mrkts_master_v1 <-  mrkta_info %>%
+  mutate(`3c.all.sales` = `3a.sheep.sales` + `3b.goat.sales`) %>%
+  select(
+    fid,
+    date,
+    country,
+    region.final,
+    district.final,
+    ward.final,
+    village.final,
+    market.final,
+    all.sales = `3c.all.sales`,
+    gps.coordinates.of.the.market,
+    unique.row.identifier.uuid.
+  )
+  
+
+```
+
+### 2) Nearest Town:
+
+```{r nearestTown}
+
+
+
+```
+
+
+### 3) Market C Survey:
+
+```{r mrktc}
+
+head(mrktc_info)
+
+mrktc_forjoin <- mrktc_info %>%
+  select(fid,ends_with(".final"),other.market.visited,number.markets.visited,trader) %>%
+  group_by(region.final,district.final,ward.final,village.final,market.final) %>%
+  summarise(num.srvy = n(),
+            other.markets = mean(number.markets.visited),
+            prop.trader = sum(trader)/num.srvy) %>%
+  ungroup()
+
+mrkts_master_v2 <- mrkts_master_v1 %>%
+  left_join(mrktc_forjoin,
+            by = c("region.final", "district.final","ward.final","village.final","market.final"))
+
+```
+
+
+### 4) Market C Activities:
+
+```{r mrktcactivities}
+# prop.buy	prop.sell	prop.trade	prop.broker	prop.otheractvty	prop.multiactvty	main.actvty
+
+head(mrktc_actvty)
+
+mrktc_forjoin <- mrktc_info %>%
+  select(fid,ends_with(".final"),other.market.visited,number.markets.visited,trader) %>%
+  group_by(region.final,district.final,ward.final,village.final,market.final) %>%
+  summarise(num.srvy = n(),
+            other.markets = mean(number.markets.visited),
+            prop.trader = sum(trader)/num.srvy) %>%
+  ungroup()
+
+mrkts_master_v2 <- mrkts_master_v1 %>%
+  left_join(mrktc_forjoin,
+            by = c("region.final", "district.final","ward.final","village.final","market.final"))
+
+```
