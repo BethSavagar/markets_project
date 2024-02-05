@@ -576,4 +576,38 @@ mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
 # write.csv(mrkta_gps_manualgeomatch_lkp, file = here("data/tanzania_data/mrkta_gps_manualgeomatchlkp.csv"), row.names = F)
 ```
 
+```{r savemrktaInfo, echo = F}
+
+
+# read in CLEAN tanzania market data 
+
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrkta_info_CLEAN <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
+
+# link mrkta Info to clean gps data and retain only variables of interest
+mrkta_info <- left_join(
+  mrkta_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), village)),
+  mrkta_gps %>% select(-c(country, reg.ward.mrkt.final)),
+  by = c("fid","date", "gps.coordinates.of.the.market", "unique.row.identifier.uuid.")) %>%
+  select(
+    fid, 
+    date, 
+    country,
+    ends_with(".final"),
+    everything()
+  ) %>% 
+  rename(
+    "1.origins" = "1.location.brought.from",
+    "2.destinations" = "2.location.taken.to.",
+    "3a.sheep.sales" = "3a.no.sheep.sold.per.day",
+    "3b.goat.sales" = "3b.no.goats.sold.per.day"
+  )
+
+# write.csv(mrkta_info, file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
+# write.csv(mrkta_info, file = here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
+
+```
+
 ## END OF REWRITE
