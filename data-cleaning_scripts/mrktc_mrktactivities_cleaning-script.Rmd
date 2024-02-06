@@ -33,7 +33,7 @@ filesave <- F
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
 
 # mrkta_generalinfo, need to link to cleaned update market location data
-mrktc_info_CLEAN <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
 
 mrktc_activities_raw <- read_csv(here("data/tanzania_data/mrktc_mrktactivities_tanzania.csv"))
 ```
@@ -203,8 +203,8 @@ mrktc_activities_v2 <- mrktc_activities_clean2 %>%
     "1.activity.middleman" = if_else(grepl("2", `1.mrkt.activity`), 1, 0),
     "1.activity.trade" = if_else(grepl("3", `1.mrkt.activity`), 1, 0),
     "1.activity.buy" = if_else(grepl("4", `1.mrkt.activity`), 1, 0),
-    "1.activity.other" = if_else(grepl("-66", `1.mrkt.activity`), 1, 0)
-  )
+    "1.activity.other" = if_else(grepl("-66", `1.mrkt.activity`), 1, 0), 
+    "1.activity.multi" = if_else(sum(`1.activity.sell`,`1.activity.buy`,`1.activity.middleman`,`1.activity.trade`,`1.activity.other`)>1, 1, 0))
 
 ```
 
@@ -303,6 +303,42 @@ mrktc_activities_v6 <- mrktc_activities_v5 %>%
 
 ```
 
+```{r}
+
+mrktc_activities_v6 %>% select(`12.buy.sell.per.month`) %>% summary()
+mrktc_activities_v6 %>% distinct(`12.buy.sell.per.month`) # remove any > 24
+
+mrktc_activities_v7 <- mrktc_activities_v6 %>%
+  mutate(`12.buy.sell.per.month` = if_else(`12.buy.sell.per.month`>30, NA, `12.buy.sell.per.month`))
+
+```
+
+```{r }
+
+mrktc_activities_v7 %>% colnames()
+
+mrktc_activities_summary <- mrktc_activities_v7 %>%
+  select(
+    fid, 
+    starts_with("1."),
+    starts_with("2."),
+    starts_with("4."),
+    starts_with("6."),
+    starts_with("8."),
+    starts_with("12."),
+    unique.row.identifier.uuid.
+  )
+
+
+
+```
+
+```{r saveActvty}
+if(filesave){
+  write_csv(mrktc_activities_summary, file = here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+}
+
+```
 
 
 ## ORIGIN WARDS:

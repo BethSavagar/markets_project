@@ -178,7 +178,6 @@ mrkttype_lkp2 %>% select(all.sales, number.surveys) %>% summary()
 
 ## Town Locations: 
 
-
 ```{r map}
 
 Regions_Cmanual <- mrktc_sf %>% pull(region.final) %>% unique() %>% str_to_title()
@@ -252,6 +251,14 @@ ggplot() +
        col = "Market region")+
   theme(legend.position = "right", legend.box = "horizontal")
 
+
+```
+
+
+
+```{r savetowns, echo = F}
+
+# write.csv(mrkttype_lkp3, )
 
 ```
 
