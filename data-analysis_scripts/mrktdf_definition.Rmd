@@ -34,6 +34,7 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```
 
 ```{r load-data, include = F}
+# Market survey A data:
 
 mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
   rename(region.final = region.geomatch.final, 
@@ -42,7 +43,6 @@ mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %
          village.final = village.manual.final,
          market.final = market.manual.final)
 
-# mrkta_generalinfo, need to link to cleaned update market location data
 mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv")) %>%
   rename(region.final = region.geomatch.final, 
          district.final = district.geomatch.final,
@@ -50,10 +50,16 @@ mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania
          village.final = village.manual.final,
          market.final = market.manual.final)
 
+
+# Market Survey C data
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
 mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
 mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
 
+# Tanzania Towns Data: 
+ttownsOth_shp <- st_read(here("data/shapefiles/tz_towns/tz-othertowns.shp")) # Major town locations
+ttownsMaj_shp <- st_read(here("data/shapefiles/tz_towns/tz-majortowns.shp")) # Other town locations
+ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"), ttownsOth_shp %>% mutate(town.type = "other"))
 ```
 
 
@@ -83,43 +89,45 @@ mrkts_master_v1 <-  mrkta_info %>%
     unique.row.identifier.uuid.
   )
   
-
 ```
 
-<!-- ### 2) Nearest Town: -->
+### 2) Nearest Town:
 
-<!-- ```{r nearestTown} -->
+- Compute distance to nearest town using tanzania-towns database:
+    - Source: <https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/41f6d923-9e22-4d30-9046-5ede043f4aa6>
+    - Compute distance between market and nearest town ("major", or "other" town)
+    - Use to Type Markets based on EcoPPR market type definitions.
 
+```{r nearestTown}
 
-<!-- ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"),  -->
-<!--                        ttownsOth_shp %>% mutate(town.type = "other")) -->
+# Market A Map Data
+mrkta_mapdata <- mrkta_gps %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>%
+  filter(!is.na(lat), !is.na(long))
 
-<!-- townsId <- st_nearest_feature(mrkta_sf, ttownsAll_shp) -->
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
 
-<!-- # townsId <- sf::st_nearest_feature(mrkta_sf, towns_all) -->
-<!-- #  -->
-<!-- # townsDf <- data.frame( -->
-<!-- #   townsId = st_nearest_feature(mrkta_sf, ttownsAll_shp), -->
-<!-- #   townsDist = st_distance(mrkta_sf, ttownsAll_shp[townsId, ], by_element = T) %>% as.numeric() -->
-<!-- # ) %>% -->
-<!-- #   mutate(townsDist_km = round(townsDist/1000, digits = 2)) %>% -->
-<!-- #   left_join(ttownsAll_shp %>% st_drop_geometry() %>% mutate(townsId = 1:nrow(.)) %>% select(townsId, town.type),  -->
-<!-- #             by = "townsId") -->
-<!-- #     -->
+# Location of nearest town:
+townsId <- st_nearest_feature(mrkta_sf, ttownsAll_shp)
 
-<!-- mrkttype_lkp3 <- mrkttype_lkp2 %>% -->
-<!--   mutate( -->
-<!--     # identify closest town to market: -->
-<!--     townsId = st_nearest_feature(mrkta_sf, ttownsAll_shp), -->
-<!--     # calc distance to closest town: -->
-<!--     townsDist = st_distance(mrkta_sf, ttownsAll_shp[townsId, ], by_element = T) %>% as.numeric(), -->
-<!--     townsDist_km = round(townsDist/1000, digits = 2)) %>% -->
-<!--   # id towns as "major" or "other" -->
-<!--   left_join(ttownsAll_shp %>% st_drop_geometry() %>% mutate(townsId = 1:nrow(.)) %>% select(townsId, town.type),  -->
-<!--             by = "townsId") %>% -->
-<!--   select(-c("townsId", "townsDist")) -->
+towns_forjoin <- mrkta_sf %>% 
+  mutate(
+    # identify closest town to market:
+    townsId = st_nearest_feature(mrkta_sf, ttownsAll_shp),
+    # calc distance to closest town:
+    town.dist = st_distance(mrkta_sf, ttownsAll_shp[townsId, ], by_element = T) %>% as.numeric(),
+    town.distkm = round(town.dist/1000, digits = 2)) %>%
+  # id towns as "major" or "other"
+  left_join(ttownsAll_shp %>% st_drop_geometry() %>% mutate(townsId = 1:nrow(.)) %>% select(townsId, town.type),
+            by = "townsId") %>%
+  select(-c("townsId", "town.dist"))
 
-<!-- ``` -->
+mrkts_master_v2 <- mrkts_master_v1 %>%
+  left_join(towns_forjoin %>% select("fid", "town.dist" = town.distkm, "town.type"),
+            by = c("fid"))
+
+```
 
 ## 3) Market Survey C, part I (Info) :
 
@@ -140,7 +148,7 @@ mrktc_forjoin <- mrktc_info %>%
             prop.trader = sum(trader)/num.srvy) %>%
   ungroup()
 
-mrkts_master_v2 <- mrkts_master_v1 %>%
+mrkts_master_v3 <- mrkts_master_v2 %>%
   left_join(mrktc_forjoin,
             by = c("region.final", "district.final","ward.final","village.final","market.final"))
 
@@ -170,7 +178,7 @@ mrkts_master_v2 <- mrkts_master_v1 %>%
 
 colnames(mrktc_actvty)
 
-mrktc_actvty_forjoin <- mrktc_info %>%
+mrktc_actvty_summary <- mrktc_info %>%
   select(fid, ends_with(".final")) %>% 
   left_join(mrktc_actvty, by = "fid") %>%
   group_by(region.final, district.final, ward.final, village.final, market.final) %>%
@@ -184,7 +192,7 @@ mrktc_actvty_forjoin <- mrktc_info %>%
     prop.trade = sum(`1.activity.trade`)/num.srvy, 
     prop.otheractvty = sum(`1.activity.other`)/num.srvy,
     prop.multiactvty = sum(`1.activity.multi`)/num.srvy,
-    # main.actvty = ###
+    # actvty.main = ###
     
     # origin placetype
     origin.village = sum(`2.sell.village`)/num.srvy,
@@ -192,6 +200,7 @@ mrktc_actvty_forjoin <- mrktc_info %>%
     origin.market = sum(`2.sell.market`)/num.srvy,
     origin.abattoir = sum(`2.sell.abattoir`)/num.srvy,
     origin.otherplace = sum(`2.sell.otherplace`)/num.srvy,
+    # origin.main = ###
     
     # origin transport type:
     origin.foot = sum(`4.sell.foot`)/num.srvy,
@@ -199,6 +208,7 @@ mrktc_actvty_forjoin <- mrktc_info %>%
     origin.cart = sum(`4.sell.cart`)/num.srvy,
     origin.othertransport = sum(`4.sell.othertransport`)/num.srvy,
     origin.unknowntransport = sum(`4.sell.unknowntransport`)/num.srvy,
+    # origin.transport.main = ###
     
     # destination placetype
     dest.village = sum(`6.buy.village`)/num.srvy,
@@ -206,13 +216,15 @@ mrktc_actvty_forjoin <- mrktc_info %>%
     dest.market = sum(`6.buy.market`)/num.srvy,
     dest.abattoir = sum(`6.buy.abattoir`)/num.srvy,
     dest.otherplace = sum(`6.buy.otherplace`)/num.srvy,
+    # dest.main = ###
     
-     # destination transport type:
+    # destination transport type:
     dest.foot = sum(`8.buy.foot`)/num.srvy,
     dest.vehicle = sum(`8.buy.vehicle`)/num.srvy,
     dest.cart = sum(`8.buy.cart`)/num.srvy,
     dest.othertransport = sum(`8.buy.othertransport`)/num.srvy,
     dest.unknowntransport = sum(`8.buy.unknowntransport`)/num.srvy,
+    # dest.transport.main = ###
     
     # mean buy/sell at market each month (ignore NA)
     buysell.month = sum(na.omit(`12.buy.sell.per.month`))/num.srvy)  %>%
@@ -223,9 +235,27 @@ mrktc_actvty_forjoin <- mrktc_info %>%
          starts_with("origin."),
          starts_with("dest"),
          "buysell.month")
+
+
+mrktc_actvty_forjoin <- mrktc_actvty_summary %>%
+  rowwise() %>%
+  mutate(
+    prop.actvty.main = names(mrktc_actvty_summary %>% select(prop.buy:prop.otheractvty))[which.max(c_across(c(prop.buy:prop.otheractvty)))],
+    origin.main = names(mrktc_actvty_summary %>% select(origin.village:origin.otherplace))[which.max(c_across(c(origin.village:origin.otherplace)))],
+    origin.transport.main = names(mrktc_actvty_summary %>% select(origin.foot:origin.unknowntransport))[which.max(c_across(c(origin.foot:origin.unknowntransport)))],
+    dest.main = names(mrktc_actvty_summary %>% select(dest.village:dest.otherplace))[which.max(c_across(c(dest.village:dest.otherplace)))],
+    dest.transport.main = names(mrktc_actvty_summary %>% select(dest.foot:dest.unknowntransport))[which.max(c_across(c(dest.foot:dest.unknowntransport)))]
+    ) %>%
+   ungroup() %>% 
+  select(ends_with(".final"), 
+         starts_with("num."),
+         starts_with("prop."),
+         starts_with("origin."),
+         starts_with("dest"),
+         "buysell.month")
   
   
-mrkts_master_v3 <- mrkts_master_v2 %>%
+mrkts_master_v4 <- mrkts_master_v3 %>%
   left_join(mrktc_actvty_forjoin %>% select(-num.srvy),
             by = c("region.final", "district.final","ward.final","village.final","market.final"))
 
@@ -236,7 +266,7 @@ mrkts_master_v3 <- mrkts_master_v2 %>%
 ####### PLOTS
 
 ```{r mrktsmasterNomtwara, include = F}
-mrkts_master_noMtwara <- mrkts_master_v3 %>% filter(!region.final %in% c("mtwara", "lindi", "ruvuma"))
+mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region.final %in% c("mtwara", "lindi", "ruvuma"))
 
 ```
 
