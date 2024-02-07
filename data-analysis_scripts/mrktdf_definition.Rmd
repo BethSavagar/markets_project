@@ -62,6 +62,7 @@ ttownsMaj_shp <- st_read(here("data/shapefiles/tz_towns/tz-majortowns.shp")) # O
 ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"), ttownsOth_shp %>% mutate(town.type = "other"))
 ```
 
+# Data Overview:
 
 ## 1) Market Survey A
 
@@ -91,7 +92,7 @@ mrkts_master_v1 <-  mrkta_info %>%
   
 ```
 
-### 2) Nearest Town:
+## 2) Nearest Town Location:
 
 - Compute distance to nearest town using tanzania-towns database:
     - Source: <https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/41f6d923-9e22-4d30-9046-5ede043f4aa6>
@@ -248,6 +249,7 @@ mrktc_actvty_forjoin <- mrktc_actvty_summary %>%
     ) %>%
    ungroup() %>% 
   select(ends_with(".final"), 
+         starts_with("town."),
          starts_with("num."),
          starts_with("prop."),
          starts_with("origin."),
@@ -263,40 +265,109 @@ mrkts_master_v4 <- mrkts_master_v3 %>%
 ```
 
 
-####### PLOTS
+# Market Characteristics:
+
+Market surveys were filtered to **exclude** markets in Mtwara region
+
+Markets in Ruvuma and Lindi (1 market each) were also excluded 
+  - Visited as part of Mtwara surveys
 
 ```{r mrktsmasterNomtwara, include = F}
 mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region.final %in% c("mtwara", "lindi", "ruvuma"))
 
 ```
 
+## (1) Number of surveys per market:
+
+- *NA's correspond to markets in survey A which are not found in survey C*
 
 ```{r mrktsrvy}
 
 num_srvy <- nrow(mrkts_master_noMtwara)
-print(paste("There are ", num_srvy, " rows of data corresponding to unique markets"))
+print(paste(num_srvy, "markets were surveyed, excluding Mtwara markets"))
 
-mrkts_master_noMtwara %>% pull(num.srvy) %>% summary()
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(num.srvy, na.rm = TRUE), 
+    q1 = quantile(num.srvy, 0.25, na.rm = TRUE), 
+    median = median(num.srvy, na.rm = TRUE), 
+    mean = mean(num.srvy, na.rm = TRUE), 
+    q3 = quantile(num.srvy, 0.75, na.rm = TRUE), 
+    max = max(num.srvy, na.rm = TRUE), 
+    NAs = sum(is.na(num.srvy))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
 
-# NAs correxpond to markets in survey A which are not found in survey C
+# NAs correspond to markets in survey A which are not found in survey C
+```
+
+\newpage
+
+## (X) Distance to nearest town:
+- *Distance to nearest town in km*
+
+```{r towndist}
+
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(town.dist, na.rm = TRUE), 
+    q1 = quantile(town.dist, 0.25, na.rm = TRUE), 
+    median = median(town.dist, na.rm = TRUE), 
+    mean = mean(town.dist, na.rm = TRUE), 
+    q3 = quantile(town.dist, 0.75, na.rm = TRUE), 
+    max = max(town.dist, na.rm = TRUE), 
+    NAs = sum(is.na(town.dist))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+distp1 <- ggplot(mrkts_master_noMtwara, aes(x=town.dist, group = town.type))+
+  geom_histogram(aes(fill = town.type), alpha = 0.5, col = "black", boundary = 0)+
+  labs(x = "Distance (km)",
+       y = "Count")+
+  theme(legend.position = "none")
+
+distp2 <- ggplot(mrkts_master_noMtwara, aes(x = town.type, y=town.dist, group = town.type))+
+  geom_boxplot(aes(fill = town.type),alpha = 0.5)+
+  geom_jitter(shape = 18, size = 2, width = 0.3)+
+  # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+  labs(x = "", y = "Distance to nearest town")#+
+  # theme(axis.text.x = element_text(angle = 45, hjust = 1),
+  #       legend.position = "none")
+
+ggarrange(distp1, distp2, nrow = 1)
 
 ```
+
+\newpage
+
+## (2) Small ruminant sales per market:
 
 ```{r mrktsales}
 
 # Sales per Market
 
-mrkts_master_noMtwara %>% pull(all.sales) %>% summary()
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(all.sales, na.rm = TRUE), 
+    q1 = quantile(all.sales, 0.25, na.rm = TRUE), 
+    median = median(all.sales, na.rm = TRUE), 
+    mean = mean(all.sales, na.rm = TRUE), 
+    q3 = quantile(all.sales, 0.75, na.rm = TRUE), 
+    max = max(all.sales, na.rm = TRUE), 
+    NAs = sum(is.na(all.sales))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
 
-ggplot(mrkts_master_noMtwara, aes(x=all.sales))+
+salesp1 <- ggplot(mrkts_master_noMtwara, aes(x=all.sales))+
   geom_histogram(binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+
   scale_x_continuous(breaks = seq(0,650,50), labels = seq(0,650,50))+
   labs(x = "Small ruminant sales per market",
-       y = "Count",
-       title = "Small ruminant sales per market")
+       y = "Count")
 
-
-ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=all.sales))+
+salesp2 <- ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=all.sales))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -304,23 +375,39 @@ ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=all.sales))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+ggarrange(salesp1, salesp2, nrow = 1)
 ```
 
+\newpage
+
+## (3) Other markets visited:
+
+- *Mean visits to other markets per month, per actor*
 
 ```{r othermrkts}
 
 # Other markets visited in past 1 month (mean per market)
 
-mrkts_master_noMtwara %>% pull(other.markets) %>% summary()
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(other.markets, na.rm = TRUE), 
+    q1 = quantile(other.markets, 0.25, na.rm = TRUE), 
+    median = median(other.markets, na.rm = TRUE), 
+    mean = mean(other.markets, na.rm = TRUE), 
+    q3 = quantile(other.markets, 0.75, na.rm = TRUE), 
+    max = max(other.markets, na.rm = TRUE), 
+    NAs = sum(is.na(other.markets))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
 
-ggplot(mrkts_master_noMtwara, aes(x=other.markets))+
+othermrktsp1 <- ggplot(mrkts_master_noMtwara, aes(x=other.markets))+
   geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Other markets visited",
-       y = "Count",
-       title = "Other markets visited")
+       y = "Count")
 
 
-ggplot(mrkts_master_noMtwara, aes(x = "other.markets", y=other.markets))+
+othermrktsp2 <- ggplot(mrkts_master_noMtwara, aes(x = "other.markets", y=other.markets))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -328,23 +415,76 @@ ggplot(mrkts_master_noMtwara, aes(x = "other.markets", y=other.markets))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+ggarrange(othermrktsp1,othermrktsp2,nrow=1)
 ```
 
+
+\newpage
+
+## (4) Visits to this market:
+
+- *Mean visits to this market per month, per actor*
+
+```{r buysellmonth}
+
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(buysell.month, na.rm = TRUE), 
+    q1 = quantile(buysell.month, 0.25, na.rm = TRUE), 
+    median = median(buysell.month, na.rm = TRUE), 
+    mean = mean(buysell.month, na.rm = TRUE), 
+    q3 = quantile(buysell.month, 0.75, na.rm = TRUE), 
+    max = max(buysell.month, na.rm = TRUE), 
+    NAs = sum(is.na(buysell.month))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+visits1 <- ggplot(mrkts_master_noMtwara, aes(x=buysell.month))+
+  geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
+  labs(x = "Mean visits (buy/sell) at market per month",
+       y = "Count")
+
+
+visits2 <- ggplot(mrkts_master_noMtwara, aes(x = "Visits", y=buysell.month))+
+  geom_boxplot(fill = "grey",alpha = 0.5)+
+  geom_jitter(shape = 18, size = 2, width = 0.3)+
+  # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+  labs(x = "", y = "Visits (buy/sell) at market per month")#+
+  # theme(axis.text.x = element_text(angle = 45, hjust = 1),
+  #       legend.position = "none")
+
+ggarrange(visits1, visits2, nrow = 1)
+```
+
+\newpage
+
+## (5) Proportion traders at market
+- *Proportion traders at market (self-id as "trader") *
 
 ```{r ptrader}
 
 # Proportion trader at market:
 
-mrkts_master_noMtwara %>% pull(prop.trader) %>% summary()
+mrkts_master_noMtwara %>% summarise(
+    min = min(prop.trader, na.rm = TRUE), 
+    q1 = quantile(prop.trader, 0.25, na.rm = TRUE), 
+    median = median(prop.trader, na.rm = TRUE), 
+    mean = mean(prop.trader, na.rm = TRUE), 
+    q3 = quantile(prop.trader, 0.75, na.rm = TRUE), 
+    max = max(prop.trader, na.rm = TRUE), 
+    NAs = sum(is.na(prop.trader))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable()
 
-ggplot(mrkts_master_noMtwara, aes(x=prop.trader))+
+trader1 <- ggplot(mrkts_master_noMtwara, aes(x=prop.trader))+
   geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Proportion traders at market",
-       y = "Count",
-       title = "Proportion traders at market")
+       y = "Count")
 
 
-ggplot(mrkts_master_noMtwara, aes(x = "Trader", y=prop.trader))+
+trader2 <- ggplot(mrkts_master_noMtwara, aes(x = "Trader", y=prop.trader))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -352,20 +492,31 @@ ggplot(mrkts_master_noMtwara, aes(x = "Trader", y=prop.trader))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+ggarrange(trader1, trader2, nrow = 1)
 
 ```
 
 
+\newpage
+
+## (6) Activities at the market
+
+- Proportion actors at the market reporting activity types:
+  - Selling
+  - Buying
+  - Trading
+  - Brokering/Middleman
+  - Other
+
 ```{r mrktactivity}
 
-
-mrkts_master_noMtwara %>%
-  select(prop.buy,
-         prop.sell,
-         prop.trade,
-         prop.middleman,
-         prop.otheractvty) %>%
-  summary()
+# mrkts_master_noMtwara %>%
+#   select(prop.buy,
+#          prop.sell,
+#          prop.trade,
+#          prop.middleman,
+#          prop.otheractvty) %>%
+#   summary()
 
 
 mrkts_master_actvty <- mrkts_master_noMtwara %>%
@@ -384,7 +535,21 @@ mrkts_master_actvty <- mrkts_master_noMtwara %>%
          "prop.middleman",
          "prop.otheractvty")))
 
-ggplot(mrkts_master_actvty, aes(x = activity, y=proportion))+
+mrkts_master_actvty %>% 
+  group_by(activity) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable()
+
+mrktacvty1 <- ggplot(mrkts_master_actvty, aes(x = activity, y=proportion))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -392,19 +557,34 @@ ggplot(mrkts_master_actvty, aes(x = activity, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+mrktacvty2 <- ggplot(mrkts_master_noMtwara, aes(x=prop.actvty.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Main market activity", y = "Count")
+
+ggarrange(mrktacvty1, mrktacvty2, ncol = 1)
 ```
 
+\newpage
+
+## (7) Origins of animals sold at the market
+
+- Proportion of actors bringing animals from different origin placetypes:
+  - Village
+  - Town
+  - Market
+  - Abattoir
+  - Other
 
 ```{r, originplace}
 
-
-mrkts_master_noMtwara %>%
-  select("origin.village",          
-         "origin.town" ,            
-         "origin.market" ,          
-         "origin.abattoir",
-         "origin.otherplace") %>%
-  summary()
+# 
+# mrkts_master_noMtwara %>%
+#   select("origin.village",          
+#          "origin.town" ,            
+#          "origin.market" ,          
+#          "origin.abattoir",
+#          "origin.otherplace") %>%
+#   summary()
 
 
 mrkts_master_origplace <- mrkts_master_noMtwara %>%
@@ -424,7 +604,21 @@ mrkts_master_origplace <- mrkts_master_noMtwara %>%
          "abattoir",
          "otherplace")))
 
-ggplot(mrkts_master_origplace, aes(x = placetype, y=proportion))+
+mrkts_master_origplace %>% 
+  group_by(placetype) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable()
+
+orig1 <- ggplot(mrkts_master_origplace, aes(x = placetype, y=proportion))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -432,18 +626,36 @@ ggplot(mrkts_master_origplace, aes(x = placetype, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+
+orig2 <- ggplot(mrkts_master_noMtwara, aes(x=origin.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Main origin placetype", y = "Count")
+
+ggarrange(orig1, orig2, ncol = 1)
+
 ```
 
 
-```{r, origintransport}
+\newpage
 
-mrkts_master_noMtwara %>%
-  select("origin.foot",          
-         "origin.vehicle" ,            
-         "origin.cart" ,          
-         "origin.othertransport",
-         "origin.unknowntransport") %>%
-  summary()
+## (8) Transport to market
+
+- Proportion of actors using different types of tranasport to bring animals to market:
+  - Foot
+  - Vehicle
+  - Cart
+  - Other
+  - Unknown
+
+```{r, origintransport}
+# 
+# mrkts_master_noMtwara %>%
+#   select("origin.foot",          
+#          "origin.vehicle" ,            
+#          "origin.cart" ,          
+#          "origin.othertransport",
+#          "origin.unknowntransport") %>%
+#   summary()
 
 
 mrkts_master_origtrans <- mrkts_master_noMtwara %>%
@@ -457,13 +669,27 @@ mrkts_master_origtrans <- mrkts_master_noMtwara %>%
   gather(., key = "transtype", value = "proportion", -c(fid,market.final)) %>% 
   ungroup() %>%
   mutate(
-         transtype = ordered(transtype, levels = c("origin.foot",          
+         transtype = ordered(transtype, levels = c("origin.foot",         
          "origin.vehicle" ,            
          "origin.cart" ,          
          "origin.othertransport",
          "origin.unknowntransport")))
 
-ggplot(mrkts_master_origtrans, aes(x = transtype, y=proportion))+
+mrkts_master_origtrans %>% 
+  group_by(transtype) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+origtrans1 <- ggplot(mrkts_master_origtrans, aes(x = transtype, y=proportion))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -471,18 +697,30 @@ ggplot(mrkts_master_origtrans, aes(x = transtype, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+origtrans2 <- ggplot(mrkts_master_noMtwara, aes(x=origin.transport.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Main origin transport", y = "Count")
+
+ggarrange(origtrans1, origtrans2, ncol = 1)
+
 ```
 
+
+\newpage
+
+## (9) Destinations of animals bought at market
+- Proportion of actors taking animals to different destination placetypes:
+
+
 ```{r, destplace}
-
-mrkts_master_noMtwara %>%
-  select("dest.village",          
-         "dest.town" ,            
-         "dest.market" ,          
-         "dest.abattoir",
-         "dest.otherplace") %>%
-  summary()
-
+# 
+# mrkts_master_noMtwara %>%
+#   select("dest.village",          
+#          "dest.town" ,            
+#          "dest.market" ,          
+#          "dest.abattoir",
+#          "dest.otherplace") %>%
+#   summary()
 
 mrkts_master_distplace <- mrkts_master_noMtwara %>%
   select(fid, 
@@ -501,7 +739,21 @@ mrkts_master_distplace <- mrkts_master_noMtwara %>%
          "abattoir",
          "otherplace")))
 
-ggplot(mrkts_master_distplace, aes(x = placetype, y=proportion))+
+mrkts_master_distplace %>% 
+  group_by(placetype) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+dest1 <- ggplot(mrkts_master_distplace, aes(x = placetype, y=proportion))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -509,6 +761,20 @@ ggplot(mrkts_master_distplace, aes(x = placetype, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
+dest2 <- ggplot(mrkts_master_noMtwara, aes(x=dest.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Main destination placetype", y = "Count")
+
+ggarrange(dest1, dest2, ncol = 1)
+```
+
+\newpage
+
+### (9ii) Correlation between origin and destination placetype
+
+- *Correlations between proportion origins and proportion destinations at each market*
+
+```{r placetypecor}
 
 placetype_cor <- left_join(
   mrkts_master_origplace,
@@ -518,24 +784,34 @@ placetype_cor <- left_join(
 
 ggplot(placetype_cor, aes(x=proportion, y = dest.proportion))+
   geom_point()+
-  facet_wrap(~placetype, scales = "free")
+  facet_wrap(~placetype, scales = "free")+
+  labs(x = "Origin placetype proportion", y = "Destination placetype proportion")
 ```
 
 
+\newpage
 
+## (10) Transport from market
+
+- Proportion of actors using different types of transport to take animals to market:
+  - Foot
+  - Vehicle
+  - Cart
+  - Other
+  - Unknown
 
 ```{r, desttransport}
 
-mrkts_master_noMtwara %>%
-  select("dest.foot",          
-         "dest.vehicle" ,            
-         "dest.cart" ,          
-         "dest.othertransport",
-         "dest.unknowntransport") %>%
-  summary()
+# mrkts_master_noMtwara %>%
+#   select("dest.foot",          
+#          "dest.vehicle" ,            
+#          "dest.cart" ,          
+#          "dest.othertransport",
+#          "dest.unknowntransport") %>%
+#   summary()
 
 
-mrkts_master_origtrans <- mrkts_master_noMtwara %>%
+mrkts_master_desttrans <- mrkts_master_noMtwara %>%
   select(fid, 
          market.final, 
          "dest.foot",          
@@ -552,7 +828,22 @@ mrkts_master_origtrans <- mrkts_master_noMtwara %>%
          "dest.othertransport",
          "dest.unknowntransport")))
 
-ggplot(mrkts_master_origtrans, aes(x = transtype, y=proportion))+
+
+mrkts_master_desttrans %>% 
+  group_by(transtype) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+desttrans1 <- ggplot(mrkts_master_desttrans, aes(x = transtype, y=proportion))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -560,26 +851,10 @@ ggplot(mrkts_master_origtrans, aes(x = transtype, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
-```
+desttrans2 <- ggplot(mrkts_master_noMtwara, aes(x=dest.transport.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Main destination transport", y = "Count")
 
-```{r buysellmonth}
-
-mrkts_master_noMtwara %>% pull(buysell.month) %>% summary()
-
-ggplot(mrkts_master_noMtwara, aes(x=buysell.month))+
-  geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
-  labs(x = "Mean visits (buy/sell) at market per month",
-       y = "Count",
-       title = "Mean visits (buy/sell) at market per month")
-
-
-ggplot(mrkts_master_noMtwara, aes(x = "Visits", y=buysell.month))+
-  geom_boxplot(fill = "grey",alpha = 0.5)+
-  geom_jitter(shape = 18, size = 2, width = 0.3)+
-  # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
-  labs(x = "", y = "Visits (buy/sell) at market per month")#+
-  # theme(axis.text.x = element_text(angle = 45, hjust = 1),
-  #       legend.position = "none")
-
+ggarrange(desttrans1, desttrans2, ncol = 1)
 
 ```
