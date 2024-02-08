@@ -1,0 +1,165 @@
+---
+title: "Tanzania Market Survey C: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+```{r load-data, include = F}
+# Market survey A data:
+# 
+# mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+#   rename(region.final = region.geomatch.final, 
+#          district.final = district.geomatch.final,
+#          ward.final = ward.geomatch.final, 
+#          village.final = village.manual.final,
+#          market.final = market.manual.final)
+# 
+# mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv")) %>%
+#   rename(region.final = region.geomatch.final, 
+#          district.final = district.geomatch.final,
+#          ward.final = ward.geomatch.final, 
+#          village.final = village.manual.final,
+#          market.final = market.manual.final)
+
+# Market Survey C data
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+# 
+# # Tanzania Towns Data: 
+# ttownsOth_shp <- st_read(here("data/shapefiles/tz_towns/tz-othertowns.shp")) # Major town locations
+# ttownsMaj_shp <- st_read(here("data/shapefiles/tz_towns/tz-majortowns.shp")) # Other town locations
+# ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"), ttownsOth_shp %>% mutate(town.type = "other"))
+
+
+# Load Tanzania Shapefile:
+# tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
+tregs_shp <- st_read(here("data/shapefiles/tza_admbnda_adm1_20181019.shp")) %>% # with region boundaries
+   rename(
+    "Country_N"=ADM0_EN,    
+    "Country_NSw" = ADM0_SW,
+    "Country_C"=ADM0_PCODE,
+    "Region_Nam" = ADM1_EN,
+    "Region_Cod" = ADM1_PCODE,
+  )
+
+# tdists_shp <- st_read(here("data/shapefiles/tza_admbnda_adm2_20181019.shp")) # with district boundaries
+twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>% # with ward boundaries
+    rename(
+    "Country_N"=ADM0_EN,    
+    "Country_NSw" = ADM0_SW,
+    "Country_C"=ADM0_PCODE,
+    "Region_Nam" = ADM1_EN,
+    "Region_Cod" = ADM1_PCODE,
+    "District_N" = ADM2_EN,
+    "District_C" = ADM2_PCODE,
+    "Ward_Name"=ADM3_EN,
+    "Ward_Code"= ADM3_PCODE
+  )
+```
+
+```{r subsetdata}
+
+# mjini = urban, vijini = rural
+
+twards_df <- twards_shp %>% 
+  st_drop_geometry() %>%
+  select(ET_ID, 
+         Region_Nam,
+         District_N,
+         Ward_Name)
+
+# fid origins and destinations:
+mrktc_origdest <- mrktc_actvty %>% 
+  select(fid,
+         starts_with("2.sell.place"), 
+         starts_with("6.buy.place"))
+
+# unique origin wards + districts
+
+mrktc_origdistricts <- mrktc_origdest %>% 
+  filter(!is.na(`2.sell.place.district`)) %>% 
+  distinct(`2.sell.place.district`) %>% 
+  arrange(`2.sell.place.district`) 
+
+mrktc_origdistricts %>% View()
+
+twards_comparedf <- twards_df %>% 
+  distinct(District_N, Ward_Name) %>% 
+  mutate(district = tolower(District_N),
+         district = gsub("[[:punct:]]", " ", `district`), # remove punctuation
+         district = trimws(`district`), #trim leading and trailing spaces
+         district = gsub("\\s+", ".", `district`) # replace 1+ spaces with "."
+  ) %>% 
+  mutate(ward = tolower(Ward_Name),
+         ward = gsub("[[:punct:]]", " ", `ward`), # remove punctuation
+         ward = trimws(`ward`), #trim leading and trailing spaces
+         ward = gsub("\\s+", ".", `ward`) # replace 1+ spaces with "."
+  ) %>%
+  mutate(warddist_compare = paste(ward, district, sep = "-"))
+
+twards_vec <- twards_comparedf %>% pull(warddist_compare)
+
+# checks <- tdists_vec[amatch(mrktc_origdistricts$`2.sell.place.district`, tdists_vec, maxDist = Inf)]
+
+mrktc_distmatch <- mrktc_origdistricts %>%
+  mutate(
+    checkTdists = tdists_vec[amatch(mrktc_origdistricts$`2.sell.place.district`, tdists_vec, maxDist = Inf)]
+  )
+
+
+
+mrktc_warddistmatch <- mrktc_origdest %>% 
+  filter(!is.na(`2.sell.place.ward`)) %>% 
+  distinct(`2.sell.place.ward`, `2.sell.place.district`) %>% 
+  mutate(warddistrict = paste(`2.sell.place.ward`, `2.sell.place.district`, sep = "-")) 
+
+mrktc_warddistcheck <- mrktc_warddistmatch %>%
+   mutate(
+    checkTwards = twards_vec[amatch(mrktc_warddistmatch$warddistrict, twards_vec, maxDist = Inf)]
+  )
+  
+
+mrktc_warddistcheck <- mrktc_warddistcheck %>%
+  mutate(check = ifelse(warddistrict == checkTwards, "accept", NA))
+
+
+mrktc_warddist_unmatch <- mrktc_warddistcheck %>%
+  filter(is.na(check))
+
+
+# save for checking
+write.csv(mrktc_warddist_unmatch, file = here("data/data-cleaning_data/mrktc_origplace_clean1.csv"))
+
+```
