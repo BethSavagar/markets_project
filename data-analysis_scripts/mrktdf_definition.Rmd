@@ -50,6 +50,8 @@ mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania
          village.final = village.manual.final,
          market.final = market.manual.final)
 
+# Market Survey B data
+mrktb_info <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania_final.csv"))
 
 # Market Survey C data
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
@@ -122,11 +124,45 @@ towns_forjoin <- mrkta_sf %>%
   # id towns as "major" or "other"
   left_join(ttownsAll_shp %>% st_drop_geometry() %>% mutate(townsId = 1:nrow(.)) %>% select(townsId, town.type),
             by = "townsId") %>%
-  select(-c("townsId", "town.dist"))
+  select(-c("townsId", "town.dist")) %>%
+  st_drop_geometry()
 
 mrkts_master_v2 <- mrkts_master_v1 %>%
   left_join(towns_forjoin %>% select("fid", "town.dist" = town.distkm, "town.type"),
             by = c("fid"))
+
+```
+
+## 3) Market Survey B, Market Observations:
+- For purpose of market type definition and MVA, Market Survey B provides:
+    - Number of animals at the market by age and species group:
+        - sheep <1y, sheep >1y, goat <1y, goat >1y
+        
+
+```{r mrktb, include = F}
+
+head(mrktb_info)
+
+mrktb_summary <- mrktb_info %>%
+  select(fid,ends_with(".final"),market.type, starts_with("sheep."), starts_with("goat."), - "date.final") %>%
+  rowwise() %>% 
+  mutate(num.animals.all = sum(c_across(`sheep.0to12`:`goat.adult`), na.rm = T)) %>%
+  ungroup() %>%
+  mutate(prop.sheep.0to12 = sheep.0to12/num.animals.all,
+         prop.sheep.adult = sheep.adult/num.animals.all,
+         prop.goat.0to12 = goat.0to12/num.animals.all,
+         prop.goat.adult = goat.adult/num.animals.all) %>%
+  select(ends_with(".final"), "num.animals.all", starts_with("prop."))
+
+mrktb_forjoin <- mrktb_summary %>%
+  rowwise() %>%
+  mutate(prop.animal.main = names(mrktb_summary %>% select(prop.sheep.0to12:prop.goat.adult))[which.max(c_across(c(prop.sheep.0to12:prop.goat.adult)))],
+         prop.animal.main = gsub("prop.", "", prop.animal.main)) %>%
+  ungroup()
+
+mrkts_master_v3a <- mrkts_master_v2 %>%
+  left_join(mrktb_forjoin,
+            by = c("region.final", "district.final","ward.final","village.final","market.final"))
 
 ```
 
@@ -149,7 +185,7 @@ mrktc_forjoin <- mrktc_info %>%
             prop.trader = sum(trader)/num.srvy) %>%
   ungroup()
 
-mrkts_master_v3 <- mrkts_master_v2 %>%
+mrkts_master_v3 <- mrkts_master_v3a %>%
   left_join(mrktc_forjoin,
             by = c("region.final", "district.final","ward.final","village.final","market.final"))
 
@@ -342,7 +378,88 @@ ggarrange(distp1, distp2, nrow = 1)
 
 \newpage
 
-## (2) Small ruminant sales per market:
+## (2a) Small ruminants at market:
+
+```{r anmlstotal}
+
+# Sales per Market
+
+mrkts_master_noMtwara %>%
+  summarise(
+    min = min(num.animals.all, na.rm = TRUE), 
+    q1 = quantile(num.animals.all, 0.25, na.rm = TRUE), 
+    median = median(num.animals.all, na.rm = TRUE), 
+    mean = mean(num.animals.all, na.rm = TRUE), 
+    q3 = quantile(num.animals.all, 0.75, na.rm = TRUE), 
+    max = max(num.animals.all, na.rm = TRUE), 
+    NAs = sum(is.na(num.animals.all))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable() 
+
+animalsp1 <- ggplot(mrkts_master_noMtwara, aes(x=num.animals.all))+
+  geom_histogram(binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+
+  labs(x = "Small ruminants per market",
+       y = "Count")
+# 
+# salesp2 <- ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=all.sales))+
+#   geom_boxplot(fill = "grey",alpha = 0.5)+
+#   geom_jitter(shape = 18, size = 2, width = 0.3)+
+#   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+#   labs(x = "", y = "Small ruminant sales per market")#+
+#   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
+#   #       legend.position = "none")
+
+
+mrkts_master_animals <- mrkts_master_noMtwara %>%
+  select(fid, 
+         market.final, 
+         prop.sheep.0to12,
+         prop.sheep.adult, 
+         prop.goat.0to12,
+         prop.goat.adult) %>%
+  gather(., key = "agegroup", value = "proportion", -c(fid,market.final)) %>% 
+  ungroup() %>%
+  mutate(activity = ordered(agegroup, levels = c(
+         "prop.sheep.0to12",
+         "prop.sheep.adult",
+         "prop.goat.0to12",
+         "prop.goat.adult")))
+
+mrkts_master_animals %>% 
+  group_by(agegroup) %>%
+  summarise(
+    min = min(proportion, na.rm = TRUE), 
+    q1 = quantile(proportion, 0.25, na.rm = TRUE), 
+    median = median(proportion, na.rm = TRUE), 
+    mean = mean(proportion, na.rm = TRUE), 
+    q3 = quantile(proportion, 0.75, na.rm = TRUE), 
+    max = max(proportion, na.rm = TRUE), 
+    NAs = sum(is.na(proportion))
+  ) %>%
+  mutate_if(is.numeric, round, digits = 2) %>%
+  kable()
+
+mrktanimals1 <- ggplot(mrkts_master_animals, aes(x = agegroup, y=proportion))+
+  geom_boxplot(fill = "grey",alpha = 0.5)+
+  geom_jitter(shape = 18, size = 2, width = 0.3)+
+  # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
+  labs(x = "Age Group", y = "Proportion")#+
+  # theme(axis.text.x = element_text(angle = 45, hjust = 1),
+  #       legend.position = "none")
+
+mrktanimals2 <- ggplot(mrkts_master_noMtwara, aes(x=prop.animal.main))+
+  geom_histogram(stat = "count", alpha = 0.5, col = "black")+
+  labs(x = "Primary animal at market", y = "Count")
+
+
+animalsp1
+ggarrange(mrktanimals1, mrktanimals2, ncol = 1)
+
+```
+\newpage
+
+## (2b) Small ruminant sales per market:
 
 ```{r mrktsales}
 
