@@ -1,0 +1,288 @@
+---
+title: "Tanzania Market Survey A: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "Times New Roman", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C", "#FFD700", "#1E90FF")
+```
+
+```{r dataload, include = F}
+
+# load tanzania data for market c general info and activities surveys
+mrktb_general <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania.csv"))
+
+## LOOKUPS ##
+# use market a lookups for ward and region as market c lookups are blank
+
+# Market A location data:
+mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
+
+# Market A locations gps lookup:
+mrkta_gps_manualgeomatchlkp <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"))
+mrkta_lkpward <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpward.csv"))
+mrkta_lkpregion <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpregion.csv"))
+
+
+twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>% # with ward boundaries
+    rename(
+    "Country_N"=ADM0_EN,    
+    "Country_NSw" = ADM0_SW,
+    "Country_C"=ADM0_PCODE,
+    "Region_Nam" = ADM1_EN,
+    "Region_Cod" = ADM1_PCODE,
+    "District_N" = ADM2_EN,
+    "District_C" = ADM2_PCODE,
+    "Ward_Name"=ADM3_EN,
+    "Ward_Code"= ADM3_PCODE
+  )
+
+```
+
+
+### 1) Clean market b data: 
+- lowercase, remove spaces, punctuation etc
+
+```{r mrktb_fields, include = F}
+# mrktc
+
+# Select only the fields of interest (location data, SR sale data)
+
+colnames(mrktb_general)
+
+mrktb_clean <- mrktb_general %>%
+  left_join(mrkta_lkpward %>% select("Code", ward.name = "Description"),
+            by = c(`department.ward.see.mrkta.lkpward.` = "Code")) %>%
+  left_join(mrkta_lkpregion %>% select(Code,"district.region.name" = "Description"),
+            by = c(`region.see.mrkta.lkpregion.` = "Code")) %>%
+  # excl. fields such as: respondent age, gender, detail of disease problems
+  # select fields of interest i.e. trade info: respondent role, number of markets visited, pattern of trading
+  separate(end.time, c("date.end", "time.end"), sep = " ") %>%
+  select(
+    fid = `fid.see.mrktb.idtable.`,
+    date,
+    date.end,
+    date.of.interview,
+    country = `country.see.mrkta.lkpcountry.`,
+    district.region.code = `region.see.mrkta.lkpregion.`,
+    district.region.name,
+    ward.code = `department.ward.see.mrkta.lkpward.`,
+    ward.name,
+    village,
+    market.name = `name.of.market`,
+    market.type = `type.of.market.see.mrktb.lkpmrkt.type.`,
+    immature.sheep.less.1.,
+    adult.sheep.more.1.,
+    immature.goats.less.1.,
+    adult.goats.more.1.,
+    `gps.coordinates.of.the.market`,
+    `unique.row.identifier.uuid.`
+    ) %>%
+  
+  ##############
+  ## CLEAN ##
+  ##############
+
+  # clean text variables:
+  mutate(
+    "district.region.name" = tolower(`district.region.name`), # all lower case
+    "district.region.name" = gsub("[[:punct:]]", " ", `district.region.name`), # remove punctuation
+    "district.region.name" = trimws(`district.region.name`), #trim leading and trailing spaces
+    "district.region.name" = gsub("\\s+", ".", `district.region.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "ward.name" = tolower(`ward.name`),
+    "ward.name" = gsub("[[:punct:]]", " ", `ward.name`), # remove punctuation
+    "ward.name" = trimws(`ward.name`), #trim leading and trailing spaces
+    "ward.name" = gsub("\\s+", ".", `ward.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "market.name" = tolower(`market.name`), # lowercase
+    "market.name" = gsub("[[:punct:]]", " ", `market.name`), # remove punctuation
+    "market.name" = trimws(`market.name`), #trim leading and trailing spaces
+    "market.name" = gsub("\\s+", ".", `market.name`)# replace 1+ spaces with "."
+  )  %>% 
+  mutate(
+    "village" = tolower(`village`), # lowercase
+    "village" = gsub("[[:punct:]]", " ", `village`), # remove punctuation
+    "village" = trimws(`village`),
+    "village" = gsub("\\s+", ".", `village`)
+  )
+
+colnames(mrktb_clean) %>% kable()
+  
+```
+
+
+```{r btoA}
+
+# A mapdata
+mrkta_mapdata <- mrkta_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+
+# B mapdata 
+
+mrktb_clean %>% 
+  filter(is.na(`gps.coordinates.of.the.market`))
+
+mrktb_mapdata <- mrktb_clean %>% 
+  filter(!is.na(`gps.coordinates.of.the.market`)) %>% # mtwara - nangoo
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+  # arrange(gps.coordinates.of.the.market) %>% 
+  # filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrktb_sf <- st_as_sf(mrktb_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+
+# Join geomatched location data (from tanzania shapefile) to mrtka location data
+mrktb_linkA_gps <- mrktb_clean %>%
+  filter(!is.na(gps.coordinates.of.the.market)) %>%
+  mutate(mrktaID = st_nearest_feature(mrktb_sf, mrkta_sf)) %>% 
+  # join matched location data. by rowid (twardID)
+  left_join(
+    mrkta_mapdata %>%
+      mutate(mrktaID = 1:nrow(.)) %>%
+      select(
+        mrktaID,
+        "region.geomatch.final.A" = "region.geomatch.final",
+        "district.geomatch.final.A" = "district.geomatch.final",
+        "ward.geomatch.final.A" = "ward.geomatch.final",
+        "village.manual.final.A" = "village.manual.final" ,
+        "market.manual.final.A" = "market.manual.final"
+        # "reg.ward.mrkt.final.A" = "reg.ward.mrkt.final"
+      ),
+    by = c("mrktaID")) %>%
+  select(-mrktaID) 
+
+colnames(mrktb_linkA_gps)
+
+mrktb_linkA_gps %>% mutate(mrktIDb = paste(district.region.name, ward.name, village, market.name, sep = "-"), 
+                           mrktIDa = paste(region.geomatch.final.A, district.geomatch.final.A, ward.geomatch.final.A, village.manual.final.A, market.manual.final.A, sep = "-")) %>%
+  distinct(mrktIDa, mrktIDb) %>%
+  View()
+
+
+
+
+mrktb_linkA_mapdata <- mrktb_linkA_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+  # arrange(gps.coordinates.of.the.market) %>% 
+  # filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrktb_linkA_sf <- st_as_sf(mrktb_linkA_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+
+
+## MAP
+map_plots <- list()
+regions <- mrktb_linkA_gps %>% distinct(region.geomatch.final.A) %>% pull()
+
+for(i in 1:length(regions)){
+  
+  region_i <- regions[i]
+  
+  map_plots[[i]] <- ggplot() +
+   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
+            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktb_linkA_sf %>% filter(region.geomatch.final.A %in% region_i), 
+            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region_Nam)+
+   coord_sf()+
+   labs(col = "Ward of market"
+        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+        )+
+  theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+map_plots[[1]]; map_plots[[2]]; map_plots[[3]]; map_plots[[4]]; map_plots[[5]]; map_plots[[6]]; 
+map_plots[[7]]; map_plots[[8]]; map_plots[[9]]; map_plots[[10]]; map_plots[[11]]; map_plots[[12]]; 
+map_plots[[13]]
+
+
+mrktb_final <- mrktb_linkA_gps %>% 
+  select(
+    fid,
+    date,
+    date.final = date.end,
+    country,
+    region.final = region.geomatch.final.A,
+    district.final = district.geomatch.final.A,
+    ward.final = ward.geomatch.final.A,
+    village.final = village.manual.final.A,
+    market.final = market.manual.final.A,
+    market.type,
+    sheep.0to12 = immature.sheep.less.1.,
+    sheep.adult = adult.sheep.more.1.,
+    goat.0to12 = immature.goats.less.1.,
+    goat.adult = adult.goats.more.1.,
+    gps.coordinates.of.the.market,
+    unique.row.identifier.uuid.
+  )
+
+if(filesave){
+  write.csv(mrktb_final, file = here("data/data-cleaning_data/mrktb_generalinfo_tanzania_final.csv"))
+  write.csv(mrktb_final, file = here("data/tanzania_data/mrktb_generalinfo_tanzania_final.csv"))
+}
+```
+
+
+```{r, quickanalysis}
+
+animalsaleslong <- mrktb_final %>% 
+  select(market.final, starts_with("sheep."), starts_with("goat")) %>%
+  mutate_if(is.numeric, replace_na, replace = 0) %>%
+  rowwise() %>% 
+  mutate(count.all = sum(c_across(`sheep.0to12`:`goat.adult`), na.rm = T)) %>%
+  gather(key = "age.group", value = "count", -c(market.final, count.all)) %>%
+  mutate(prop = round(count/count.all, digits = 2))
+
+
+
+ggplot(animalsaleslong, aes(x=count), group = age.group)+
+  geom_histogram(aes(fill = age.group), alpha = 0.5, col = "black")+
+  facet_wrap(~age.group)
+
+ggplot(animalsaleslong, aes(x=count), group = age.group)+
+  geom_histogram(aes(fill = age.group), alpha = 0.5, col = "black")+
+  facet_wrap(~age.group)
+
+```
+
