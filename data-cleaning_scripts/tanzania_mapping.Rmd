@@ -56,6 +56,8 @@ Data Sources Overview:
 
 ```{r data, include = T, warning = F, echo = F, message = F}
 
+sf_use_s2(FALSE)
+
 # (Load Tanzania Shapefile:
 ## (i) DataCatalog
 twards_datacat_shp <- st_read(here("data/shapefiles/tzwards_datacatalog/tzwards.shp")) # with region boundaries
