@@ -23,7 +23,8 @@ library(knitr)
 library(ggpubr)
 library(RColorBrewer)
 library(rmarkdown)
-
+library(stringdist)
+library(fuzzyjoin)
 ```
 
 ```{r theme, include = F}
@@ -36,63 +37,20 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```
 
 ```{r load-data, include = F}
-# Market survey A data:
-# 
-# mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-#   rename(region.final = region.geomatch.final, 
-#          district.final = district.geomatch.final,
-#          ward.final = ward.geomatch.final, 
-#          village.final = village.manual.final,
-#          market.final = market.manual.final)
-# 
-# mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv")) %>%
-#   rename(region.final = region.geomatch.final, 
-#          district.final = district.geomatch.final,
-#          ward.final = ward.geomatch.final, 
-#          village.final = village.manual.final,
-#          market.final = market.manual.final)
 
 # Market Survey C data
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
 mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
 mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
-# 
-# # Tanzania Towns Data: 
-# ttownsOth_shp <- st_read(here("data/shapefiles/tz_towns/tz-othertowns.shp")) # Major town locations
-# ttownsMaj_shp <- st_read(here("data/shapefiles/tz_towns/tz-majortowns.shp")) # Other town locations
-# ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"), ttownsOth_shp %>% mutate(town.type = "other"))
 
 
 # Load Tanzania Shapefile:
 # tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
-tregs_shp <- st_read(here("data/shapefiles/tza_admbnda_adm1_20181019.shp")) %>% # with region boundaries
-   rename(
-    "Country_N"=ADM0_EN,    
-    "Country_NSw" = ADM0_SW,
-    "Country_C"=ADM0_PCODE,
-    "Region_Nam" = ADM1_EN,
-    "Region_Cod" = ADM1_PCODE,
-  )
+tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp")) 
 
 # tdists_shp <- st_read(here("data/shapefiles/tza_admbnda_adm2_20181019.shp")) # with district boundaries
-twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>% # with ward boundaries
-    rename(
-    "Country_N"=ADM0_EN,    
-    "Country_NSw" = ADM0_SW,
-    "Country_C"=ADM0_PCODE,
-    "Region_Nam" = ADM1_EN,
-    "Region_Cod" = ADM1_PCODE,
-    "District_N" = ADM2_EN,
-    "District_C" = ADM2_PCODE,
-    "Ward_Name"=ADM3_EN,
-    "Ward_Code"= ADM3_PCODE
-  )
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
 
-# clean twards data for comparison
-tdists2_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp"))
-
-twards_shp <- st_join(twards_shp, 
-        tdists2_shp %>% select(Region20 = Region_Nam, NewDist20))
 ```
 
 ```{r subsetdata}
@@ -100,48 +58,16 @@ twards_shp <- st_join(twards_shp,
 # mjini = urban, vijini = rural
 
 twards_df <- twards_shp %>% 
-  st_drop_geometry() %>%
-  select(ET_ID, 
-         Region_Nam,
-         Region20,
-         District_N,
-         NewDist20,
-         Ward_Name) %>%
-  mutate(region = tolower(Region_Nam),
-         region = gsub("[[:punct:]]", " ", `region`), # remove punctuation
-         region = trimws(`region`), #trim leading and trailing spaces
-         region = gsub("\\s+", ".", `region`) # replace 1+ spaces with ".")
-  ) %>%
-   mutate(region20 = tolower(Region20),
-         region20 = gsub("[[:punct:]]", " ", `region20`), # remove punctuation
-         region20 = trimws(`region20`), #trim leading and trailing spaces
-         region20 = gsub("\\s+", ".", `region20`) # replace 1+ spaces with ".")
-  ) %>%
-  
-  mutate(district = tolower(District_N),
-         district = gsub("[[:punct:]]", " ", `district`), # remove punctuation
-         district = trimws(`district`), #trim leading and trailing spaces
-         district = gsub("\\s+", ".", `district`) # replace 1+ spaces with "."
-  ) %>% 
-  mutate(district20 = tolower(NewDist20),
-         district20 = gsub("[[:punct:]]", " ", `district20`), # remove punctuation
-         district20 = trimws(`district20`), #trim leading and trailing spaces
-         district20 = gsub("\\s+", ".", `district20`) # replace 1+ spaces with "."
-  ) %>%
-  mutate(ward = tolower(Ward_Name),
-         ward = gsub("[[:punct:]]", " ", `ward`), # remove punctuation
-         ward = trimws(`ward`), #trim leading and trailing spaces
-         ward = gsub("\\s+", ".", `ward`) # replace 1+ spaces with "."
-  )
+  st_drop_geometry()
 
-
-# fid origins and destinations:
+# Select origin and destination data from market activities dataset:
 mrktc_origdest <- mrktc_actvty %>% 
   select(fid,
          starts_with("2.sell.place"), 
          starts_with("6.buy.place"))
 
 
+# Create longform dataset containing unique combinations of origin or destination place-ward-districts.
 mrktc_origdest_long <- mrktc_actvty %>%
   select(fid,
          place = `2.sell.place.name`,
@@ -155,303 +81,626 @@ mrktc_origdest_long <- mrktc_actvty %>%
                      district = `6.buy.place.district`) %>%
               mutate(origdest = "dest")
   ) %>%
-  filter(if_any(c(place,ward,district), ~ !is.na(.))) 
+  filter(!is.na(district))
 
-mrktc_origdest_distinct <- mrktc_origdest_long %>%
-  distinct(place,ward,district) %>%
+```
+
+focus on district first:
+
+```{r matchdist}
+
+library(fuzzyjoin)
+library(dplyr)
+
+# review common suffix in district name data:
+# suffix for urban: .tc, .mc, .cc
+# suffix for rural: "dc"
+twards_df %>% distinct(Dist20_N) %>% View()
+twards_df %>% 
   mutate(
-    # AND = NA
-    place = gsub("\\.na\\.", "\\.and\\.", place), # translation
-         ward = gsub("\\.na\\.", "\\.and\\.", ward),
-         district = gsub("\\.na\\.", "\\.and\\.", district),
-         
-         # OF = YA
-         # place = gsub("\\.ya\\.", "\\.of\\.", place), # translation
-         # ward = gsub("\\.ya\\.", "\\.of\\.", ward),
-         # district = gsub("\\.ya\\.", "\\.of\\.", district),
+    suffix = stringr::str_extract(Dist20_N, "\\.[^.]*$") # Extracts the part after the last dot
+  ) %>%
+  distinct(suffix)
+
+# For origdest data, replace common suffixes with code used above for urban/rural
+mrktc_origdest_long %>%
+  mutate(
+    suffix = stringr::str_extract(district, "\\.[^.]*$") # Extracts the part after the last dot
+  ) %>%
+  distinct(suffix) %>% 
+  arrange(suffix) %>% 
+  View()
+
+mrktc_origdest_match <- mrktc_origdest_long %>%
+  mutate(dist_suffix = gsub("\\.mji[a-z]*$", ".cc.mc.tc", district), #.mji, .mjini
+         dist_suffix = gsub("\\.ji[a-z]*$", ".cc.mc.tc", dist_suffix), # .jini
+         dist_suffix = gsub("\\.manispaa$", ".mc", dist_suffix),
+         dist_suffix = gsub("\\.munispaa$", ".mc", dist_suffix),
+         dist_suffix = gsub("\\.vij[a-z]*$", ".dc", dist_suffix), #.vijijini , .vijini
+         dist_suffix = if_else(grepl("dodoma",dist_suffix), "dodoma.cc", dist_suffix),
+         dist_suffix = if_else(grepl("makambako",dist_suffix), "makambako.tc", dist_suffix),
+         dist_suffix = if_else(grepl("\\.(dc|tc|cc|mc)$", dist_suffix), # Checks if location ends with .dc, .tc, .cc, or .mc
+                              dist_suffix,                            # If true, keep the original location
+                              paste0(dist_suffix, ".dc")              # If false, append ".dc"
+                              ),
+         dist_nosuffix = gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", dist_suffix),
          # 
-         # # replace mji in middle of word (means urban)
-         # place = gsub("mji[a-z]*\\.", "urban.", place),
-         # ward = gsub("mji[a-z]*\\.", "urban.", ward),
-         # district = gsub("mji[a-z]*\\.", "urban.", district),
-         
-         # replace mji at end of word (means urban) 
-         place = gsub("mji[a-z]*\\b", "urban", place),
-         ward = gsub("mji[a-z]*\\b", "urban", ward),
-         district = gsub("mji[a-z]*\\b", "urban", district),
-         
-         # # replace vij in middle of word
-         # place = gsub("vij[a-z]*\\.", "rural.", place),
-         # ward = gsub("vij[a-z]*\\.", "rural.", ward),
-         # district = gsub("vij[a-z]*\\.", "rural.", district),
-         
-         # replace vij at end of word:
-         place = gsub("vij[a-z]*\\b", "rural", place),
-         ward = gsub("vij[a-z]*\\b", "rural", ward),
-         district = gsub("vij[a-z]*\\b", "rural", district),
-         
-         # replace manispaa (means municipality) in middle of word
-         place = gsub("manispaa", "municipality", place),
-         ward = gsub("manispaa", "municipality", ward),
-         district = gsub("manispaa", "municipality", district),
-         
-         # replace munispaa means municipality) in middle of word
-         place = gsub("munispaa", "municipality", place),
-         ward = gsub("munispaa", "municipality", ward),
-         district = gsub("munispaa", "municipality", district)
-         )
+         # # Place name: 
+         # place_suffix = gsub("\\.mji[a-z]*$", ".cc.mc.tc", place), #.mji, .mjini
+         # place_suffix = gsub("\\.ji[a-z]*$", ".cc.mc.tc", place_suffix), # .jini
+         # place_suffix = gsub("\\.manispaa$", ".mc", place_suffix),
+         # place_suffix = gsub("\\.munispaa$", ".mc", place_suffix),
+         # place_suffix = gsub("\\.vij[a-z]*$", ".dc", place_suffix), #.vijijini , .vijini
+         # place_suffix = if_else(grepl("dodoma",place_suffix), "dodoma.cc", place_suffix),
+         # place_suffix = if_else(grepl("makambako",dist_suffix), "makambako.tc", place_suffix),
+         # place_suffix = if_else(grepl("\\.(dc|tc|cc|mc)$", place_suffix), # Checks if location ends with .dc, .tc, .cc, or .mc
+         #                      dist_suffix,                            # If true, keep the original location
+         #                      paste0(dist_suffix, ".dc")              # If false, append ".dc"
+         #                      ),
+         # place_nosuffix = gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", place_suffix)
+  )
+```
+
+
+<!-- ```{r distonly} -->
+<!-- distonly <- mrktc_origdest_match %>% -->
+<!--   distinct(dist_suffix, dist_nosuffix) -->
+
+<!-- #perform fuzzy matching left join -->
+<!-- distmatch <- stringdist_join(distonly, twards_df %>%  -->
+<!--                                distinct(Dist20_N) %>%  -->
+<!--                                mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N)),  -->
+<!--                 by=c("dist_suffix" = "Dist20_N", -->
+<!--                      "dist_nosuffix" = "Dist20_nosuffix" -->
+<!--                      ), -->
+<!--                 mode='left', #use left join -->
+<!--                 method = "jw", #use jw distance metric -->
+<!--                 max_dist=99,  -->
+<!--                 distance_col='dist') %>% -->
+<!--   group_by(dist_suffix) %>% -->
+<!--   slice_min(order_by=dist_suffix.dist, n=1) -->
+
+
+<!-- distmatch <- distmatch %>% mutate(match = if_else( -->
+<!--   dist_suffix.dist == 0, "accept0",  -->
+<!--   if_else( -->
+<!--     dist_suffix.dist > 0 & dist_nosuffix.dist == 0, "accept1", NA) -->
+<!-- )) -->
+
+<!-- distmatch %>% group_by(match) %>% count() -->
+<!-- # 74 out of 175 are an exact match (0) or match on nosuffix data (1)  -->
+
+<!-- distmatch %>% filter(is.na(match)) %>% arrange(dist_suffix.dist) %>% View() -->
+
+
+<!-- ``` -->
+
+
+<!-- ```{r warddist} -->
+
+
+<!-- warddist <- mrktc_origdest_match %>% -->
+<!--   distinct(place, ward, dist_suffix, dist_nosuffix) %>% -->
+<!--   mutate(wardsim = stringsim(place, ward), -->
+<!--          distsim = stringsim(place, dist_nosuffix), -->
+<!--          placecheck = if_else(wardsim==1 & distsim==1, "pwd", -->
+<!--                              if_else(wardsim == 1 & distsim<1, "ward", -->
+<!--                                      if_else(wardsim > 0.58 & distsim<1, "ward*", -->
+<!--                                              if_else(distsim == 1 & wardsim<1, "district", -->
+<!--                                                      if_else(distsim > 0.75 & wardsim<1, "district*", -->
+<!--                                                              if_else(wardsim == 0 & distsim == 0, "none", NA))))))) %>% -->
+<!--    mutate(placecheck = if_else(is.na(wardsim) & distsim==1, "district", placecheck), -->
+<!--           placecheck = if_else(is.na(distsim) & wardsim==1, "ward", placecheck), -->
+<!--           placecheck = if_else(ward == dist_nosuffix, "pwd", placecheck), -->
+<!--           placecheck = if_else(ward == dist_suffix, "pwd", placecheck)) -->
+
+
+<!-- pwddist <- warddist %>% distinct(placecheck, ward, dist_suffix, dist_nosuffix) -->
+<!-- pwddist2 <- warddist %>% distinct(place, ward, dist_suffix, dist_nosuffix) -->
+
+<!-- #perform fuzzy matching left join -->
+<!-- PWDmatch <- stringdist_join(pwddist,  -->
+<!--                             twards_df %>%  -->
+<!--                               distinct(Ward_N, Dist20_N) %>%  -->
+<!--                               mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N)),  -->
+<!--                 by=c( -->
+<!--                   "dist_nosuffix" = "Dist20_nosuffix", -->
+<!--                   "dist_suffix" = "Dist20_N", -->
+<!--                   "ward" = "Ward_N"), -->
+<!--                 mode='left', #use left join -->
+<!--                 method = "jw", #use jw distance metric -->
+<!--                 max_dist=99,  -->
+<!--                 distance_col='dist') %>% -->
+<!--   rowwise() %>% -->
+<!--   mutate(dist_sum = sum(dist_suffix.dist, ward.dist), -->
+<!--          distnosuffix_sum = sum(dist_nosuffix.dist, ward.dist)) %>% -->
+<!--   ungroup() %>% -->
+<!--   group_by(dist_suffix, dist_nosuffix, ward) %>% -->
+<!--   slice_min(order_by=dist_sum, n=1) -->
+
+
+<!-- PWDmatch2 <- stringdist_join(pwddist2 %>% mutate(wd = paste(ward, dist_nosuffix, sep = "-"),  -->
+<!--                                                  pwd=paste(place,ward,dist_nosuffix, sep = "-")),  -->
+<!--                             twards_df %>%  -->
+<!--                               distinct(Ward_N, Dist20_N, Region20_N) %>%  -->
+<!--                               mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N), -->
+<!--                                      pwd20 = paste(Ward_N, Dist20_N, Region20_N, sep = "-"), -->
+<!--                                      wd20 = paste(Ward_N, Dist20_N, sep = "-")),  -->
+
+<!--                 by=c("pwd" = "pwd20", -->
+<!--                      "wd" = "wd20" -->
+<!--                   # "dist_nosuffix" = "Dist20_nosuffix", -->
+<!--                   # "dist_suffix" = "Dist20_N", -->
+<!--                   # "ward" = "Ward_N" -->
+<!--                   ), -->
+<!--                 mode='left', #use left join -->
+<!--                 method = "jw", #use jw distance metric -->
+<!--                 max_dist=99,  -->
+<!--                 distance_col='dist') %>% -->
+<!--   rowwise() %>% -->
+<!--   # mutate(dist_sum = sum(dist_suffix.dist, ward.dist), -->
+<!--   #        distnosuffix_sum = sum(dist_nosuffix.dist, ward.dist)) %>% -->
+<!--   mutate(dist_sum = sum(wd.dist, pwd.dist)) %>% -->
+<!--   ungroup() %>% -->
+<!--   group_by(dist_suffix, dist_nosuffix, ward) %>% -->
+<!--   slice_min(order_by=dist_sum, n=1) -->
+
+
+<!-- ``` -->
+
+
+
+
+```{r warddist}
+
+
+pwd_df <- mrktc_origdest_match %>%
+  distinct(place, ward, dist_suffix, dist_nosuffix) %>%
+  # place-ward-district: 
+  mutate(pwd=paste(place, ward, dist_nosuffix, sep = "-"), 
+         wd = paste(ward, dist_nosuffix, sep = "-"),
+         pwd = gsub("NA-|na-|-na|-NA", "", pwd), 
+         wd = gsub("NA-|na-|-na|-NA", "", wd))
+
+twdr_df <- twards_df %>%
+  distinct(Ward_N, Dist20_N, Region20_N) %>% 
+  mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N),
+         wdr20 = paste(Ward_N, Dist20_nosuffix, Region20_N, sep = "-"),
+         wd20 = paste(Ward_N, Dist20_nosuffix, sep = "-"))
   
 
+pwd_match <- stringdist_join(pwd_df, twdr_df, 
+                             by=c("pwd" = "wdr20",
+                                  "wd" = "wd20"),
+                mode='left', #use left join
+                method = "jw", #use jw distance metric
+                max_dist=99, 
+                distance_col='dist') %>%
+  rowwise() %>%
+  # mutate(dist_sum = sum(dist_suffix.dist, ward.dist),
+  #        distnosuffix_sum = sum(dist_nosuffix.dist, ward.dist)) %>%
+  mutate(dist_sum = sum(wd.dist, pwd.dist)) %>%
+  ungroup() %>%
+  group_by(pwd) %>%
+  slice_min(order_by=dist_sum, n=1) %>%
+  ungroup()
+
+pwd_match %>% select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% View()
+pwd_match %>% filter(wd.dist == 0) %>% nrow() # 936 rows with perfect ward-district match!
+
+pwd_match %>% filter(wd.dist > 0) %>% select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% View()
+
+pwd_match %>% 
+  ungroup() %>%
+  filter(wd.dist > 0) %>% 
+  select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% 
+  distinct(wd.A, wd.B, wd.dist) %>% View()
 
 
+pwd_match_join <- pwd_match %>%
+  ungroup() %>%
+  mutate(accept = if_else(wd.dist==0, "accept", NA)) %>%
+  filter(accept == "accept")
+  
+mrktc_origdest_match2 <- mrktc_origdest_match %>%
+  left_join(
+    pwd_match_join %>% select(place, ward, dist_suffix, Ward_N, Dist20_N, Region20_N, accept),
+    by = c("place", "ward", "dist_suffix")
+  )
 
-```
-
-
-# Compare districts to tanzania districts list:
-
-```{r }
-
-# tdists <- twards_df %>% distinct(district) %>% pull()
-# tdisturban <- tdists[grep("urban", tdists)]
-# 
-# twards <- twards_df %>% distinct(ward) %>% pull()
-# tregs <- twards_df %>% distinct(region) %>% pull()
-# # 
-# mrktc_origdest_distinct <- mrktc_origdest_distinct %>% 
-#   mutate(district = if_else(str_detect(district, "\\.urban") & !district %in% tdisturban, 
-#                             str_remove(district, "\\.urban"),
-#                             district))
-# 
-# 
-# distcorrect <- mrktc_origdest_distinct %>% 
-#   # list distinct district names in origdest data:
-#   distinct(district) %>% 
-#   filter(!is.na(district)) %>%
-#   arrange() %>%
-#   mutate(
-#     # check if recorded district name matches any fields in tanzania region, district or ward 
-#     treg = tregs[amatch(district, tregs, maxDist = Inf)],
-#     tdist = tdists[amatch(district, tdists, maxDist = Inf)],
-#     tward = twards[amatch(district, twards, maxDist = Inf)]
-#   ) %>%
-#   mutate(check = if_else(district == tdist, "accept_0", 
-#                          if_else(district == tward, "ward.name",
-#                                  if_else(district == treg, "reg.name", NA)))
-#          )
-#   
-# # save and then compare to twards_df in excel
-# write.csv(distcorrect, file = here("data/data-cleaning_data/mrktc_origdest_tdists.csv"), row.names = F)
-# write.csv(twards_df, file = here("data/data-cleaning_data/twards_df.csv"), row.names = F)
-# 
-# 
-# # save for checking
-# write.csv(mrktc_warddist_unmatch, file = here("data/data-cleaning_data/mrktc_origplace_clean1.csv"))
-# 
-```
-
-
-```{r originaldistricts}
-
-tdists <- twards_df %>% distinct(district) %>% pull()
-# tdisturban <- tdists[grep("urban", tdists)]
-
-twards <- twards_df %>% distinct(ward) %>% pull()
-tregs <- twards_df %>% distinct(region) %>% pull()
-
-# Find exact matches on ward and district from twards geodata:
-
-mrktc_origdest_check <- mrktc_origdest_distinct %>% 
-  # list distinct district names in origdest data:
-  arrange() %>%
-  left_join(twards_df %>% select(district, ward, ET_ID) %>% mutate(tmatch_0 = "tmatch_0"), by = c("district", "ward")) 
-
-mrktc_origdest_check %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-# Verify District Names:
-# - Start by cleaning district names:
-
-distonly_match <- mrktc_origdest_check %>%
-  # filter(is.na(tmatch_0)) %>%
-  # select(-c(ET_ID, tmatch_0)) %>%
-  # identify districts which are found in the tdists data:
-  mutate(tmatch_0 = if_else(is.na(tmatch_0) & district %in% tdists, "tmatch_distonly_0", tmatch_0))
-
-distonly_match %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-# 544 districts are unmatched
-
-distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district)
-
-# remove ".urban" and .municipality suffix if not found in twards data
-# remove .rural as only .urban distinction is required and found in tdists
-
-distonly_match <- distonly_match %>%
-  mutate(
-    # remove ".urban" and .municipality suffix if not found in twards data
-# remove .rural as only .urban distinction is required and found in tdists
-    district_clean1 = gsub("municipality", "urban", district), 
-    district_clean1 = if_else(str_detect(district_clean1, "\\.urban") & !district_clean1 %in% tdists,
-                              str_remove(district_clean1, "\\.urban"),
-                              district_clean1),
-    district_clean1 = gsub(".rural", "", district_clean1)) %>%
-  mutate(tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tdists, "tmatch_distonly_1", tmatch_0),
-         ## identify if ward or region name:
-         tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tregs, "reg.name",
-                            if_else(is.na(tmatch_0) & district_clean1 %in% twards, "ward.name?", tmatch_0))
-         )
-
-distonly_match %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) %>% View()
-
-distonly_matchOld <- distonly_match
-
-
-# mrktc_origdest_distinct <- mrktc_origdest_distinct %>% 
-#   mutate(district_clean1 = if_else(str_detect(district, "\\.urban") & !district %in% tdisturban, 
-#                             str_remove(district, "\\.urban"),
-#                             district))
-# 
-
-
-
-# 
-# 
-# # Match District and Ward is typo: 
-# mrktc_origdest_unmatch <- mrktc_origdest_check %>%
-#   filter(is.na(tmatch_0)) %>%
-#   select(-c(ET_ID, tmatch_0)) %>%
-#   filter(district %in% tdists)
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-#   
-#   
-#   mutate(
-#     # check if recorded district name matches any fields in tanzania region, district or ward 
-#     Dtreg = tregs[amatch(district, tregs, maxDist = Inf)],
-#     Dtdist = tdists[amatch(district, tdists, maxDist = Inf)],
-#     Dtward = twards[amatch(district, twards, maxDist = Inf)],
-#     
-#      # check if recorded ward name matches any fields in tanzania region, district or ward 
-#     Wtreg = tregs[amatch(ward, tregs, maxDist = Inf)],
-#     Wtdist = tdists[amatch(ward, tdists, maxDist = Inf)],
-#     Wtward = twards[amatch(ward, twards, maxDist = Inf)],
-#   ) %>%
-#   mutate(Dcheck = if_else(district == Dtdist, "accept_0", 
-#                          if_else(district == Dtward, "ward.name",
-#                                  if_else(district == Dtreg, "reg.name", NA))),
-#          Wcheck = if_else(ward == Wtward, "accept_0", 
-#                          if_else(ward == Wtdist, "dist.name",
-#                                  if_else(ward == Wtreg, "reg.name", NA)))
-#          )
-#   
-# 
-# 
-# distward_exact <- distcorrect2 %>%
-#   select(place,ward,district, Wtward, Dtdist, Wcheck, Dcheck) %>%
-#   mutate(twarddist = paste(Wtward, Dtdist, sep = "-")) %>%
-#   anti_join(twards_df %>% select(district, ward), by = c())
-
+mrktc_origdest_match2 %>% group_by(accept) %>% count()
 
 ```
 
 
-```{r, distnew}
-
-tdists <- twards_df %>% distinct(district20) %>% pull()
-
-twards20_df <- twards_df %>%
-  mutate(district20group = gsub(".tc", "", district20), 
-         district20group = gsub(".dc", "", district20group))
-
-districtgroups <- twards20_df %>% 
-  distinct(district20, district20group) %>%
-  group_by(district20group) %>%
-  count() %>%
-  filter(n>1) %>%
-  select(district20group) %>%
-  pull()
-
-twards20_df <- twards20_df %>%
-  mutate(district20clean = if_else(
-    district20group %in% districtgroups, district20, district20group)) %>% 
-  select(-district20group)
-
-tdists_cut <-  twards_df %>% mutate(district20 = gsub(".tc", "", district20),
-                                    district20 = gsub(".dc", "", district20)) %>%
-  distinct(district20) %>% pull()
-# tdisturban <- tdists[grep("urban", tdists)]
-
-twards <- twards_df %>% distinct(ward) %>% pull()
-tregs <- twards_df %>% distinct(region20) %>% pull()
-
-# Find exact matches on ward and district from twards geodata:
-
-mrktc_origdest_check <- mrktc_origdest_distinct %>% 
-  # list distinct district names in origdest data:
-  arrange() %>%
-  left_join(twards_df %>% select(district20, ward, ET_ID) %>% mutate(tmatch_0 = "tmatch_0"), by = c("district" = "district20", "ward")) 
-
-mrktc_origdest_check %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-# Verify District Names:
-# - Start by cleaning district names:
-
-distonly_match <- mrktc_origdest_check %>%
-  # filter(is.na(tmatch_0)) %>%
-  # select(-c(ET_ID, tmatch_0)) %>%
-  # identify districts which are found in the tdists data:
-  mutate(tmatch_0 = if_else(is.na(tmatch_0) & district %in% tdists, "tmatch_distonly_0", tmatch_0))
-
-distonly_match %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-# 544 districts are unmatched
-
-distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district)
-
-# remove ".urban" and .municipality suffix if not found in twards data
-# remove .rural as only .urban distinction is required and found in tdists
-
-distonly_match <- distonly_match %>%
-  mutate(
-    # remove ".urban" and .municipality suffix if not found in twards data
-# remove .rural as only .urban distinction is required and found in tdists
-    district_clean1 = gsub("municipality", "urban", district), 
-    district_clean1 = if_else(str_detect(district_clean1, "\\.urban") & !district_clean1 %in% tdists,
-                              str_remove(district_clean1, "\\.urban"),
-                              district_clean1),
-    district_clean1 = gsub(".rural", "", district_clean1)) %>%
-  mutate(tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tdists, "tmatch_distonly_1", tmatch_0),
-         ## identify if ward or region name:
-         tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tregs, "reg.name",
-                            if_else(is.na(tmatch_0) & district_clean1 %in% twards, "ward.name?", tmatch_0))
-         )
-
-distonly_match %>%
-  group_by(tmatch_0) %>% 
-  count()
-
-distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) %>% View()
-
-distonly_matchNew <- distonly_match
 
 
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ```{r checks} -->
+
+
+<!-- # 1. Ward - match;  District - match -->
+<!-- # 2. Ward - match; District - minor error -->
+<!-- # 3. Ward - minor error; District - match -->
+<!-- # 4. Ward - minor error; District - minor error -->
+<!-- # 5. Ward = match; placecheck = ward OR pwd -->
+<!-- # 6. Dist - match; placecheck = dist OR pwd -->
+
+
+<!-- PWDmatch <- PWDmatch %>%  -->
+<!--   mutate( -->
+<!--     # 1. Ward - match;  District - match -->
+<!--     match = if_else(dist_sum == 0, "accept0", NA), -->
+<!--     match = if_else(is.na(match) & distnosuffix_sum == 0, "accept0*", match), -->
+
+<!--     # 2. Ward - match; District - minor error -->
+<!--     match = if_else(is.na(match) & ward.dist == 0 & dist_sum < 0.2, "acceptW0", match), -->
+
+<!--     # 3. Ward - minor error; District - match -->
+<!--     match = if_else(is.na(match) & dist_nosuffix.dist == 0 & dist_sum < 0.217, "acceptD0", match), -->
+<!--     # 4. Ward - minor error; District - minor error -->
+<!--     #### -->
+
+<!--     # If all fields are the same and match a ward or district name: -->
+<!--     match = if_else(is.na(match) & ward.dist == 0 & placecheck == "pwd", "acceptW1", match), -->
+
+<!--     match = if_else(is.na(match) & dist_nosuffix.dist == 0 & placecheck == "pwd", "acceptD1", match), -->
+
+<!--     # If ward name is correct -->
+<!--     match = if_else(is.na(match) & ward.dist == 0, "acceptW2", match) -->
+
+<!--   ) -->
+
+
+<!-- PWDmatch %>% filter(is.na(match)) %>% View() -->
+<!-- ## If place == ward == district  -->
+
+
+
+
+
+
+
+
+
+<!-- warddistmatch %>% select(dist_suffix, Dist20_N, dist_nosuffix, Dist20_nosuffix, ward, Ward_N, everything()) %>% -->
+<!--   filter(is.na(match), dist_nosuffix.dist == 0) %>% -->
+<!--   View() -->
+<!-- # 377 match districts -->
+
+
+<!-- warddistmatch %>% select(dist_suffix, Dist20_N, dist_nosuffix, Dist20_nosuffix, ward, Ward_N, everything()) %>% -->
+<!--   filter(is.na(match), ward.dist == 0) %>% -->
+<!--   View() -->
+<!-- # 73 matched wards -->
+
+<!-- distmatch %>% filter(is.na(match)) %>% arrange(dist_suffix.dist) %>% View() -->
+<!-- distmatch %>% group_by(dist_match) %>% count() %>% filter(n>1) # 11 district entries match multiples -->
+
+
+<!-- # Accept all exact matches for ward? -->
+
+<!-- ``` -->
+
+
+
+
+
+
+
+
+<!-- ```{r} -->
+
+
+
+
+<!-- mrktc_origdest_distinct <- mrktc_origdest_long %>% -->
+<!--   distinct(place,ward,district) %>% -->
+<!--   mutate( -->
+<!--     # AND = NA -->
+<!--     place = gsub("\\.na\\.", "\\.and\\.", place), # translation -->
+<!--          ward = gsub("\\.na\\.", "\\.and\\.", ward), -->
+<!--          district = gsub("\\.na\\.", "\\.and\\.", district), -->
+
+<!--          # OF = YA -->
+<!--          # place = gsub("\\.ya\\.", "\\.of\\.", place), # translation -->
+<!--          # ward = gsub("\\.ya\\.", "\\.of\\.", ward), -->
+<!--          # district = gsub("\\.ya\\.", "\\.of\\.", district), -->
+<!--          #  -->
+<!--          # # replace mji in middle of word (means urban) -->
+<!--          # place = gsub("mji[a-z]*\\.", "urban.", place), -->
+<!--          # ward = gsub("mji[a-z]*\\.", "urban.", ward), -->
+<!--          # district = gsub("mji[a-z]*\\.", "urban.", district), -->
+
+<!--          # replace mji at end of word (means urban)  -->
+<!--          place = gsub("mji[a-z]*\\b", "urban", place), -->
+<!--          ward = gsub("mji[a-z]*\\b", "urban", ward), -->
+<!--          district = gsub("mji[a-z]*\\b", "urban", district), -->
+
+<!--          # # replace vij in middle of word -->
+<!--          # place = gsub("vij[a-z]*\\.", "rural.", place), -->
+<!--          # ward = gsub("vij[a-z]*\\.", "rural.", ward), -->
+<!--          # district = gsub("vij[a-z]*\\.", "rural.", district), -->
+
+<!--          # replace vij at end of word: -->
+<!--          place = gsub("vij[a-z]*\\b", "rural", place), -->
+<!--          ward = gsub("vij[a-z]*\\b", "rural", ward), -->
+<!--          district = gsub("vij[a-z]*\\b", "rural", district), -->
+
+<!--          # replace manispaa (means municipality) in middle of word -->
+<!--          place = gsub("manispaa", "municipality", place), -->
+<!--          ward = gsub("manispaa", "municipality", ward), -->
+<!--          district = gsub("manispaa", "municipality", district), -->
+
+<!--          # replace munispaa means municipality) in middle of word -->
+<!--          place = gsub("munispaa", "municipality", place), -->
+<!--          ward = gsub("munispaa", "municipality", ward), -->
+<!--          district = gsub("munispaa", "municipality", district) -->
+<!--          ) -->
+
+
+
+
+
+<!-- ``` -->
+
+
+<!-- # Compare districts to tanzania districts list: -->
+
+<!-- ```{r } -->
+
+<!-- # tdists <- twards_df %>% distinct(district) %>% pull() -->
+<!-- # tdisturban <- tdists[grep("urban", tdists)] -->
+<!-- #  -->
+<!-- # twards <- twards_df %>% distinct(ward) %>% pull() -->
+<!-- # tregs <- twards_df %>% distinct(region) %>% pull() -->
+<!-- # #  -->
+<!-- # mrktc_origdest_distinct <- mrktc_origdest_distinct %>%  -->
+<!-- #   mutate(district = if_else(str_detect(district, "\\.urban") & !district %in% tdisturban,  -->
+<!-- #                             str_remove(district, "\\.urban"), -->
+<!-- #                             district)) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # distcorrect <- mrktc_origdest_distinct %>%  -->
+<!-- #   # list distinct district names in origdest data: -->
+<!-- #   distinct(district) %>%  -->
+<!-- #   filter(!is.na(district)) %>% -->
+<!-- #   arrange() %>% -->
+<!-- #   mutate( -->
+<!-- #     # check if recorded district name matches any fields in tanzania region, district or ward  -->
+<!-- #     treg = tregs[amatch(district, tregs, maxDist = Inf)], -->
+<!-- #     tdist = tdists[amatch(district, tdists, maxDist = Inf)], -->
+<!-- #     tward = twards[amatch(district, twards, maxDist = Inf)] -->
+<!-- #   ) %>% -->
+<!-- #   mutate(check = if_else(district == tdist, "accept_0",  -->
+<!-- #                          if_else(district == tward, "ward.name", -->
+<!-- #                                  if_else(district == treg, "reg.name", NA))) -->
+<!-- #          ) -->
+<!-- #    -->
+<!-- # # save and then compare to twards_df in excel -->
+<!-- # write.csv(distcorrect, file = here("data/data-cleaning_data/mrktc_origdest_tdists.csv"), row.names = F) -->
+<!-- # write.csv(twards_df, file = here("data/data-cleaning_data/twards_df.csv"), row.names = F) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # # save for checking -->
+<!-- # write.csv(mrktc_warddist_unmatch, file = here("data/data-cleaning_data/mrktc_origplace_clean1.csv")) -->
+<!-- #  -->
+<!-- ``` -->
+
+
+<!-- ```{r originaldistricts} -->
+
+<!-- tdists <- twards_df %>% distinct(district) %>% pull() -->
+<!-- # tdisturban <- tdists[grep("urban", tdists)] -->
+
+<!-- twards <- twards_df %>% distinct(ward) %>% pull() -->
+<!-- tregs <- twards_df %>% distinct(region) %>% pull() -->
+
+<!-- # Find exact matches on ward and district from twards geodata: -->
+
+<!-- mrktc_origdest_check <- mrktc_origdest_distinct %>%  -->
+<!--   # list distinct district names in origdest data: -->
+<!--   arrange() %>% -->
+<!--   left_join(twards_df %>% select(district, ward, ET_ID) %>% mutate(tmatch_0 = "tmatch_0"), by = c("district", "ward"))  -->
+
+<!-- mrktc_origdest_check %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- # Verify District Names: -->
+<!-- # - Start by cleaning district names: -->
+
+<!-- distonly_match <- mrktc_origdest_check %>% -->
+<!--   # filter(is.na(tmatch_0)) %>% -->
+<!--   # select(-c(ET_ID, tmatch_0)) %>% -->
+<!--   # identify districts which are found in the tdists data: -->
+<!--   mutate(tmatch_0 = if_else(is.na(tmatch_0) & district %in% tdists, "tmatch_distonly_0", tmatch_0)) -->
+
+<!-- distonly_match %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- # 544 districts are unmatched -->
+
+<!-- distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) -->
+
+<!-- # remove ".urban" and .municipality suffix if not found in twards data -->
+<!-- # remove .rural as only .urban distinction is required and found in tdists -->
+
+<!-- distonly_match <- distonly_match %>% -->
+<!--   mutate( -->
+<!--     # remove ".urban" and .municipality suffix if not found in twards data -->
+<!-- # remove .rural as only .urban distinction is required and found in tdists -->
+<!--     district_clean1 = gsub("municipality", "urban", district),  -->
+<!--     district_clean1 = if_else(str_detect(district_clean1, "\\.urban") & !district_clean1 %in% tdists, -->
+<!--                               str_remove(district_clean1, "\\.urban"), -->
+<!--                               district_clean1), -->
+<!--     district_clean1 = gsub(".rural", "", district_clean1)) %>% -->
+<!--   mutate(tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tdists, "tmatch_distonly_1", tmatch_0), -->
+<!--          ## identify if ward or region name: -->
+<!--          tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tregs, "reg.name", -->
+<!--                             if_else(is.na(tmatch_0) & district_clean1 %in% twards, "ward.name?", tmatch_0)) -->
+<!--          ) -->
+
+<!-- distonly_match %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) %>% View() -->
+
+<!-- distonly_matchOld <- distonly_match -->
+
+
+<!-- # mrktc_origdest_distinct <- mrktc_origdest_distinct %>%  -->
+<!-- #   mutate(district_clean1 = if_else(str_detect(district, "\\.urban") & !district %in% tdisturban,  -->
+<!-- #                             str_remove(district, "\\.urban"), -->
+<!-- #                             district)) -->
+<!-- #  -->
+
+
+
+<!-- #  -->
+<!-- #  -->
+<!-- # # Match District and Ward is typo:  -->
+<!-- # mrktc_origdest_unmatch <- mrktc_origdest_check %>% -->
+<!-- #   filter(is.na(tmatch_0)) %>% -->
+<!-- #   select(-c(ET_ID, tmatch_0)) %>% -->
+<!-- #   filter(district %in% tdists) -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #    -->
+<!-- #    -->
+<!-- #   mutate( -->
+<!-- #     # check if recorded district name matches any fields in tanzania region, district or ward  -->
+<!-- #     Dtreg = tregs[amatch(district, tregs, maxDist = Inf)], -->
+<!-- #     Dtdist = tdists[amatch(district, tdists, maxDist = Inf)], -->
+<!-- #     Dtward = twards[amatch(district, twards, maxDist = Inf)], -->
+<!-- #      -->
+<!-- #      # check if recorded ward name matches any fields in tanzania region, district or ward  -->
+<!-- #     Wtreg = tregs[amatch(ward, tregs, maxDist = Inf)], -->
+<!-- #     Wtdist = tdists[amatch(ward, tdists, maxDist = Inf)], -->
+<!-- #     Wtward = twards[amatch(ward, twards, maxDist = Inf)], -->
+<!-- #   ) %>% -->
+<!-- #   mutate(Dcheck = if_else(district == Dtdist, "accept_0",  -->
+<!-- #                          if_else(district == Dtward, "ward.name", -->
+<!-- #                                  if_else(district == Dtreg, "reg.name", NA))), -->
+<!-- #          Wcheck = if_else(ward == Wtward, "accept_0",  -->
+<!-- #                          if_else(ward == Wtdist, "dist.name", -->
+<!-- #                                  if_else(ward == Wtreg, "reg.name", NA))) -->
+<!-- #          ) -->
+<!-- #    -->
+<!-- #  -->
+<!-- #  -->
+<!-- # distward_exact <- distcorrect2 %>% -->
+<!-- #   select(place,ward,district, Wtward, Dtdist, Wcheck, Dcheck) %>% -->
+<!-- #   mutate(twarddist = paste(Wtward, Dtdist, sep = "-")) %>% -->
+<!-- #   anti_join(twards_df %>% select(district, ward), by = c()) -->
+
+
+<!-- ``` -->
+
+
+<!-- ```{r, distnew} -->
+
+<!-- tdists <- twards_df %>% distinct(district20) %>% pull() -->
+
+<!-- twards20_df <- twards_df %>% -->
+<!--   mutate(district20group = gsub(".tc", "", district20),  -->
+<!--          district20group = gsub(".dc", "", district20group)) -->
+
+<!-- districtgroups <- twards20_df %>%  -->
+<!--   distinct(district20, district20group) %>% -->
+<!--   group_by(district20group) %>% -->
+<!--   count() %>% -->
+<!--   filter(n>1) %>% -->
+<!--   select(district20group) %>% -->
+<!--   pull() -->
+
+<!-- twards20_df <- twards20_df %>% -->
+<!--   mutate(district20clean = if_else( -->
+<!--     district20group %in% districtgroups, district20, district20group)) %>%  -->
+<!--   select(-district20group) -->
+
+<!-- tdists_cut <-  twards_df %>% mutate(district20 = gsub(".tc", "", district20), -->
+<!--                                     district20 = gsub(".dc", "", district20)) %>% -->
+<!--   distinct(district20) %>% pull() -->
+<!-- # tdisturban <- tdists[grep("urban", tdists)] -->
+
+<!-- twards <- twards_df %>% distinct(ward) %>% pull() -->
+<!-- tregs <- twards_df %>% distinct(region20) %>% pull() -->
+
+<!-- # Find exact matches on ward and district from twards geodata: -->
+
+<!-- mrktc_origdest_check <- mrktc_origdest_distinct %>%  -->
+<!--   # list distinct district names in origdest data: -->
+<!--   arrange() %>% -->
+<!--   left_join(twards_df %>% select(district20, ward, ET_ID) %>% mutate(tmatch_0 = "tmatch_0"), by = c("district" = "district20", "ward"))  -->
+
+<!-- mrktc_origdest_check %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- # Verify District Names: -->
+<!-- # - Start by cleaning district names: -->
+
+<!-- distonly_match <- mrktc_origdest_check %>% -->
+<!--   # filter(is.na(tmatch_0)) %>% -->
+<!--   # select(-c(ET_ID, tmatch_0)) %>% -->
+<!--   # identify districts which are found in the tdists data: -->
+<!--   mutate(tmatch_0 = if_else(is.na(tmatch_0) & district %in% tdists, "tmatch_distonly_0", tmatch_0)) -->
+
+<!-- distonly_match %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- # 544 districts are unmatched -->
+
+<!-- distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) -->
+
+<!-- # remove ".urban" and .municipality suffix if not found in twards data -->
+<!-- # remove .rural as only .urban distinction is required and found in tdists -->
+
+<!-- distonly_match <- distonly_match %>% -->
+<!--   mutate( -->
+<!--     # remove ".urban" and .municipality suffix if not found in twards data -->
+<!-- # remove .rural as only .urban distinction is required and found in tdists -->
+<!--     district_clean1 = gsub("municipality", "urban", district),  -->
+<!--     district_clean1 = if_else(str_detect(district_clean1, "\\.urban") & !district_clean1 %in% tdists, -->
+<!--                               str_remove(district_clean1, "\\.urban"), -->
+<!--                               district_clean1), -->
+<!--     district_clean1 = gsub(".rural", "", district_clean1)) %>% -->
+<!--   mutate(tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tdists, "tmatch_distonly_1", tmatch_0), -->
+<!--          ## identify if ward or region name: -->
+<!--          tmatch_0 = if_else(is.na(tmatch_0) & district_clean1 %in% tregs, "reg.name", -->
+<!--                             if_else(is.na(tmatch_0) & district_clean1 %in% twards, "ward.name?", tmatch_0)) -->
+<!--          ) -->
+
+<!-- distonly_match %>% -->
+<!--   group_by(tmatch_0) %>%  -->
+<!--   count() -->
+
+<!-- distonly_match %>% filter(is.na(tmatch_0)) %>% distinct(district) %>% View() -->
+
+<!-- distonly_matchNew <- distonly_match -->
+
+
+<!-- ``` -->
