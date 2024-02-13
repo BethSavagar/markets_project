@@ -9,7 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r libraries, include = F, echo = F, warning = F}
-
 library(sf)
 library(here)
 library(tidyverse)
@@ -209,8 +208,37 @@ ward1 <- ggplot() +
 
 ```{r joins}
 
-tregs_final <- tregs_humdata_shp
-tdists_final <- tdists19_NB_shp
+tregs_final <- tregs_humdata_shp %>%
+  select("Country_N" = ADM0_EN,
+         "Country_C" = ADM0_PCODE,
+         "Region_N" = Region_Nam,
+         "Region_C" = ADM1_PCODE,
+         geometry
+         ) %>%
+   mutate(
+    "Region_N" = tolower(`Region_N`), # all lower case
+    "Region_N" = gsub("[[:punct:]]", " ", `Region_N`), # remove punctuation
+    "Region_N" = trimws(`Region_N`), #trim leading and trailing spaces
+    "Region_N" = gsub("\\s+", ".", `Region_N`), # replace 1+ spaces with "."
+   )
+
+tdists_final <- tdists19_NB_shp %>%
+  select("Region_N" = Region_Nam,
+         "Region_C" = Region_Cod,
+         "Dist20_C" = District_C,
+         "Dist20_N" = NewDist20, 
+         geometry) %>%
+   mutate(
+    "Region_N" = tolower(`Region_N`), # all lower case
+    "Region_N" = gsub("[[:punct:]]", " ", `Region_N`), # remove punctuation
+    "Region_N" = trimws(`Region_N`), #trim leading and trailing spaces
+    "Region_N" = gsub("\\s+", ".", `Region_N`), # replace 1+ spaces with "."
+    
+    "Dist20_N" = tolower(`Dist20_N`), # all lower case
+    "Dist20_N" = gsub("[[:punct:]]", " ", `Dist20_N`), # remove punctuation
+    "Dist20_N" = trimws(`Dist20_N`), #trim leading and trailing spaces
+    "Dist20_N" = gsub("\\s+", ".", `Dist20_N`) # replace 1+ spaces with "."
+   )
 
 # use twards from humdata and regs/dists from txNBS
 twards_distreg20b <- st_join(twards_humdata_shp %>% select(Region_Nam, 
@@ -226,7 +254,51 @@ twards_distreg20b <- st_join(twards_humdata_shp %>% select(Region_Nam,
          starts_with("Ward"),
          geometry)
 
-twards_final <- twards_distreg20b
+
+
+twards_final <- twards_distreg20b %>%
+  select("Region_N" = Region_Nam,
+         "Region20_N" = Region_Nam20,
+         "Dist_N" = District_N,
+         "Dist20_N" = District_N20, 
+         "Ward_N" = Ward_Name,
+         geometry) %>%
+  mutate(
+    "Region_N" = tolower(`Region_N`), # all lower case
+    "Region_N" = gsub("[[:punct:]]", " ", `Region_N`), # remove punctuation
+    "Region_N" = trimws(`Region_N`), #trim leading and trailing spaces
+    "Region_N" = gsub("\\s+", ".", `Region_N`), # replace 1+ spaces with "."
+    
+    "Region20_N" = tolower(`Region20_N`), # all lower case
+    "Region20_N" = gsub("[[:punct:]]", " ", `Region20_N`), # remove punctuation
+    "Region20_N" = trimws(`Region20_N`), #trim leading and trailing spaces
+    "Region20_N" = gsub("\\s+", ".", `Region20_N`), # replace 1+ spaces with "."
+    
+    "Dist_N" = tolower(`Dist_N`), # all lower case
+    "Dist_N" = gsub("[[:punct:]]", " ", `Dist_N`), # remove punctuation
+    "Dist_N" = trimws(`Dist_N`), #trim leading and trailing spaces
+    "Dist_N" = gsub("\\s+", ".", `Dist_N`), # replace 1+ spaces with "."
+    
+    "Dist20_N" = tolower(`Dist20_N`), # all lower case
+    "Dist20_N" = gsub("[[:punct:]]", " ", `Dist20_N`), # remove punctuation
+    "Dist20_N" = trimws(`Dist20_N`), #trim leading and trailing spaces
+    "Dist20_N" = gsub("\\s+", ".", `Dist20_N`), # replace 1+ spaces with "."
+    
+    "Ward_N" = tolower(`Ward_N`), # all lower case
+    "Ward_N" = gsub("[[:punct:]]", " ", `Ward_N`), # remove punctuation
+    "Ward_N" = trimws(`Ward_N`), #trim leading and trailing spaces
+    "Ward_N" = gsub("\\s+", ".", `Ward_N`)# replace 1+ spaces with "."
+  )
+
+```
+
+
+
+```{r saveshp}
+
+st_write(tregs_final, here("data/shapefiles/tzshp_final/tregs_final.shp"))
+st_write(tdists_final, here("data/shapefiles/tzshp_final/tdists_final.shp"))
+st_write(twards_final, here("data/shapefiles/tzshp_final/twards_final.shp"))
 
 ```
 
