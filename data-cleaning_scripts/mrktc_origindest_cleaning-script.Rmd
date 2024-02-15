@@ -142,114 +142,6 @@ mrktc_origdest_match <- mrktc_origdest_long %>%
 ```
 
 
-<!-- ```{r distonly} -->
-<!-- distonly <- mrktc_origdest_match %>% -->
-<!--   distinct(dist_suffix, dist_nosuffix) -->
-
-<!-- #perform fuzzy matching left join -->
-<!-- distmatch <- stringdist_join(distonly, twards_df %>%  -->
-<!--                                distinct(Dist20_N) %>%  -->
-<!--                                mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N)),  -->
-<!--                 by=c("dist_suffix" = "Dist20_N", -->
-<!--                      "dist_nosuffix" = "Dist20_nosuffix" -->
-<!--                      ), -->
-<!--                 mode='left', #use left join -->
-<!--                 method = "jw", #use jw distance metric -->
-<!--                 max_dist=99,  -->
-<!--                 distance_col='dist') %>% -->
-<!--   group_by(dist_suffix) %>% -->
-<!--   slice_min(order_by=dist_suffix.dist, n=1) -->
-
-
-<!-- distmatch <- distmatch %>% mutate(match = if_else( -->
-<!--   dist_suffix.dist == 0, "accept0",  -->
-<!--   if_else( -->
-<!--     dist_suffix.dist > 0 & dist_nosuffix.dist == 0, "accept1", NA) -->
-<!-- )) -->
-
-<!-- distmatch %>% group_by(match) %>% count() -->
-<!-- # 74 out of 175 are an exact match (0) or match on nosuffix data (1)  -->
-
-<!-- distmatch %>% filter(is.na(match)) %>% arrange(dist_suffix.dist) %>% View() -->
-
-
-<!-- ``` -->
-
-
-<!-- ```{r warddist} -->
-
-
-<!-- warddist <- mrktc_origdest_match %>% -->
-<!--   distinct(place, ward, dist_suffix, dist_nosuffix) %>% -->
-<!--   mutate(wardsim = stringsim(place, ward), -->
-<!--          distsim = stringsim(place, dist_nosuffix), -->
-<!--          placecheck = if_else(wardsim==1 & distsim==1, "pwd", -->
-<!--                              if_else(wardsim == 1 & distsim<1, "ward", -->
-<!--                                      if_else(wardsim > 0.58 & distsim<1, "ward*", -->
-<!--                                              if_else(distsim == 1 & wardsim<1, "district", -->
-<!--                                                      if_else(distsim > 0.75 & wardsim<1, "district*", -->
-<!--                                                              if_else(wardsim == 0 & distsim == 0, "none", NA))))))) %>% -->
-<!--    mutate(placecheck = if_else(is.na(wardsim) & distsim==1, "district", placecheck), -->
-<!--           placecheck = if_else(is.na(distsim) & wardsim==1, "ward", placecheck), -->
-<!--           placecheck = if_else(ward == dist_nosuffix, "pwd", placecheck), -->
-<!--           placecheck = if_else(ward == dist_suffix, "pwd", placecheck)) -->
-
-
-<!-- pwddist <- warddist %>% distinct(placecheck, ward, dist_suffix, dist_nosuffix) -->
-<!-- pwddist2 <- warddist %>% distinct(place, ward, dist_suffix, dist_nosuffix) -->
-
-<!-- #perform fuzzy matching left join -->
-<!-- PWDmatch <- stringdist_join(pwddist,  -->
-<!--                             twards_df %>%  -->
-<!--                               distinct(Ward_N, Dist20_N) %>%  -->
-<!--                               mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N)),  -->
-<!--                 by=c( -->
-<!--                   "dist_nosuffix" = "Dist20_nosuffix", -->
-<!--                   "dist_suffix" = "Dist20_N", -->
-<!--                   "ward" = "Ward_N"), -->
-<!--                 mode='left', #use left join -->
-<!--                 method = "jw", #use jw distance metric -->
-<!--                 max_dist=99,  -->
-<!--                 distance_col='dist') %>% -->
-<!--   rowwise() %>% -->
-<!--   mutate(dist_sum = sum(dist_suffix.dist, ward.dist), -->
-<!--          distnosuffix_sum = sum(dist_nosuffix.dist, ward.dist)) %>% -->
-<!--   ungroup() %>% -->
-<!--   group_by(dist_suffix, dist_nosuffix, ward) %>% -->
-<!--   slice_min(order_by=dist_sum, n=1) -->
-
-
-<!-- PWDmatch2 <- stringdist_join(pwddist2 %>% mutate(wd = paste(ward, dist_nosuffix, sep = "-"),  -->
-<!--                                                  pwd=paste(place,ward,dist_nosuffix, sep = "-")),  -->
-<!--                             twards_df %>%  -->
-<!--                               distinct(Ward_N, Dist20_N, Region20_N) %>%  -->
-<!--                               mutate(Dist20_nosuffix =  gsub("\\.(dc|tc|cc|mc|cc\\.mc\\.tc)$", "", Dist20_N), -->
-<!--                                      pwd20 = paste(Ward_N, Dist20_N, Region20_N, sep = "-"), -->
-<!--                                      wd20 = paste(Ward_N, Dist20_N, sep = "-")),  -->
-
-<!--                 by=c("pwd" = "pwd20", -->
-<!--                      "wd" = "wd20" -->
-<!--                   # "dist_nosuffix" = "Dist20_nosuffix", -->
-<!--                   # "dist_suffix" = "Dist20_N", -->
-<!--                   # "ward" = "Ward_N" -->
-<!--                   ), -->
-<!--                 mode='left', #use left join -->
-<!--                 method = "jw", #use jw distance metric -->
-<!--                 max_dist=99,  -->
-<!--                 distance_col='dist') %>% -->
-<!--   rowwise() %>% -->
-<!--   # mutate(dist_sum = sum(dist_suffix.dist, ward.dist), -->
-<!--   #        distnosuffix_sum = sum(dist_nosuffix.dist, ward.dist)) %>% -->
-<!--   mutate(dist_sum = sum(wd.dist, pwd.dist)) %>% -->
-<!--   ungroup() %>% -->
-<!--   group_by(dist_suffix, dist_nosuffix, ward) %>% -->
-<!--   slice_min(order_by=dist_sum, n=1) -->
-
-
-<!-- ``` -->
-
-
-
 
 ```{r warddist}
 
@@ -260,7 +152,7 @@ pwd_df <- mrktc_origdest_match %>%
   mutate(pwd=paste(place, ward, dist_nosuffix, sep = "-"), 
          wd = paste(ward, dist_nosuffix, sep = "-"),
          pwd = gsub("NA-|na-|-na|-NA", "", pwd), 
-         wd = gsub("NA-|na-|-na|-NA", "", wd))
+         wd = gsub("NA-|na-|-na|-NA", "", wd)) 
 
 twdr_df <- twards_df %>%
   distinct(Ward_N, Dist20_N, Region20_N) %>% 
@@ -288,31 +180,68 @@ pwd_match <- stringdist_join(pwd_df, twdr_df,
 pwd_match %>% select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% View()
 pwd_match %>% filter(wd.dist == 0) %>% nrow() # 936 rows with perfect ward-district match!
 
-pwd_match %>% filter(wd.dist > 0) %>% select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% View()
+pwd_join <- pwd_match %>%
+  mutate(accept = if_else(wd.dist==0, "accept0", NA))
 
-pwd_match %>% 
-  ungroup() %>%
+pwd_unmatch <- pwd_join %>% 
   filter(wd.dist > 0) %>% 
-  select(pwd.A = pwd,wdr.B=wdr20,wd.A = wd,wd.B = wd20,ends_with(".dist"), dist_sum) %>% 
-  distinct(wd.A, wd.B, wd.dist) %>% View()
-
-
-pwd_match_join <- pwd_match %>%
-  ungroup() %>%
-  mutate(accept = if_else(wd.dist==0, "accept", NA)) %>%
-  filter(accept == "accept")
+  select(pwd.A = pwd, wdr.B=wdr20, wd.A = wd, wd.B = wd20, ends_with(".dist"), dist_sum) 
   
-mrktc_origdest_match2 <- mrktc_origdest_match %>%
-  left_join(
-    pwd_match_join %>% select(place, ward, dist_suffix, Ward_N, Dist20_N, Region20_N, accept),
-    by = c("place", "ward", "dist_suffix")
-  )
-
-mrktc_origdest_match2 %>% group_by(accept) %>% count()
+# mrktc_origdest_match2 <- mrktc_origdest_match %>%
+#   left_join(
+#     pwd_join %>% select(place, ward, dist_suffix, Ward_N, Dist20_N, Region20_N, accept),
+#     by = c("place", "ward", "dist_suffix")
+#   )
+# 
+# mrktc_origdest_match2 %>% group_by(accept) %>% count()
 
 ```
 
+# Pwd_unmatch - save as excel sheet and manually check wd-dist matches mark 1 if accepted, mark 0 if not accepted:
 
+```{r manualmatch}
+pwd_unmatch_lkp <- read_excel(here("data/data-cleaning_data/mrktc_origdest-stringmatch_lkp.xlsx")) %>% rename("accept1" = "accept")
+colnames(pwd_join)
+
+pwd_join2 <- pwd_join %>% 
+  # round distance metrics for joining
+  mutate(pwd.dist = round(pwd.dist, digits = 4),
+         wd.dist = round(pwd.dist, digits = 4),
+         dist_sum = round(pwd.dist, digits = 4)) %>%
+  left_join(
+    pwd_unmatch_lkp %>% 
+      # round distance metrics for joining
+      mutate(pwd.dist = round(pwd.dist, digits = 4),
+             wd.dist = round(pwd.dist, digits = 4),
+             dist_sum = round(pwd.dist, digits = 4)),
+      by = c(pwd = "pwd.A",
+             wd = "wd.A",
+             wdr20 = "wdr.B",
+             wd20 = "wd.B",
+             "pwd.dist",
+             "wd.dist",
+             "dist_sum"
+             )
+    ) %>%
+  # update accept field:
+  mutate(accept = if_else(is.na(accept) & accept1 == 1, "accept1", accept)) %>%
+  distinct()
+
+pwd_unmatch2 <- pwd_join2 %>% 
+  filter(is.na(accept)) %>% 
+  distinct()
+  # select(pwd.A = pwd, wdr.B=wdr20, wd.A = wd, wd.B = wd20, ends_with(".dist"), dist_sum) 
+
+
+mrktc_origdest_match2 <- mrktc_origdest_match %>%
+  left_join(
+    pwd_join2 %>% 
+      select(place, ward, dist_suffix, Ward_N, Dist20_N, Region20_N, accept) %>%
+      filter(!is.na(accept)),
+    by = c("place", "ward", "dist_suffix")
+  )
+
+```
 
 
 
