@@ -173,7 +173,7 @@ ggplot() +
 ### Population density at market BY WARD:
 
 ```{r popatmrkt}
-
+sf_use_s2(FALSE)
 
 mrkta_withfeatures <- mrkta_withfeatures %>%
   mutate(wardID = st_nearest_feature(mrkta_sf, twards_pop_shp)) %>% 
