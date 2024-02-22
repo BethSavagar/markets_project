@@ -18,6 +18,7 @@ library(readr)
 library(tidyverse)
 library(sf)
 library(ggplot2)
+library(readxl)
 library(here)
 library(knitr)
 library(ggpubr)
@@ -44,6 +45,8 @@ twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
 twards_df <- twards_shp %>% 
   st_drop_geometry()
 
+
+thfacilities <- st_read(here("data/shapefiles/health_facilities/health_facilities.shp"))
 ```
 
 # mjini = urban, vijini = rural
@@ -363,12 +366,12 @@ WDR_matched <- WDR_matched %>%
 
 WDR_matched %>% group_by(acceptWDR) %>% count()
 
-# wdr_join <- WDR_matched %>%
-#   filter(!is.na(acceptWDR)) %>%
-#   select(place,ward.A,dist.A,reg.A,ward.B,dist.B,reg.B, acceptWDR)
+wdr_join <- WDR_matched %>%
+  filter(!is.na(acceptWDR)) %>%
+  select(place,ward.A,dist.A,reg.A,ward.B,dist.B,reg.B, acceptWDR)
 
 # write.csv(wdr_match, file = "data/data-cleaning_data/origdest_wdr_jmatch.csv")
-
+# 
 # wdr_join %>%
 #   group_by(place,ward.A,dist.A,reg.A,ward.B,dist.B,reg.B) %>%
 #   mutate(dupe = n()>1) %>% View()
@@ -427,7 +430,7 @@ unmatched_lkp <- unmatched_match %>%
 # write.csv(unmatched_lkp, file = "data/data-cleaning_data/unmatched2_lkp.csv")
 unmatched_lkp <- read_excel(here("data/data-cleaning_data/unmatched2_lkp.xlsx"))
 unmatched_lkp <- unmatched_lkp %>%
-  mutate(acceptWR0 = if_else(acceptWR0 != "acceptWR0", acceptW0, acceptWR0)) %>%
+  # mutate(acceptWR0 = if_else(acceptWR0 != "acceptWR0", acceptW0, acceptWR0)) %>%
   filter(acceptWR0 %in% c("acceptWR0", "acceptW0")) %>%
   left_join(unmatched_match %>% select(place,wdr.A,ward.B,dist.B,reg.B, wdr.B),
                             by = c("place", "wdr.A", "wdr.B", "dist.B"))
@@ -481,7 +484,7 @@ WARD TO PLACE EXACT
 
 
 ```{r}
-hfacilities_df <- tedu %>%
+hfacilities_df <- thfacilities %>%
   st_drop_geometry() %>%
   select(Facility_N,
          Village_St,
@@ -939,9 +942,10 @@ unmatched_final <- unmatched_join %>%
 
 ```
 
+
 ```{r}
 
-origdest_join <- origdest_unique %>%
+origdest_join <- origdest_lkpunique %>%
   left_join(
     wdr_join,
     by = c("place", "ward.A", "dist.A", "reg.A")
@@ -970,5 +974,30 @@ fidNA <- origdest_lkp %>%
     origdest,
     acceptAll.final
   )
+
+```
+
+
+```{r }
+# 
+# unmatched_finallkp <- unmatched_final %>% 
+#   mutate(
+#     pdr = paste(place,ward.A,dist.A,reg.A, sep = "-"),
+#     wdr = paste(place,ward.A,dist.A,reg.A, sep = "-")) %>%
+#   stringdist_join(.,twards_match,
+#                    by=c("wdr" = "wdr.B",
+#                         "pdr"="wdr.B"),
+#                 mode='left', #use left join
+#                 method = "jw", #use jw distance metric
+#                 max_dist=1,
+#                 distance_col='dist')  %>%
+#   # rowwise() %>%
+#   # mutate(dist_sum = sum(place.dist)) %>%
+#   # ungroup() %>%
+#   group_by(place,ward.A,dist.A,reg.A) %>%
+#   slice_min(order_by=wdr.dist, n=1) %>%
+#   ungroup()
+# 
+
 
 ```
