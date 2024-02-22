@@ -32,6 +32,15 @@ library(terra)
 
 ```
 
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
 ```{r load-tzboundaries, include = F}
 # Load Tanzania Shapefile:
 # tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
@@ -44,17 +53,39 @@ twards_df <- twards_shp %>%
 
 ```
 
+```{r load-mrktdata, include = F}
+# Market survey A data:
+
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+  select(-`...1`)
+# Market A Map Data
+mrkta_mapdata <- mrkta_gps %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>%
+  filter(!is.na(lat), !is.na(long))
+
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+```
+
 
 ## 1. Population Density
 
-### (i) Humanitarian data exchange - World Pop
+Source: Humanitarian Data Exchange (World Population)
+
+### Population density raster, Tanzania.
 
 ```{r}
 
 # Raster file:
 pop_raster <- rast(here("data/shapefiles/tza_pd_2020_1km.tif"))
+# At 10k resolution??
+# pop_raster10 <- aggregate(pop_raster, fact=10, fun=mean, na.rm=TRUE)
+
 pop_df <- as.data.frame(pop_raster, xy = TRUE) %>%
   rename(humpop = "tza_pd_2020_1km")
+
+# pop_df <- as.data.frame(pop_raster10, xy = TRUE) %>%
+#   rename(humpop = "tza_pd_2020_1km")
 
 summary(pop_df$humpop)
 cuts <- quantile(pop_df$humpop, probs = c(0.10, 0.20, 0.3, 0.4, 0.5, 0.60, 0.7, 0.80, 0.9, 1))
@@ -66,6 +97,9 @@ pop_df <- pop_df %>%
 
 ggplot() +
   geom_raster(data = pop_df, aes(x = x, y = y, fill = pop_cut2)) +
+  geom_sf(data = mrkta_sf) +
+  geom_sf(data = twards_shp, fill = NA)+
+
   # scale_fill_brewer(palette = "RdYlGn")+
   scale_fill_viridis_d()+
   # geom_raster(data = pop_df, aes(x = x, y = y, fill = humpop))+
@@ -83,63 +117,87 @@ ggplot() +
 
 ```
 
+### Population density at market:
+
+```{r popatmrkt}
+
+mrkta_withfeatures <- mrkta_gps %>%
+  mutate(extract(pop_raster, mrkta_sf, ID = FALSE)) %>%
+  rename(humpop_density1km = tza_pd_2020_1km)
+
+```
+
+
+### Population density raster BY WARD, Tanzania.
 
 ```{r tmap2}
 
 # Use the 'extract' function with fun=sum to calculate total population per ward
 twards_pop_shp <- twards_shp %>% 
+  # sum human pop density:
   mutate(extract(pop_raster, twards_shp, fun=sum, na.rm=TRUE, ID = F)) %>%
   rename(humpop = "tza_pd_2020_1km") %>%
+  # mean human pop density:
   mutate(extract(pop_raster, twards_shp, fun=mean, na.rm=TRUE, ID = F)) %>% 
   rename(meandensity = "tza_pd_2020_1km")
 
-
 summary(twards_pop_shp$humpop)
-wardcuts <- quantile(twards_pop_shp$humpop, probs = c(0.10, 0.20, 0.3, 0.4, 0.5, 0.60, 0.7, 0.80, 0.9, 1))
+wardcutsSum <- quantile(twards_pop_shp$humpop, probs = c(0.10, 0.20, 0.3, 0.4, 0.5, 0.60, 0.7, 0.80, 0.9, 1))
 
 summary(twards_pop_shp$meandensity)
-wardcuts2 <- quantile(twards_pop_shp$meandensity, probs = c(0.10, 0.20, 0.3, 0.4, 0.5, 0.60, 0.7, 0.80, 0.9, 1))
+wardcutsMean <- quantile(twards_pop_shp$meandensity, probs = c(0.10, 0.20, 0.3, 0.4, 0.5, 0.60, 0.7, 0.80, 0.9, 1))
 
 twards_pop_shp <- twards_pop_shp %>% 
   # mutate(pop_cut = cut(humpop, breaks = 4)) %>%
   # mutate(pop_cut2 = cut(humpop, breaks = c(0, 0.85, 2.28,5,9.5,16.6,27.5, 43.5,70,125,65400))) 
-  mutate(wardcuts = cut(humpop, breaks = c(0, wardcuts))) %>%
-  mutate(wardcuts2 = cut(meandensity, breaks = c(0, wardcuts2)))
+  mutate(wardcutsSum = cut(humpop, breaks = c(0, wardcutsSum))) %>%
+  mutate(wardcutsMean = cut(meandensity, breaks = c(0, wardcutsMean)))
 
 ggplot() +
   # geom_raster(data = as.data.frame(pop_raster, xy = TRUE), aes(x = x, y = y, fill = tza_pd_2020_1km)) +
-  geom_sf(data = twards_pop_shp, aes(fill = wardcuts))+
+  geom_sf(data = twards_pop_shp, aes(fill = wardcutsSum))+
   # geom_sf(data = twards_pop_shp, aes(fill = wardcuts2))+
+  geom_sf(data = mrkta_sf) +
   scale_fill_viridis_d()+
   coord_sf()
 
 ggplot() +
   # geom_raster(data = as.data.frame(pop_raster, xy = TRUE), aes(x = x, y = y, fill = tza_pd_2020_1km)) +
-  geom_sf(data = twards_pop_shp, aes(fill = wardcuts2))+
+  geom_sf(data = twards_pop_shp, aes(fill = wardcutsMean))+
+  geom_sf(data = mrkta_sf) +
   scale_fill_viridis_d()+
   coord_sf()
 
+```
 
-# pop_data_ascii <- read_csv(here("data/shapefiles/tza_pd_2020_1km_ASCII_XYZ.csv"))
-# pop_data_sf <- st_as_sf(pop_data_ascii, coords = c("X", "Y"), crs = 4326)
+### Population density at market BY WARD:
 
-# Spatially join points with wards
-# sf_use_s2(FALSE)
-# points_in_wards <- st_join(pop_data_sf, twards_shp)
-# 
-# ggplot() +
-#   geom_sf(data = twards_shp, fill = NA, color = "black") + # Shapefile boundary
-#   geom_sf(data = pop_data_sf, aes(size = Z), color = "red", alpha = 0.6) + # Population points
-#   scale_size(range = c(1, 10), name = "Population Size") + # Adjust size scale as needed
-#   theme_minimal() +
-#   labs(title = "Population Distribution in Tanzania")
+```{r popatmrkt}
+
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(wardID = st_nearest_feature(mrkta_sf, twards_pop_shp)) %>% 
+  # join matched location data. by rowid (twardID)
+  left_join(
+    twards_pop_shp %>%
+      st_drop_geometry() %>%
+      mutate(wardID = 1:nrow(.)) %>%
+      select(
+        wardID,
+        # Ward_N,
+        meandensity
+      ),
+    by = c("wardID")) %>%
+  select(-wardID) 
 
 ```
 
 
 ## 2. Animal Density
 
-### (i) 
+Source: FAO Gridded Livestock of the World
+
+### Sheep density raster, Tanzania.
 
 ```{r sheep}
 
@@ -147,7 +205,6 @@ ggplot() +
 shp_raster <- rast(here("data/shapefiles/glw_shp2015/5_Sh_2015_Da.tif"))
 sheep_df <- as.data.frame(shp_raster, xy = TRUE) %>%
   rename("shppop" = `5_Sh_2015_Da`)
-
 
 # Crop raster to the extent of the Tanzania shapefile
 shp_raster_tanzania <- crop(shp_raster, ext(twards_shp))
@@ -157,13 +214,34 @@ shp_raster_tanzania_masked <- mask(shp_raster_tanzania, twards_shp)
 sheep_df <- as.data.frame(shp_raster_tanzania_masked, xy = TRUE) %>%
   rename("shppop" = `5_Sh_2015_Da`)
 
+cuts <- c(0,1,5,10,20,50,100,250,1e+06) # to match FAO GLW boundaries
+
+sheep_df <- sheep_df %>% 
+  # mutate(pop_cut = cut(humpop, breaks = 4)) %>%
+  # mutate(pop_cut2 = cut(humpop, breaks = c(0, 0.85, 2.28,5,9.5,16.6,27.5, 43.5,70,125,65400))) 
+  mutate(shppop_cut = cut(shppop, breaks = cuts))
+
 ggplot() +
-  geom_raster(data = sheep_df, aes(x = x, y = y, fill = shppop)) +
-  # scale_fill_brewer(palette = "BrBG")+
+  # geom_raster(data = sheep_df, aes(x = x, y = y, fill = shppop)) +
+  geom_raster(data = sheep_df, aes(x = x, y = y, fill = shppop_cut)) +
+  scale_fill_brewer(palette = "BrBG")+
   coord_sf()
 
+```
 
+### Sheep density at market:
 
+```{r shpatmrkt}
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(extract(shp_raster_tanzania_masked, mrkta_sf, ID = FALSE)) %>%
+  rename(shp_pop10km = `5_Sh_2015_Da`)
+
+```
+
+### Sheep density at BY WARD:
+
+```{r shpward}
 
 # Use the 'extract' function with fun=sum to calculate total population per ward
 twards_sheep_shp <- twards_shp %>% 
@@ -189,13 +267,36 @@ ggplot() +
 
 ```
 
+### Sheep density at market BY WARD:
+
+```{r sheepatmrkt2}
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(wardID = st_nearest_feature(mrkta_sf, twards_sheep_shp)) %>% 
+  # join matched location data. by rowid (twardID)
+  left_join(
+    twards_sheep_shp %>%
+      st_drop_geometry() %>%
+      mutate(wardID = 1:nrow(.)) %>%
+      select(
+        wardID,
+        # Ward_N,
+        shppop
+      ),
+    by = c("wardID")) %>%
+  select(-wardID) 
+
+```
+
+
+### Goat density raster, Tanzania.
+
 ```{r goat}
 
 # Raster file:
 gt_raster <- rast(here("data/shapefiles/glw_goats2015/5_Gt_2015_Da.tif"))
 goat_df <- as.data.frame(gt_raster, xy = TRUE) %>%
   rename("gtpop" = `5_Gt_2015_Da`)
-
 
 # Crop raster to the extent of the Tanzania shapefile
 gt_raster_tanzania <- crop(gt_raster, ext(twards_shp))
@@ -205,11 +306,34 @@ gt_raster_tanzania_masked <- mask(gt_raster_tanzania, twards_shp)
 goat_df <- as.data.frame(gt_raster_tanzania_masked, xy = TRUE) %>%
   rename("gtpop" = `5_Gt_2015_Da`)
 
+cuts <- c(0,1,5,10,20,50,100,250,500, 1e+06) # to match FAO GLW boundaries
+
+goat_df <- goat_df %>% 
+  # mutate(pop_cut = cut(humpop, breaks = 4)) %>%
+  # mutate(pop_cut2 = cut(humpop, breaks = c(0, 0.85, 2.28,5,9.5,16.6,27.5, 43.5,70,125,65400))) 
+  mutate(gtpop_cut = cut(gtpop, breaks = cuts))
+
 ggplot() +
-  geom_raster(data = goat_df, aes(x = x, y = y, fill = gtpop)) +
-  # scale_fill_brewer(palette = "BrBG")+
+  # geom_raster(data = sheep_df, aes(x = x, y = y, fill = shppop)) +
+  geom_raster(data = goat_df, aes(x = x, y = y, fill = gtpop_cut)) +
+  scale_fill_brewer(palette = "BrBG")+
   coord_sf()
 
+```
+
+### Goat density at market:
+
+```{r gtatmrkt}
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(extract(gt_raster_tanzania_masked, mrkta_sf, ID = FALSE)) %>%
+  rename(gt_pop10km = `5_Gt_2015_Da`)
+
+```
+
+### Goat density at BY WARD:
+
+```{r gtward}
 
 # Use the 'extract' function with fun=sum to calculate total population per ward
 twards_goat_shp <- twards_shp %>% 
@@ -235,6 +359,28 @@ ggplot() +
 
 ```
 
+### Goat density at market BY WARD:
+
+```{r gtbyward}
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(wardID = st_nearest_feature(mrkta_sf, twards_goat_shp)) %>% 
+  # join matched location data. by rowid (twardID)
+  left_join(
+    twards_goat_shp %>%
+      st_drop_geometry() %>%
+      mutate(wardID = 1:nrow(.)) %>%
+      select(
+        wardID,
+        # Ward_N,
+        gtpop
+      ),
+    by = c("wardID")) %>%
+  select(-wardID) 
+
+```
+
+### Production systems raster, Tanzania.
 
 ```{r productionsystems}
 
@@ -249,11 +395,10 @@ ggplot() +
 
 
 # Crop raster to the extent of the Tanzania shapefile
-sheep_raster_tanzania <- crop(ps_raster, ext(twards_shp))
+ps_raster_tanzania <- crop(ps_raster, ext(twards_shp))
+ps_raster_tanzania_masked <- mask(ps_raster_tanzania, twards_shp)
 
-sheep_raster_tanzania_masked <- mask(sheep_raster_tanzania, twards_shp)
-
-psT_df <- as.data.frame(sheep_raster_tanzania_masked, xy = TRUE) %>%
+psT_df <- as.data.frame(ps_raster_tanzania_masked, xy = TRUE) %>%
   rename("ps" = `CLASSNAME`)
 
 ggplot() +
@@ -261,9 +406,55 @@ ggplot() +
   scale_fill_brewer(palette = "Spectral")+
   coord_sf()
 
+```
+
+### Prod Sys at market:
+
+```{r gtatmrkt}
+
+mrkta_withfeatures <- mrkta_withfeatures %>%
+  mutate(extract(ps_raster_tanzania_masked, mrkta_sf, ID = FALSE)) %>%
+  rename(ps = CLASSNAME)
+
+```
+
+
+
+```{r roads}
+
+# Raster file:
+roads_shp <- st_read(here("data/shapefiles/tz_roads/tza_roads/tza_roads_1.shp"))
+ggplot()+
+  geom_sf(data = twards_pop_shp, aes(fill = wardcutsMean))+
+  geom_sf(data = roads_shp, aes(col = type))+
+  geom_sf(data = mrkta_sf) +
+  scale_fill_viridis_d()+
+  # scale_fill_manual(values = c(brewer.pal(n=9,"Greens"),"black"))+
+  scale_colour_manual(values = c("red", "orange", "white"))+
+  # scale_colour_brewer(palette = "YlOrRd", direction = -1)+
+  coord_sf()
+
+
+# Location of nearest road:
+roadID = st_nearest_feature(mrkta_sf, roads_shp)
+
+mrkta_withfeatures <- mrkta_withfeatures %>% 
+  mutate(
+    # identify closest road to market:
+    roadID = st_nearest_feature(mrkta_sf, roads_shp),
+    # calc distance to closest road:
+    road.dist = st_distance(mrkta_sf, roads_shp[roadID, ], by_element = T) %>% as.numeric(),
+    road.distkm = round(road.dist/1000, digits = 2)) %>%
+  # id towns as "major" or "other"
+  left_join(roads_shp %>% st_drop_geometry() %>% mutate(roadID = 1:nrow(.)) %>% select(roadID, road.type = type),
+            by = "roadID") %>%
+  select(-c("roadID")) %>%
+  st_drop_geometry()
 
 
 ```
+##########
+##########
 
 ```{r spagg}
 
