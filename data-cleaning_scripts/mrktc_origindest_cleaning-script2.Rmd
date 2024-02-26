@@ -939,6 +939,7 @@ unmatched_final <- unmatched_join %>%
   filter(is.na(acceptAll)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
+# write_csv(unmatched_final, file = here("data/data-cleaning_data/unmatchedfinal_lkp.csv"))
 
 ```
 
