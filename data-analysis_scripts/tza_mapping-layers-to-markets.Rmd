@@ -521,6 +521,7 @@ mrkta_withfeatures <- mrkta_withfeatures %>%
     district,
     district20,
     ward,
+    village,
     market,
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.,
