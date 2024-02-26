@@ -7,6 +7,9 @@ output:
   html_document: default
 ---
 
+## review Other categories for data to tease out 
+# - see excel sheets, recode and reform in mrktdf_definition dataframe
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -105,8 +108,8 @@ mrktc_activities_clean1 <- mrktc_activities_raw %>%
     "2.sell.place.name" = "name.of.place.8",
     "2.sell.place.ward" = "ward.9",
     "2.sell.place.district" = "district.10",
-    # "3.sell.reason"="3.what.is.your.main.reason.for.selling.these.sheep.and.or.goats.",
-    # "3.sell.reason.other"="if.other.specify.12",
+    "3.sell.reason"="3.what.is.your.main.reason.for.selling.these.sheep.and.or.goats.",
+    "3.sell.reason.other"="if.other.specify.12",
     "4.sell.transport.type"="4.how.were.sheep.goats.transported.to.the.market.see.mrktc.lkpsell.trans.",
     "4.sell.transport.other" = "if.other.specify.14",
     # "5.sell.other.species."="5.do.you.also.sell.other.animal.species.apart.from.sheep.and.goats.",
@@ -117,8 +120,8 @@ mrktc_activities_clean1 <- mrktc_activities_raw %>%
     "6.buy.place.name" ="name.of.place.21",
     "6.buy.place.ward"="ward.22",
     "6.buy.place.district"="district.23",
-    # "7.buy.reason"="7.what.is.your.main.reason.for.buying.these.small.ruminants.",
-    # "7.buy.reason.other" = "if.other.specify.25",
+    "7.buy.reason"="7.what.is.your.main.reason.for.buying.these.small.ruminants.",
+    "7.buy.reason.other" = "if.other.specify.25",
     "6.buy.transport.yesno" = "will.you.transport.the.sheep.goats.you.are.buying.today.",
     "8.buy.transport.type"="8.how.will.you.transport.these.small.ruminants.that.you.are.buying.see.mrktc.lkpsell.trans.",
     "8.buy.transport.other"="if.other.specify.27",
@@ -196,15 +199,45 @@ lkp_mrktactvty
 # 4 3     Trader (buying and selling)           7237a10d-bec6-11eb-81ba-3822e2cde809 Trader               
 # 5 4     Buying sheep and/ or goats for myself 723813aa-bec6-11eb-81ba-3822e2cde809 Buying  
 
+# Other activities at market:
+
+# write.csv(mrktc_activities_summary %>% distinct(`1.mrkt.activity.other`), file = here("data/data-cleaning_data/mrktactvtyother.csv"))
+mrktactvtyother <- read_excel(here("data/data-cleaning_data/mrktactvtyother.xlsx"))
+
 mrktc_activities_v2 <- mrktc_activities_clean2 %>%
+  
+  # join recoded other activity col:
+  left_join(mrktactvtyother %>% 
+              select(`1.mrkt.activity.other`, `1.mrkt.activity.other.code`),
+            by = c("1.mrkt.activity.other")) %>%
   mutate(`1.mrkt.activity` = gsub(" ", ";", `1.mrkt.activity`)) %>% 
   mutate(
     "1.activity.sell" = if_else(grepl("1", `1.mrkt.activity`), 1, 0),
+    "1.activity.sell" = if_else(grepl("sell", `1.mrkt.activity.other.code`), 1, `1.activity.sell`),
+
     "1.activity.middleman" = if_else(grepl("2", `1.mrkt.activity`), 1, 0),
+    "1.activity.middleman" = if_else(grepl("middleman", `1.mrkt.activity.other.code`), 1, `1.activity.middleman`),
+    
     "1.activity.trade" = if_else(grepl("3", `1.mrkt.activity`), 1, 0),
+    "1.activity.trade" = if_else(grepl("trade", `1.mrkt.activity.other.code`), 1, `1.activity.trade`),
+    
     "1.activity.buy" = if_else(grepl("4", `1.mrkt.activity`), 1, 0),
-    "1.activity.other" = if_else(grepl("-66", `1.mrkt.activity`), 1, 0), 
-    "1.activity.multi" = if_else(sum(`1.activity.sell`,`1.activity.buy`,`1.activity.middleman`,`1.activity.trade`,`1.activity.other`)>1, 1, 0))
+    "1.activity.buy" = if_else(grepl("buy", `1.mrkt.activity.other.code`), 1, `1.activity.buy`),
+    
+    # additional categories:
+    "1.activity.slaughter" = if_else(grepl("slaughter", `1.mrkt.activity.other.code`), 1, 0),
+    "1.activity.food" = if_else(grepl("food", `1.mrkt.activity.other.code`), 1, 0),
+
+    "1.activity.other" = if_else(grepl("other", `1.mrkt.activity.other.code`), 1, 0)
+    # "1.activity.other" = if_else(grepl("-66", `1.mrkt.activity`), 1, `1.activity.other`)
+    ) %>%
+  # calc. if multi activity:
+  rowwise() %>%
+  mutate(
+    "1.activity.multi" = if_else(sum(`1.activity.sell`,`1.activity.buy`,`1.activity.middleman`,`1.activity.trade`,`1.activity.slaughter`, `1.activity.food`, `1.activity.other`)>1,1,0)
+  ) %>%
+  ungroup()
+
 
 ```
 
@@ -220,14 +253,104 @@ lkp_sellplacetype
 # 4 3     Market               7239de7c-bec6-11eb-81ba-3822e2cde809 Market                
 # 5 4     Abattoir             723a2cba-bec6-11eb-81ba-3822e2cde809 Abattoir  
 
+lkp_sellreason
+#   Code Description                          `Unique Row Identifier (UUID)`      
+#   <dbl> <chr>                                <chr>                               
+# 1   -66 Other selling (give details)         7247685d-bec6-11eb-81ba-3822e2cde809
+# 2     1 Business (trader)                    72457d73-bec6-11eb-81ba-3822e2cde809
+# 3     2 For household needs - food, clothing 7245ac82-bec6-11eb-81ba-3822e2cde809
+# 4     3 Medical bills                        7245e031-bec6-11eb-81ba-3822e2cde809
+# 5     4 School fees                          72462b70-bec6-11eb-81ba-3822e2cde809
+# 6     5 Livestock treatment costs            7246d36b-bec6-11eb-81ba-3822e2cde809
+# 7     6 To buy new animals                   724708ed-bec6-11eb-81ba-3822e2cde809
+# 8     7 Religious event                      724737c8-bec6-11eb-81ba-3822e2cde809
+
+# Other sell place
+# write.csv(mrktc_activities_summary %>% distinct(`2.sell.placetype.other`), file = here("data/data-cleaning_data/sellplacetypeother.csv"))
+
+sellplaceother <- read_excel(here("data/data-cleaning_data/sellplacetypeother.xlsx"))
+
+# Other sell reason
+# write.csv(mrktc_activities_summary %>% distinct(`3.sell.reason.other`), file = here("data/data-cleaning_data/sellreasonother.csv"))
+
+sellotherreason <- read_excel(here("data/data-cleaning_data/sellotherreason.xlsx"))
+
 mrktc_activities_v3 <- mrktc_activities_v2 %>%
+  # join recoded other placetype col:
+  left_join(sellplaceother %>% 
+              select(`2.sell.placetype.other`, `2.sell.placetype.other.code`),
+            by = c("2.sell.placetype.other")) %>%
+  
   mutate(
     "2.sell.village" = if_else(grepl("1", `2.sell.placetype.code`), 1, 0),
+    "2.sell.village" = if_else(grepl("village", `2.sell.placetype.other.code`), 1, `2.sell.village`),
+    
     "2.sell.town" = if_else(grepl("2", `2.sell.placetype.code`), 1, 0),
+    "2.sell.town" = if_else(grepl("town", `2.sell.placetype.other.code`), 1, `2.sell.town`),
+    
     "2.sell.market" = if_else(grepl("3", `2.sell.placetype.code`), 1, 0),
+    "2.sell.market" = if_else(grepl("market", `2.sell.placetype.other.code`), 1, `2.sell.market`),
+    
     "2.sell.abattoir" = if_else(grepl("4", `2.sell.placetype.code`), 1, 0),
-    "2.sell.otherplace" = if_else(grepl("-66", `2.sell.placetype.code`), 1, 0)
-  )
+    "2.sell.abattoir" = if_else(grepl("abattoir", `2.sell.placetype.other.code`), 1, `2.sell.abattoir`),
+    
+    
+    "2.sell.otherplace" = if_else(grepl("other", `2.sell.placetype.other.code`), 1, 0)) %>%
+    # "2.sell.otherplace" = if_else(grepl("-66", `2.sell.placetype.code`), 1, 0),
+    
+    # SELL REASON:
+    # join recoded other reason col:
+    left_join(sellotherreason %>% 
+              select(`3.sell.reason.other`, `3.sell.reason.other.code`),
+            by = c("3.sell.reason.other")) %>%
+    
+    
+    ### reason
+      mutate(
+    `3.sell.business` = if_else(grepl("1", `3.sell.reason`), 1, 0), 
+    `3.sell.business` = if_else(grepl("business", `3.sell.reason.other.code`), 1, `3.sell.business`),
+    
+    `3.sell.household` = if_else(grepl("2", `3.sell.reason`), 1, 0), 
+    `3.sell.household` = if_else(grepl("household", `3.sell.reason.other.code`), 1, `3.sell.household`),
+    
+    `3.sell.medical` = if_else(grepl("3", `3.sell.reason`), 1, 0), 
+    `3.sell.medical` = if_else(grepl("medical", `3.sell.reason.other.code`), 1, `3.sell.medical`),
+    
+    `3.sell.school` = if_else(grepl("4", `3.sell.reason`), 1, 0), 
+    `3.sell.school` = if_else(grepl("school", `3.sell.reason.other.code`), 1, `3.sell.school`),
+    
+    `3.sell.livestocktreatment` = if_else(grepl("5", `3.sell.reason`), 1, 0), 
+    `3.sell.livestocktreatment` = if_else(grepl("livestock", `3.sell.reason.other.code`), 1, `3.sell.livestocktreatment`),
+    
+    `3.sell.restock` = if_else(grepl("6", `3.sell.reason`), 1, 0), 
+    `3.sell.restock` = if_else(grepl("restock", `3.sell.reason.other.code`), 1, `3.sell.restock`),
+    
+    `3.sell.religious` = if_else(grepl("7", `3.sell.reason`), 1, 0), 
+    `3.sell.religious` = if_else(grepl("religious", `3.sell.reason.other.code`), 1, `3.sell.religious`),
+    
+    # Other Categories:
+    `3.sell.slaughter` = if_else(grepl("slaughter", `3.sell.reason.other.code`), 1, 0),
+    `3.sell.income` = if_else(grepl("income", `3.sell.reason.other.code`), 1, 0),
+    `3.sell.agriculture` = if_else(grepl("agriculture", `3.sell.reason.other.code`), 1, 0),
+    `3.sell.food` = if_else(grepl("food", `3.sell.reason.other.code`), 1, 0),
+    `3.sell.otherreason` = if_else(grepl("other", `3.sell.reason.other.code`), 1, 0)
+    
+    ) %>%
+  rowwise() %>%
+  mutate(`3.sellreason.multi` = if_else(sum(`3.sell.business`,
+                                            `3.sell.household`,
+                                            `3.sell.medical`,
+                                            `3.sell.school`,
+                                            `3.sell.livestocktreatment`,
+                                            `3.sell.restock`,
+                                            `3.sell.religious`,
+                                            `3.sell.slaughter`,
+                                            `3.sell.income`,
+                                            `3.sell.agriculture`,
+                                            `3.sell.food`,
+                                            `3.sell.otherreason`)>1, 1, 0)) %>% 
+  ungroup()
+
 
 ```
 
@@ -244,14 +367,25 @@ lkp_selltransport
 # 4 2     By vehicle       723c33ba-bec6-11eb-81ba-3822e2cde809 Vehicle               
 # 5 3     By cart          723c781b-bec6-11eb-81ba-3822e2cde809 Cart   
 
+# Other sell place
+# write.csv(mrktc_activities_summary %>% distinct(`4.sell.transport.other`), file = here("data/data-cleaning_data/selltransportother.csv"))
+
+selltransportother <- read_excel(here("data/data-cleaning_data/selltransportother.xlsx"))
+
 mrktc_activities_v4 <- mrktc_activities_v3 %>%
+  left_join(selltransportother %>% select(`4.sell.transport.other`, `4.sell.transport.other.code`),
+            by = c("4.sell.transport.other")) %>%
   mutate(
     "4.sell.foot" = if_else(grepl("1", `4.sell.transport.type`), 1, 0),
     "4.sell.vehicle" = if_else(grepl("2", `4.sell.transport.type`), 1, 0),
     "4.sell.cart" = if_else(grepl("3", `4.sell.transport.type`), 1, 0),
-    "4.sell.othertransport" = if_else(grepl("-66", `4.sell.transport.type`), 1, 0),
+    "4.sell.frommrkt" = if_else(grepl("market", `4.sell.transport.other.code`), 1, 0),
+    # "4.sell.othertransport" = if_else(grepl("-66", `4.sell.transport.type`), 1, 0),
+    `4.sell.othertransport` = if_else(grepl("other", `4.sell.transport.other.code`), 1, 0),
     "4.sell.unknowntransport" = if_else(grepl("-77", `4.sell.transport.type`), 1, 0)
   )
+
+
 
 ```
 
@@ -268,20 +402,110 @@ lkp_sellplacetype
 # 4 3     Market               7239de7c-bec6-11eb-81ba-3822e2cde809 Market                
 # 5 4     Abattoir             723a2cba-bec6-11eb-81ba-3822e2cde809 Abattoir  
 
+lkp_buyreason
+# # A tibble: 9 × 3
+#    Code Description                            `Unique Row Identifier (UUID)`      
+#   <dbl> <chr>                                  <chr>                               
+# 1   -66 Other buying (give details)            72453231-bec6-11eb-81ba-3822e2cde809
+# 2     1 Business (trader)                      72429617-bec6-11eb-81ba-3822e2cde809
+# 3     2 Re-stocking                            72432f4c-bec6-11eb-81ba-3822e2cde809
+# 4     3 Breeding stock                         72436bc2-bec6-11eb-81ba-3822e2cde809
+# 5     4 Fattening                              7243cb4d-bec6-11eb-81ba-3822e2cde809
+# 6     5 Rearing                                72442a15-bec6-11eb-81ba-3822e2cde809
+# 7     6 For home consumption                   7244779c-bec6-11eb-81ba-3822e2cde809
+# 8     7 Religious or social event              7244bc8d-bec6-11eb-81ba-3822e2cde809
+# 9     8 To take to the abattoir/slaughter slab 7244f996-bec6-11eb-81ba-3822e2cde809
+
+# Other buy place
+# write.csv(mrktc_activities_summary %>% distinct(`6.buy.placetype.other`), file = here("data/data-cleaning_data/buyplacetypeother.csv"))
+buyplaceother <- read_excel(here("data/data-cleaning_data/buyplacetypeother.xlsx"))
+
+# Other buy reason
+# write.csv(mrktc_activities_summary %>% distinct(`7.buy.reason.other`), file = here("data/data-cleaning_data/buyreasonother.csv"))
+
+buyreasonother <- read_excel(here("data/data-cleaning_data/buyreasonother.xlsx"))
+
+
 mrktc_activities_v5 <- mrktc_activities_v4 %>%
+  left_join(buyplaceother %>% select(`6.buy.placetype.other`, `6.buy.placetype.other.code`),
+            by = c("6.buy.placetype.other")) %>%
   mutate(
     "6.buy.village" = if_else(grepl("1", `6.buy.placetype.code`), 1, 0),
+    "6.buy.village" = if_else(grepl("village", `6.buy.placetype.other.code`), 1, `6.buy.village`),
+    
     "6.buy.town" = if_else(grepl("2", `6.buy.placetype.code`), 1, 0),
+    "6.buy.town" = if_else(grepl("town", `6.buy.placetype.other.code`), 1, `6.buy.town`),
+    
     "6.buy.market" = if_else(grepl("3", `6.buy.placetype.code`), 1, 0),
+    "6.buy.market" = if_else(grepl("market", `6.buy.placetype.other.code`), 1, `6.buy.market`),
+    
     "6.buy.abattoir" = if_else(grepl("4", `6.buy.placetype.code`), 1, 0),
-    "6.buy.otherplace" = if_else(grepl("-66", `6.buy.placetype.code`), 1, 0)
-  )
+    "6.buy.abattoir" = if_else(grepl("slaughter", `6.buy.placetype.other.code`), 1, `6.buy.abattoir`),
+    
+    "6.buy.otherplace" = if_else(grepl("other", `6.buy.placetype.other.code`), 1, 0)) %>%
+  
+  # BUY REASON
+  
+  left_join(buyreasonother %>% select(`7.buy.reason.other`, `7.buy.reason.other.code`),
+            by = c("7.buy.reason.other")) %>%
+
+     ### reason
+  mutate(
+    `7.buy.business` = if_else(grepl("1", `7.buy.reason`), 1, 0), 
+    `7.buy.business` = if_else(grepl("business", `7.buy.reason.other`), 1, `7.buy.business`),
+    
+    `7.buy.restock` = if_else(grepl("2", `7.buy.reason`), 1, 0), 
+    `7.buy.restock` = if_else(grepl("restock", `7.buy.reason.other`), 1, `7.buy.restock`),
+    
+    `7.buy.breedstock` = if_else(grepl("3", `7.buy.reason`), 1, 0), 
+    `7.buy.breedstock` = if_else(grepl("breedstock", `7.buy.reason.other`), 1, `7.buy.breedstock`),
+    
+    `7.buy.fattening` = if_else(grepl("4", `7.buy.reason`), 1, 0), 
+    `7.buy.fattening` = if_else(grepl("fattening", `7.buy.reason.other`), 1, `7.buy.fattening`),
+    
+    `7.buy.rearing` = if_else(grepl("5", `7.buy.reason`), 1, 0), 
+    `7.buy.rearing` = if_else(grepl("rearing", `7.buy.reason.other`), 1, `7.buy.rearing`),
+    
+    `7.buy.homeconsumption` = if_else(grepl("6", `7.buy.reason`), 1, 0), 
+    `7.buy.homeconsumption` = if_else(grepl("home", `7.buy.reason.other`), 1, `7.buy.homeconsumption`),
+    
+    `7.buy.religious` = if_else(grepl("7", `7.buy.reason`), 1, 0), 
+    `7.buy.religious` = if_else(grepl("religious", `7.buy.reason.other`), 1, `7.buy.religious`),
+    
+    `7.buy.slaughter` = if_else(grepl("8", `7.buy.reason`), 1, 0),
+    `7.buy.slaughter` = if_else(grepl("slaughter", `7.buy.reason.other`), 1, `7.buy.slaughter`),
+    
+    # other categories:
+    `7.buy.food` = if_else(grepl("food", `7.buy.reason.other`), 1, 0),
+    `7.buy.informaltrade` = if_else(grepl("informaltrade", `7.buy.reason.other`), 1,0),
+    `7.buy.income` = if_else(grepl("income", `7.buy.reason.other`), 1, 0),
+    
+    `7.buy.otherreason` =  if_else(grepl("other", `7.buy.reason.other`), 1, 0)
+    ) %>%
+    mutate(`7.buyreason.multi` = if_else(sum(`7.buy.business`,
+                                            `7.buy.restock`,
+                                            `7.buy.breedstock`,
+                                            `7.buy.fattening`,
+                                            `7.buy.rearing`,
+                                            `7.buy.homeconsumption`,
+                                            `7.buy.religious`,
+                                            `7.buy.slaughter`,
+                                            `7.buy.food`,
+                                            `7.buy.informaltrade`,
+                                            `7.buy.income`,
+                                            `7.buy.otherreason`
+                                            )>1, 1, 0)
+    )
+
+# Other buy reason
+# 
+# write.csv(mrktc_activities_summary %>% distinct(`7.buy.reason.other`), file = here("data/data-cleaning_data/buyreasonother.csv"))
 
 ```
 
 
 ```{r}
-lkp_selltransport
+lkp_buytransport
 
 # # A tibble: 5 × 4
 #   Code  Description      `Unique Row Identifier (UUID)`       `4.sell.transport.lkp`
@@ -292,14 +516,31 @@ lkp_selltransport
 # 4 2     By vehicle       723c33ba-bec6-11eb-81ba-3822e2cde809 Vehicle               
 # 5 3     By cart          723c781b-bec6-11eb-81ba-3822e2cde809 Cart   
 
+# write.csv(mrktc_activities_summary %>% distinct(`8.buy.transport.other`), file = here("data/data-cleaning_data/buytransportother.csv"))
+
+buytransportother <- read_excel(here("data/data-cleaning_data/buytransportother.xlsx"))
+
 mrktc_activities_v6 <- mrktc_activities_v5 %>%
+  left_join(buytransportother %>% select(`8.buy.transport.other`,`8.buy.transport.other.code`),
+            by = c("8.buy.transport.other")) %>%
   mutate(
     "8.buy.foot" = if_else(grepl("1", `8.buy.transport.type`), 1, 0),
+    "8.buy.foot" = if_else(grepl("foot", `8.buy.transport.other.code`), 1, `8.buy.foot`),
+    
     "8.buy.vehicle" = if_else(grepl("2", `8.buy.transport.type`), 1, 0),
+    "8.buy.vehicle" = if_else(grepl("vehicle", `8.buy.transport.other.code`), 1, `8.buy.vehicle`),
+    
     "8.buy.cart" = if_else(grepl("3", `8.buy.transport.type`), 1, 0),
-    "8.buy.othertransport" = if_else(grepl("-66", `8.buy.transport.type`), 1, 0),
+    "8.buy.cart" = if_else(grepl("cart", `8.buy.transport.other.code`), 1, `8.buy.cart`),
+    
+    "8.buy.motorbike" = if_else(grepl("motor", `8.buy.transport.other.code`), 1, 0),
+    "8.buy.slaughter" = if_else(grepl("slaughter", `8.buy.transport.other.code`), 1, 0),
+    "8.buy.atmarket" = if_else(grepl("market", `8.buy.transport.other.code`), 1, 0),
+    
+    "8.buy.othertransport" = if_else(grepl("other", `8.buy.transport.other.code`), 1, 0),
     "8.buy.unknowntransport" = if_else(grepl("-77", `8.buy.transport.type`), 1, 0)
   )
+
 
 ```
 
@@ -322,8 +563,10 @@ mrktc_activities_summary <- mrktc_activities_v7 %>%
     fid, 
     starts_with("1."),
     starts_with("2."),
+    starts_with("3."),
     starts_with("4."),
     starts_with("6."),
+    starts_with("7."),
     starts_with("8."),
     starts_with("12."),
     unique.row.identifier.uuid.
@@ -332,6 +575,8 @@ mrktc_activities_summary <- mrktc_activities_v7 %>%
 
 
 ```
+
+
 
 ```{r saveActvty}
 if(filesave){
