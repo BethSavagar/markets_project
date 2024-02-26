@@ -1,0 +1,877 @@
+"","place","ward.A","dist.A","reg.A","Facility_N","Village_St","ward.X","dist.X","reg.X","place.X","place.dist","reg.A.dist","dist"
+"1","alabama","minazini","malinyi.dc","morogoro","maja","bamba","Kongowe","Kibaha TC","pwani","maja-bamba",0.180952380952381,1,NA
+"2","alabama","minazini","malinyi.dc","morogoro","maja","bamba","Kongowe","Kibaha TC","pwani","maja-bamba",0.180952380952381,1,NA
+"3","bagamoyo","bagamoyo","pwani","pwani","bagamoyo","dunda","Dunda","Bagamoyo DC","pwani","bagamoyo-dunda",0.142857142857143,0,NA
+"4","bangamoyo","bangamoyo","bahi.dc","dodoma","bagamoyo","dunda","Dunda","Bagamoyo DC","pwani","bagamoyo-dunda",0.17989417989418,1,NA
+"5","biti","biti","bariadi.dc","simiyu","bitare","bitare","Bitare","Kibondo DC","kigoma","bitare-bitare",0.230769230769231,0.444444444444445,NA
+"6","biti","biti","bariadi.dc","simiyu","bitoto","bitoto","Buyagu","Sengerema DC","mwanza","bitoto-bitoto",0.230769230769231,0.555555555555556,NA
+"7","biti","biti","bariadi.dc","simiyu","bitale","bitale","Bitale","Kigoma DC","kigoma","bitale-bitale",0.230769230769231,0.444444444444445,NA
+"8","bugunguli","buhunda","misungwi.dc","mwanza","mbuguni","mbuguni","Mbuguni","Meru DC","arusha","mbuguni-mbuguni",0.234259259259259,0.444444444444445,NA
+"9","bumhala","buhala","bariadi.dc","simiyu","bumba","bumba","Mlingano","Bumbuli DC","tanga","bumba-bumba",0.277056277056277,1,NA
+"10","bumhala","buhala","bariadi.dc","simiyu","mhale","mhale","Kikeo","Mvomero DC","morogoro","mhale-mhale",0.277056277056277,0.569444444444445,NA
+"11","buzunza","kidinda","bariadi.tc","simiyu","buza","buza","Buza","Temeke MC","dar es salaam","buza-buza",0.242063492063492,0.585470085470085,NA
+"12","bwage","mzia","mvomero.dc","morogoro","ibwaga","ibwaga","Ugogoni","Kongwa DC","dodoma","ibwaga-ibwaga",0.297435897435897,0.472222222222222,NA
+"13","bwage","mzia","mvomero.dc","morogoro","wagete","wagete","Rigicha","Serengeti DC","mara","wagete-wagete",0.297435897435897,0.416666666666667,NA
+"14","bwage","mzia","mvomero.dc","morogoro","bwanga","bwanga","Bwanga","Chato DC","geita","bwanga-bwanga",0.297435897435897,1,NA
+"15","bwage","mziha","mvomero.dc","morogoro","ibwaga","ibwaga","Ugogoni","Kongwa DC","dodoma","ibwaga-ibwaga",0.297435897435897,0.472222222222222,NA
+"16","bwage","mziha","mvomero.dc","morogoro","wagete","wagete","Rigicha","Serengeti DC","mara","wagete-wagete",0.297435897435897,0.416666666666667,NA
+"17","bwage","mziha","mvomero.dc","morogoro","bwanga","bwanga","Bwanga","Chato DC","geita","bwanga-bwanga",0.297435897435897,1,NA
+"18","bwage.nyumbani","mziha","mvomero.dc","morogoro","mwageni","mwageni","Itinje","Meatu DC","simiyu","mwageni-mwageni",0.252380952380952,0.569444444444445,NA
+"19","bwawani","chikopelo","bahi.dc","dodoma","bwawani","bwawani","Bwawani","Arusha DC","arusha","bwawani-bwawani",0.177777777777778,0.555555555555556,NA
+"20","bwawani","kiberenge","ifakara.tc","morogoro","bwawani","bwawani","Bwawani","Arusha DC","arusha","bwawani-bwawani",0.177777777777778,0.569444444444445,NA
+"21","chala","chala","namanyere","namanyere","chakulu","chakuru","Uvinza","Uvinza DC","kigoma","chakulu-chakuru",0.222222222222222,0.481481481481482,NA
+"22","chala","chala","namanyere","namanyere","chala","chala 'c'","Chala","Nkasi DC","rukwa","chala-chala 'c'",0.222222222222222,0.562962962962963,NA
+"23","chala","chala","namanyere","namanyere","chalowe","chalowe","Igwachanya","Wanging'ombe DC","njombe","chalowe-chalowe",0.222222222222222,0.388888888888889,NA
+"24","chala","chala","namanyere","namanyere","chala","chala 'a'","Chala","Nkasi DC","rukwa","chala-chala 'a'",0.222222222222222,0.562962962962963,NA
+"25","chalinze","chalinze","chalinze.dc","pwani","chalinze","wilunze","Manchali","Chamwino DC","dodoma","chalinze-wilunze",0.166666666666667,1,NA
+"26","chalisuka","madibira","mufindi.dc","iringa","chivu","kigina","Ntobeye","Ngara DC","kagera","chivu-kigina",0.277777777777778,0.444444444444445,NA
+"27","chamalendi","chamalendi","mpimbwe.dc","katavi","chamalendi","chamalendi","Chamalendi","Mpimbwe DC","katavi","chamalendi-chamalendi",0.174603174603175,0,NA
+"28","chamela","chamela","kwimba.dc","mwanza","chato","kitela","Chato","Chato DC","geita","chato-kitela",0.214285714285714,0.544444444444445,NA
+"29","chandulu","haya","magu.dc","mwanza","chandulu","chandulu","Ng'haya","Magu DC","mwanza","chandulu-chandulu",0.176470588235294,0,NA
+"30","chanikanguo","chanikanguo","masasi.dc","mtwara","chanika","tunguni","Chanika","Ilala MC","dar es salaam","chanika-tunguni",0.191414141414141,0.423076923076923,NA
+"31","chanikanguocha","chanikanguo","masasi.dc","mtwara","chanika","chanika","Chanika","Karagwe DC","kagera","chanika-chanika",0.220923520923521,0.333333333333333,NA
+"32","chapwa","chapwa","mbozi.dc","songwe","chawi","chawi","Chawi","Nanyamba TC","mtwara","chawi-chawi",0.237373737373737,0.555555555555556,NA
+"33","chibuji","nyang.honga","misungwi.dc","mwanza","chibuji","chibuji","Fukalo","Kwimba DC","mwanza","chibuji-chibuji",0.177777777777778,0,NA
+"34","chibuji","nyangh.onge","misungwi.dc","mwanza","chibuji","chibuji","Fukalo","Kwimba DC","mwanza","chibuji-chibuji",0.177777777777778,0,NA
+"35","chibuji","nyangh.ongwa","misungwi.dc","mwanza","chibuji","chibuji","Fukalo","Kwimba DC","mwanza","chibuji-chibuji",0.177777777777778,0,NA
+"36","chifutuka","chifutuka","bahi.dc","dodoma","chifukuta","chifutuka","Nondwa","Bahi DC","dodoma","chifukuta-chifutuka",0.212475633528265,0,NA
+"37","chiguluka","chiguluka","bahi.dc","dodoma","chiguluka","chipanga 'b'","Chipanga","Bahi DC","dodoma","chiguluka-chipanga 'b'",0.196969696969697,0,NA
+"38","chikole","kangakero","malinyi.dc","morogoro","chato","kitela","Chato","Chato DC","geita","chato-kitela",0.234126984126984,1,NA
+"39","chikukwe","chikukwe","masasi.dc","mtwara","chosi a","muwale","Ihahi","Mbarali DC","mbeya","chosi a-muwale",0.273809523809524,0.422222222222222,NA
+"40","chilulumo","chilulumo","mbeya.dc","mbeya","chilulumo","not set","Chilulumo","Momba DC","songwe","chilulumo-not set",0.156862745098039,1,NA
+"41","chilulumo","mkomba","momba.dc","songwe","chilulumo","not set","Chilulumo","Momba DC","songwe","chilulumo-not set",0.156862745098039,0,NA
+"42","chilungulu","chilungulu","bahi.dc","dodoma","ilungu","ilungu","Ipepo","Makete DC","njombe","ilungu-ilungu",0.194871794871795,0.444444444444445,NA
+"43","chimendeli","chimendeli","bahi.dc","dodoma","chimendeli","chikola","Chikola","Bahi DC","dodoma","chimendeli-chikola",0.148148148148148,0,NA
+"44","chingali","njiwa","malinyi.dc","morogoro","chiwonga","chikuti","Chiwonga","Newala DC","mtwara","chiwonga-chikuti",0.229166666666667,0.472222222222222,NA
+"45","chinongwe","chinongwe","masasi.dc","mtwara","chinongwe","chinongwe'a'","Chinongwe","Ruangwa DC","lindi","chinongwe-chinongwe'a'",0.196969696969697,1,NA
+"46","chipole","chipole","masasi.dc","mtwara","chiola","not set","Chiola","Nachingwea DC","lindi","chiola-not set",0.238095238095238,1,NA
+"47","chipole","mumbaka","masasi.dc","mtwara","chiola","not set","Chiola","Nachingwea DC","lindi","chiola-not set",0.238095238095238,1,NA
+"48","chita","melela","mlimba","mlimba","chiuta","chiuta","Mandwanga","Lindi DC","lindi","chiuta-chiuta",0.205128205128205,0.422222222222222,NA
+"49","chitandi","nangwala","newala.dc","mtwara","chiwanda","chiwanda","Nkangamo","Momba DC","songwe","chiwanda-chiwanda",0.237745098039216,0.555555555555556,NA
+"50","chitandi","nangwala","newala.dc","mtwara","chiwanda","chiwanda","Nkangamo","Momba DC","songwe","chiwanda-chiwanda",0.237745098039216,0.555555555555556,NA
+"51","chonga","myula","nkasi.dc","rukwa","chonga","chonga","Kate","Nkasi DC","rukwa","chonga-chonga",0.17948717948718,0,NA
+"52","chunya.mjini","chunya.mjini","chunya.dc","mbeya","chunya","kibaoni","Chokaa","Chunya DC","mbeya","chunya-kibaoni",0.202380952380952,0,NA
+"53","dar.es.salaam","dar.es.salaam","dar.es.salaam","dar.es.salaam","masela","masela","Masela","Maswa DC","simiyu","masela-masela",0.316239316239316,0.585470085470085,NA
+"54","dar.es.salaam","pugu","pugu","pugu","masela","masela","Masela","Maswa DC","simiyu","masela-masela",0.316239316239316,0.527777777777778,NA
+"55","daresalamu","pugu","pugu","pugu","arafa","mbuyuni","Kigogo","Kinondoni MC","dar es salaam","arafa-mbuyuni",0.312820512820513,1,NA
+"56","daresalamu","pugu","pugu","pugu","arafa","mbuyuni","Kigogo","Kinondoni MC","dar es salaam","arafa-mbuyuni",0.312820512820513,1,NA
+"57","dodoma","dodoma","chamwino.bahi","chamwino.bahi","dodoma","mmasi","Madukani","Dodoma MC","dodoma","dodoma-mmasi",0.166666666666667,0.534188034188034,NA
+"58","dodoma","dodoma","dodoma.cc","dodoma","dodoma","mmasi","Madukani","Dodoma MC","dodoma","dodoma-mmasi",0.166666666666667,0,NA
+"59","dodoma","dodoma.mjini","dodoma.cc","dodoma","dodoma","mmasi","Madukani","Dodoma MC","dodoma","dodoma-mmasi",0.166666666666667,0,NA
+"60","dodoma","kisasa","dodoma.cc","dodoma","dodoma","mmasi","Madukani","Dodoma MC","dodoma","dodoma-mmasi",0.166666666666667,0,NA
+"61","dodoma.na.dar.es.salaam","dodoma.na.dar.es.salaam","dodoma.cc","dodoma","dodoma","mmasi","Madukani","Dodoma MC","dodoma","dodoma-mmasi",0.328502415458937,0,NA
+"62","dudulu","dudulu","itilima.dc","simiyu","dulamu","dulami","Igwachanya","Wanging'ombe DC","njombe","dulamu-dulami",0.235042735042735,0.555555555555556,NA
+"63","dungo","mziha","mvomero.dc","morogoro","dung'unyi","not set","Dung'unyi","Ikungi DC","singida","dung'unyi-not set",0.235294117647059,0.577380952380952,NA
+"64","dutwa.mwasamba","dutwa.lamadi","bariadi.busega","bariadi.busega","kwamba","kwamba","Masagulu","Kilindi DC","tanga","kwamba-kwamba",0.258648758648759,0.485714285714286,NA
+"65","dutwa.mwasamba","dutwa.lamadi","bariadi.busega","bariadi.busega","ukwama","ukwama","Ukwama","Makete DC","njombe","ukwama-ukwama",0.258648758648759,0.507936507936508,NA
+"66","faranji","igava","momba.dc","songwe","faraja","mivumoni","Wazo","Kinondoni MC","dar es salaam","faraja-mivumoni",0.247619047619048,0.670940170940171,NA
+"67","faranji","igava","momba.dc","songwe","faraja","mivumoni","Wazo","Kinondoni MC","dar es salaam","faraja-mivumoni",0.247619047619048,0.670940170940171,NA
+"68","farm.17","nachingwea","masasi.dc","mtwara","faraja","mivumoni","Wazo","Kinondoni MC","dar es salaam","faraja-mivumoni",0.387301587301587,0.423076923076923,NA
+"69","farm.17","nachingwea","masasi.dc","mtwara","faraja","mkatanga","Munanila","Buhigwe DC","kigoma","faraja-mkatanga",0.387301587301587,0.555555555555556,NA
+"70","farm.17","nachingwea","masasi.dc","mtwara","faraja","mivumoni","Wazo","Kinondoni MC","dar es salaam","faraja-mivumoni",0.387301587301587,0.423076923076923,NA
+"71","farm.17","nachingwea","masasi.dc","mtwara","faraja","mkatanga","Munanila","Buhigwe DC","kigoma","faraja-mkatanga",0.387301587301587,0.555555555555556,NA
+"72","farm.17.nachingwea.mihima.lukuledi.mpanyani.ndomoni","nachingwea.mpanyani.lukuledi","nachingwea.mpanyani.lukuledi","nachingwea.mpanyani.lukuledi","imalamihayo","imalamihayo","Uyui","Tabora MC","tabora","imalamihayo-imalamihayo",0.354425973287866,0.531746031746032,NA
+"73","farm.17.nachingwea.mihima.lukuledi.mpanyani.ndomoni","nachingwea.mpanyani.lukuledi","nachingwea.mpanyani.lukuledi","nachingwea.mpanyani.lukuledi","imalamihayo","imalamihayo","Kazaroho","Kaliua DC","tabora","imalamihayo-imalamihayo",0.354425973287866,0.531746031746032,NA
+"74","fitumbi","magunga","chunya.dc","mbeya","itumba","itumba","Itumba","Ileje DC","songwe","itumba-itumba",0.227106227106227,1,NA
+"75","gasima","gasuma","bariadi.dc","simiyu","gasuma","gasuma","Mwaubingi","Bariadi DC","simiyu","gasuma-gasuma",0.260683760683761,0,NA
+"76","gasuma","gasuma","bariadi.dc","simiyu","gasuma","gasuma","Mwaubingi","Bariadi DC","simiyu","gasuma-gasuma",0.17948717948718,0,NA
+"77","giliku","giliku","bariadi.tc","simiyu","kigulu","kigulu","Kigulu","Makete DC","njombe","kigulu-kigulu",0.318376068376068,0.555555555555556,NA
+"78","gohe","gohee","kilindi.dc","tanga","good hope","buza","Buza","Temeke MC","dar es salaam","good hope-buza",0.238095238095238,0.482051282051282,NA
+"79","gohe","gohee","kilindi.dc","tanga","good hope","buza","Buza","Temeke MC","dar es salaam","good hope-buza",0.238095238095238,0.482051282051282,NA
+"80","gombe.nyumbani","lukande","lukande","lukande","mbweni","mbweni","Mbweni","Kinondoni MC","dar es salaam","mbweni-mbweni",0.271062271062271,0.557997557997558,NA
+"81","halaka","hezia","mbozi.dc","songwe","kala","kala","Kala","Nkasi DC","rukwa","kala-kala",0.203703703703704,0.544444444444445,NA
+"82","handeni","handeni","handeni.dc","tanga","handeni","bomani","Vibaoni","Handeni TC","tanga","handeni-bomani",0.166666666666667,0,NA
+"83","handeni","handeni","tanga.cc","tanga","handeni","bomani","Vibaoni","Handeni TC","tanga","handeni-bomani",0.166666666666667,0,NA
+"84","haneti","haneti","haneti","haneti","haneti","haneti","Haneti","Chamwino DC","dodoma","haneti-haneti",0.17948717948718,1,NA
+"85","hatete","hatete","mbozi.dc","songwe","kate","kate","Kate","Nkasi DC","rukwa","kate-kate",0.203703703703704,0.544444444444445,NA
+"86","hilumba","itongo","kwimba.dc","mwanza","ileje","itumba","Itumba","Ileje DC","songwe","ileje-itumba",0.214285714285714,0.555555555555556,NA
+"87","ibilishi","ibilishi","maswa.dc","simiyu","ibililo","ibililo","Nkunga","Rungwe DC","mbeya","ibililo-ibililo",0.283333333333333,0.422222222222222,NA
+"88","ibilishi","ibilishi","maswa.dc","simiyu","ibumila","ibumila","Kichiwa","Njombe DC","njombe","ibumila-ibumila",0.283333333333333,0.555555555555556,NA
+"89","ibilishi","ibilishi","maswa.dc","simiyu","imiliwaha","mtila","Matola","Njombe TC","njombe","imiliwaha-mtila",0.283333333333333,0.555555555555556,NA
+"90","ibilisi","katuma","tanganyika","tanganyika","ibililo","ibililo","Nkunga","Rungwe DC","mbeya","ibililo-ibililo",0.247619047619048,0.633333333333333,NA
+"91","ibilisi","katuma","tanganyika","tanganyika","ibumila","ibumila","Kichiwa","Njombe DC","njombe","ibumila-ibumila",0.247619047619048,0.577777777777778,NA
+"92","ibindi","ibindi","nsimbo.dc","katavi","ibindi","ibindi","Machimboni","Nsimbo DC","katavi","ibindi-ibindi",0.17948717948718,0,NA
+"93","ibindi","ibindi","nsimbo.dc","katavi","ibindo","ibindo","Nyambiti","Kwimba DC","mwanza","ibindo-ibindo",0.17948717948718,0.444444444444445,NA
+"94","ibolyo","ibolyo","bariadi.dc","simiyu","kibo","lyasongoro","Marangu Mashariki","Moshi DC","kilimanjaro","kibo-lyasongoro",0.2,0.52020202020202,NA
+"95","idandu","namawala","mlimba","mlimba","idunda","idunda","Kichangani","Ulanga DC","morogoro","idunda-idunda",0.235042735042735,0.569444444444445,NA
+"96","idandu","namawala","mlimba","mlimba","idunda","idunda","Yakobi","Njombe TC","njombe","idunda-idunda",0.235042735042735,0.444444444444445,NA
+"97","idandu","namawala","mlimba","mlimba","idunda","idunda","Iyula","Mbozi DC","songwe","idunda-idunda",0.235042735042735,1,NA
+"98","idandu","namawala","mlimba","mlimba","idunda","idunda","Itewe","Mbeya DC","mbeya","idunda-idunda",0.235042735042735,0.422222222222222,NA
+"99","idandu","namwawala","mlimba","mlimba","idunda","idunda","Kichangani","Ulanga DC","morogoro","idunda-idunda",0.235042735042735,0.569444444444445,NA
+"100","idandu","namwawala","mlimba","mlimba","idunda","idunda","Yakobi","Njombe TC","njombe","idunda-idunda",0.235042735042735,0.444444444444445,NA
+"101","idandu","namwawala","mlimba","mlimba","idunda","idunda","Iyula","Mbozi DC","songwe","idunda-idunda",0.235042735042735,1,NA
+"102","idandu","namwawala","mlimba","mlimba","idunda","idunda","Itewe","Mbeya DC","mbeya","idunda-idunda",0.235042735042735,0.422222222222222,NA
+"103","idandu.nyumbani","namwawala","mlimba","mlimba","ndumbi","ndumbi","Mbaha","Nyasa DC","ruvuma","ndumbi-ndumbi",0.271367521367521,0.444444444444445,NA
+"104","idiwili","idiwili","mbozi.dc","songwe","idiwili","idiwili","Iyula","Mbozi DC","songwe","idiwili-idiwili",0.177777777777778,0,NA
+"105","idiwili","itiwili","mbozi.dc","songwe","idiwili","idiwili","Iyula","Mbozi DC","songwe","idiwili-idiwili",0.177777777777778,0,NA
+"106","idumulavanu","ihowanza","muf","muf","idunda","idumilavanu","Idunda","Mufindi DC","iringa","idunda-idumilavanu",0.220538720538721,1,NA
+"107","ifakara","mlabani","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"108","ifakara","mlabani","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"109","ifakara","viwanja.sitini","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"110","ifakara","viwanja.sitini","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"111","ifakara","viwanjasitini","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"112","ifakara","viwanjasitini","ifakara.tc","morogoro","ifakara","not set","Mlabani","Ifakara TC","morogoro","ifakara-not set",0.177777777777778,0,NA
+"113","igaganulwa","dutwa","dutwa","dutwa","igalamu","igalamu","Malindo","Rungwe DC","mbeya","igalamu-igalamu",0.263888888888889,0.533333333333333,NA
+"114","igalula","mpanda.ndogo","tanganyika","tanganyika","igula","igula","Kihorogota","Iringa DC","iringa","igula-igula",0.168831168831169,0.566666666666667,NA
+"115","igangwe","nkung.ungu","chunya.dc","mbeya","misigaro","ng'washi","Buhongwa","Nyamagana MC","mwanza","misigaro-ng'washi",0.263305322128851,0.422222222222222,NA
+"116","igangwe","nkung.ungu","chunya.dc","mbeya","misigaro","ng'washi","Buhongwa","Nyamagana MC","mwanza","misigaro-ng'washi",0.263305322128851,0.422222222222222,NA
+"117","igawa","igawa","malinyi.dc","morogoro","igawa","igawa","Igawa","Malinyi DC","morogoro","igawa-igawa",0.181818181818182,0,NA
+"118","igawa.nyumbani","igawa","malinyi.dc","morogoro","mbugani","mbugani","Mbugani","Chunya DC","mbeya","mbugani-mbugani",0.23968253968254,0.558333333333333,NA
+"119","igawa.nyumbani","igawa","malinyi.dc","morogoro","mbugani","mbugani","Kitandililo","Makambako TC","njombe","mbugani-mbugani",0.23968253968254,0.638888888888889,NA
+"120","igegu","igegu","bariadi.dc","simiyu","igegu","igegu","Sapiwi","Bariadi DC","simiyu","igegu-igegu",0.181818181818182,0,NA
+"121","igoma","igoma","kalemela","kalemela","igoma","igoma","Iwungilo","Njombe TC","njombe","igoma-igoma",0.181818181818182,0.638888888888889,NA
+"122","igoma","igoma","kalemela","kalemela","igoma","igoma","Igoma","Mbeya DC","mbeya","igoma-igoma",0.181818181818182,0.616666666666667,NA
+"123","igombe","kabila","magu.dc","mwanza","igombe","igombe","Nkungulu","Magu DC","mwanza","igombe-igombe",0.17948717948718,0,NA
+"124","igumbilo","milola","ulanga.dc","morogoro","igumbilo","igumbilo","Igumbilo","Iringa MC","iringa","igumbilo-igumbilo",0.176470588235294,0.472222222222222,NA
+"125","igumbilo","milola","ulanga.dc","morogoro","igumbilo","igumbilo","Lupila","Makete DC","njombe","igumbilo-igumbilo",0.176470588235294,0.638888888888889,NA
+"126","igumbilo.milola.na.mavimba","milola","ulanga.dc","morogoro","igumbilo","igumbilo","Igumbilo","Iringa MC","iringa","igumbilo-igumbilo",0.28409825468649,0.472222222222222,NA
+"127","igumbilo.milola.na.mavimba","milola","ulanga.dc","morogoro","igumbilo","igumbilo","Lupila","Makete DC","njombe","igumbilo-igumbilo",0.28409825468649,0.638888888888889,NA
+"128","igumbiro","milola","ulanga.dc","morogoro","ligumbiro","not set","Mlangali","Ludewa DC","njombe","ligumbiro-not set",0.176470588235294,0.638888888888889,NA
+"129","igumbiro.nyumbani","milola","ulanga.dc","morogoro","itumba","itumba","Itumba","Ileje DC","songwe","itumba-itumba",0.259426847662142,0.472222222222222,NA
+"130","iguru","iguru","bariadi.dc","simiyu","igurubi","igurubi","Igurubi","Igunga DC","tabora","igurubi-igurubi",0.222222222222222,1,NA
+"131","iguru","iguru","bariadi.dc","simiyu","igurusi","igurusi","Igurusi","Mbarali DC","mbeya","igurusi-igurusi",0.222222222222222,0.422222222222222,NA
+"132","iheha","mad","mbarali.dc","mbeya","ihega","ihega","Bukoli","Geita DC","geita","ihega-ihega",0.248484848484848,0.4,NA
+"133","iheha","mad","mbarali.dc","mbeya","ihega","ihega","Bukoli","Geita DC","geita","ihega-ihega",0.248484848484848,0.4,NA
+"134","ihenga","mofu","mlimba","mlimba","ishenga","ishenga","Kinyangiri","Mkalama DC","singida","ishenga-ishenga",0.2,0.46031746031746,NA
+"135","ihowanza","ihowanza","ihowanza","ihowanza","ihowanza","ihowanza","Ihowanza","Mufindi DC","iringa","ihowanza-ihowanza",0.176470588235294,0.486111111111111,NA
+"136","ihowewanga","ihowewanga","malinyi.dc","morogoro","ihowa","ihowa","Ruanda","Mbozi DC","songwe","ihowa-ihowa",0.268831168831169,0.472222222222222,NA
+"137","ikizi","ikizi","nkasi.dc","rukwa","ikozi","ikozi","Kalambanzite","Sumbawanga DC","rukwa","ikozi-ikozi",0.248484848484848,0,NA
+"138","ikizi","ikizi","nkasi.dc","rukwa","ikuzi","ikuzi","Runzewe Mashariki","Bukombe DC","geita","ikuzi-ikuzi",0.248484848484848,0.533333333333333,NA
+"139","ikola","ikola","tanganyika","tanganyika","ikola","ikola","Ikola","Mpanda DC","katavi","ikola-ikola",0.181818181818182,0.394444444444444,NA
+"140","ikuba","ikuba","ikuba","ikuba","mikuru","kibamba","Kibamba","Ubungo MC","dar es salaam","mikuru-kibamba",0.214285714285714,0.574358974358974,NA
+"141","ikuba","ikuba","ikuba","ikuba","mikuru","kibamba","Kibamba","Ubungo MC","dar es salaam","mikuru-kibamba",0.214285714285714,0.574358974358974,NA
+"142","ikuba","ikuba","wilaya","wilaya","mikuru","kibamba","Kibamba","Ubungo MC","dar es salaam","mikuru-kibamba",0.214285714285714,0.504273504273504,NA
+"143","ikuba","ikuba","wilaya","wilaya","mikuru","kibamba","Kibamba","Ubungo MC","dar es salaam","mikuru-kibamba",0.214285714285714,0.504273504273504,NA
+"144","ikulimambo","uhenga","wanging.ombe.dc","njombe","mkulima","msilale","Chato","Chato DC","geita","mkulima-msilale",0.263888888888889,1,NA
+"145","ikulimambo","uhenga","wanging.ombe.dc","njombe","mkulima","msilale","Chato","Chato DC","geita","mkulima-msilale",0.263888888888889,1,NA
+"146","ikunguligu","ikunguligu","itilima.dc","simiyu","ikungu","ikungu","Marambo","Nachingwea DC","lindi","ikungu-ikungu",0.172934472934473,0.422222222222222,NA
+"147","ilambilole","kising.a","iringa.dc","iringa","ilambilole","ilambilole","Nduli","Iringa DC","iringa","ilambilole-ilambilole",0.174603174603175,0,NA
+"148","ilambo","kilangawqna","sumbawanga.dc","rukwa","ilambo","ilambo","Ibumu","Kilolo DC","iringa","ilambo-ilambo",0.17948717948718,0.422222222222222,NA
+"149","ilambo","kilyamatundu","sumbawanga.dc","rukwa","ilambo","ilambo","Ibumu","Kilolo DC","iringa","ilambo-ilambo",0.17948717948718,0.422222222222222,NA
+"150","ilambo","kolangawana","sumbawanga.dc","rukwa","ilambo","ilambo","Ibumu","Kilolo DC","iringa","ilambo-ilambo",0.17948717948718,0.422222222222222,NA
+"151","ilangawana","ilangawana","sumbawanga.dc","rukwa","kilangawana","kilangawana","Kipeta","Sumbawanga DC","rukwa","kilangawana-kilangawana",0.188405797101449,0,NA
+"152","ilengo","mkomba","momba.dc","songwe","lengo","lengo","Mchemo","Newala DC","mtwara","lengo-lengo",0.237373737373737,0.555555555555556,NA
+"153","ilomba","idiwili","mbozi.dc","songwe","ilomba","ilomba","Masoko","Mbeya DC","mbeya","ilomba-ilomba",0.17948717948718,1,NA
+"154","imalauduki","kamsisi","mlele.dc","katavi","kamuli","kamuli","Kamuli","Kyerwa DC","kagera","kamuli-kamuli",0.247008547008547,0.333333333333333,NA
+"155","imalilosongwe","imalilosongwe","songwe.dc","songwe","imalilo songwe","imalilosongwe","Imalilosongwe","Mbarali DC","mbeya","imalilo songwe-imalilosongwe",0.178571428571429,1,NA
+"156","imarauduki","kamsisi","mlele.dc","katavi","ditima","guduwi","Guduwi","Bariadi TC","simiyu","ditima-guduwi",0.253846153846154,0.555555555555556,NA
+"157","iringa","ipogoro","iringa.dc","iringa","iringa","magereza","Gangilonga","Iringa MC","iringa","iringa-magereza",0.2,0,NA
+"158","iringa","iringa","iringa.mc","iringa","iringa","magereza","Gangilonga","Iringa MC","iringa","iringa-magereza",0.2,0,NA
+"159","iringa.manispaa","iringa.manispaa","iringa.mc","iringa","mangisani","mtambani","Jangwani","Ilala MC","dar es salaam","mangisani-mtambani",0.261111111111111,0.670940170940171,NA
+"160","iringa.manispaa","iringa.manispaa","iringa.mc","iringa","mangisani","mtambani","Jangwani","Ilala MC","dar es salaam","mangisani-mtambani",0.261111111111111,0.670940170940171,NA
+"161","irunda","irunda","irunda","irunda","ifunda","ifunda","Ifunda","Iringa DC","iringa","ifunda-ifunda",0.260683760683761,0.222222222222222,NA
+"162","irunda","irunda","irunda","irunda","igunda","igunda","Igunda","Ushetu DC","shinyanga","igunda-igunda",0.260683760683761,0.388888888888889,NA
+"163","irunda","irunda","irunda","irunda","igunda","igunda","Myovizi","Mbozi DC","songwe","igunda-igunda",0.260683760683761,0.555555555555556,NA
+"164","isale","isale","namanyere","namanyere","isale","isale","Isale","Nkasi DC","rukwa","isale-isale",0.181818181818182,0.562962962962963,NA
+"165","isale","isunta","namanyere","namanyere","isale","isale","Isale","Nkasi DC","rukwa","isale-isale",0.181818181818182,0.562962962962963,NA
+"166","isale","kakoma","nkasi.dc","rukwa","isale","isale","Isale","Nkasi DC","rukwa","isale-isale",0.181818181818182,0,NA
+"167","isangawana","isangawana","chunya.dc","mbeya","isanga","isanga","Isanga","Maswa DC","simiyu","isanga-isanga",0.135897435897436,0.422222222222222,NA
+"168","isangawana","isangawana","chunya.dc","mbeya","isanga","isanga","Isanga","Bariadi TC","simiyu","isanga-isanga",0.135897435897436,0.422222222222222,NA
+"169","isangha","isangha","bahi.dc","dodoma","isangha","isangha","Chibelela","Bahi DC","dodoma","isangha-isangha",0.177777777777778,0,NA
+"170","isanzu","manda","momba.dc","songwe","isanzu","isanzu","Isanzu","Nzega DC","tabora","isanzu-isanzu",0.17948717948718,0.555555555555556,NA
+"171","isanzu","manda","momba.dc","songwe","isanzu","isanzu","Isanzu","Nzega DC","tabora","isanzu-isanzu",0.17948717948718,0.555555555555556,NA
+"172","isazya","mkomba","momba.dc","songwe","isanzu","isanzu","Isanzu","Nzega DC","tabora","isanzu-isanzu",0.260683760683761,0.555555555555556,NA
+"173","isazya","mkomba","momba.dc","songwe","isanzu","isanzu","Isanzu","Nzega DC","tabora","isanzu-isanzu",0.260683760683761,0.555555555555556,NA
+"174","isunta","isunta","namanyere","namanyere","kisemu","mtamba","Kisemu","Morogoro DC","morogoro","kisemu-mtamba",0.260683760683761,0.509259259259259,NA
+"175","itenka","itenka","tanganyika","tanganyika","itenka","itenka 'a'","Itenka","Nsimbo DC","katavi","itenka-itenka 'a'",0.215686274509804,0.394444444444444,NA
+"176","itimaa","ngwala","chunya.dc","mbeya","itamba","itamba","Mkwawa","Iringa MC","iringa","itamba-itamba",0.235042735042735,0.544444444444445,NA
+"177","itimaa","ngwala","chunya.dc","mbeya","itamba","itamba","Mapogoro","Mbarali DC","mbeya","itamba-itamba",0.235042735042735,0,NA
+"178","itimaa","ngwala","chunya.dc","mbeya","itambo","itambo","Mfriga","Njombe DC","njombe","itambo-itambo",0.235042735042735,1,NA
+"179","itindi","paramawe","nkasi.dc","rukwa","itindi","itindi","Galula","Songwe DC","songwe","itindi-itindi",0.17948717948718,0.544444444444445,NA
+"180","itindi","swahila","nkasi.dc","rukwa","itindi","itindi","Galula","Songwe DC","songwe","itindi-itindi",0.17948717948718,0.544444444444445,NA
+"181","ivuna","momba","sumbawanga.dc","rukwa","ivuna","ivuna","Ivuna","Momba DC","songwe","ivuna-ivuna",0.181818181818182,0.544444444444445,NA
+"182","izigila","jikwiti","ulanga.dc","morogoro","izigo","izigo","Izigo","Muleba DC","kagera","izigo-izigo",0.277056277056277,0.638888888888889,NA
+"183","iñyonga","iñyonga","mlele.dc","katavi","iyunga","ikuti","Iyunga","Mbeya CC","mbeya","iyunga-ikuti",0.28968253968254,0.544444444444445,NA
+"184","jida","jida","jida","jida","suji sda","malindi","Suji","Same DC","kilimanjaro","suji sda-malindi",0.25,0.439393939393939,NA
+"185","jida","jida","jida","jida","suji sda","malindi","Suji","Same DC","kilimanjaro","suji sda-malindi",0.25,0.439393939393939,NA
+"186","jija","jija","bariadi.dc","simiyu","jija","jija","Shishiyu","Maswa DC","simiyu","jija-jija",0.185185185185185,0,NA
+"187","kabage","sibwesa","tanganyika","tanganyika","kabale","kiziru","Karabagaine","Bukoba DC","kagera","kabale-kiziru",0.260683760683761,0.4,NA
+"188","kabatini","katuma","tanganyika","tanganyika","kia","patandi","Akheri","Meru DC","arusha","kia-patandi",0.234307359307359,0.488888888888889,NA
+"189","kabatini","katuma","tanganyika","tanganyika","kia","patandi","Akheri","Meru DC","arusha","kia-patandi",0.234307359307359,0.488888888888889,NA
+"190","kabila","kabila","kwimba.dc","mwanza","kabila","kabila","Nkungulu","Magu DC","mwanza","kabila-kabila",0.17948717948718,0,NA
+"191","kabila","kabila","magu.dc","mwanza","kabila","kabila","Nkungulu","Magu DC","mwanza","kabila-kabila",0.17948717948718,0,NA
+"192","kabisile","nkung.ungu","chunya.dc","mbeya","kibati","salawe","Kibati","Mvomero DC","morogoro","kibati-salawe",0.211538461538462,0.558333333333333,NA
+"193","kabungu","kabungu","tanganyika","tanganyika","kabungu","kabungu","Kabungu","Mpanda DC","katavi","kabungu-kabungu",0.177777777777778,0.394444444444444,NA
+"194","kadashi","kadashi","kwimba.dc","mwanza","kandashi","kandashi","Karansi","Siha DC","kilimanjaro","kandashi-kandashi",0.196078431372549,0.323232323232323,NA
+"195","kaelele","mpembe","tanganyika","tanganyika","kanikelele","lupembe","Lupembe","Njombe DC","njombe","kanikelele-lupembe",0.203703703703704,0.577777777777778,NA
+"196","kaenze","sibwesa","tanganyika","tanganyika","kayenze","kayenze","Nyehunge","Buchosa DC","mwanza","kayenze-kayenze",0.2,0.4,NA
+"197","kaenze","sibwesa","tanganyika","tanganyika","kayenze","kayenze","Kafita","Nyang'hwale DC","geita","kayenze-kayenze",0.2,0.533333333333333,NA
+"198","kagunga","kasekese","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Kigoma DC","kigoma","kagunga-kagunga",0.177777777777778,0.655555555555556,NA
+"199","kagunga","kasekese","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Sengerema DC","mwanza","kagunga-kagunga",0.177777777777778,0.4,NA
+"200","kagunga","katuma","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Kigoma DC","kigoma","kagunga-kagunga",0.177777777777778,0.655555555555556,NA
+"201","kagunga","katuma","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Sengerema DC","mwanza","kagunga-kagunga",0.177777777777778,0.4,NA
+"202","kagunga","sibwesa","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Kigoma DC","kigoma","kagunga-kagunga",0.177777777777778,0.655555555555556,NA
+"203","kagunga","sibwesa","tanganyika","tanganyika","kagunga","kagunga","Kagunga","Sengerema DC","mwanza","kagunga-kagunga",0.177777777777778,0.4,NA
+"204","kahele","katuma","tanganyika","tanganyika","kahe","kahe","Ubetu Kahe","Rombo DC","kilimanjaro","kahe-kahe",0.203703703703704,0.578787878787879,NA
+"205","kakoma","kakoma","namanyere","namanyere","kakonko","muganza","Kakonko","Kakonko DC","kigoma","kakonko-muganza",0.2,0.481481481481482,NA
+"206","kakoma","kipundu","nkasi.dc","rukwa","kakonko","muganza","Kakonko","Kakonko DC","kigoma","kakonko-muganza",0.2,0.422222222222222,NA
+"207","kakonji","mzia","mvomero.dc","morogoro","kakonko mission","mbizi","Kakonko","Kakonko DC","kigoma","kakonko mission-mbizi",0.285714285714286,0.638888888888889,NA
+"208","kakonji","mzia","mvomero.dc","morogoro","kakonko mission","mbizi","Kakonko","Kakonko DC","kigoma","kakonko mission-mbizi",0.285714285714286,0.638888888888889,NA
+"209","kalemela","chamngasa","busega.dc","simiyu","kalemela","mayega","Kalemela","Busega DC","simiyu","kalemela-mayega",0.155555555555556,0,NA
+"210","kalemela","kalemela","magu.dc","mwanza","kalemela","mayega","Kalemela","Busega DC","simiyu","kalemela-mayega",0.155555555555556,0.555555555555556,NA
+"211","kalenga","mofu","mlimba","mlimba","kalenga","kalenga","Kalenga","Iringa DC","iringa","kalenga-kalenga",0.177777777777778,0.444444444444445,NA
+"212","kalenga","mofu","mlimba","mlimba","kalenge","kalenge","Kandaga","Uvinza DC","kigoma","kalenge-kalenge",0.177777777777778,0.333333333333333,NA
+"213","kalenga","mofu","mlimba","mlimba","kalenge","kalenge","Kalenge","Biharamulo DC","kagera","kalenge-kalenge",0.177777777777778,0.555555555555556,NA
+"214","kalenga.nyumbani","mofu","mlimba","mlimba","pangani","kumba","Pangani Magharibi","Pangani DC","tanga","pangani-kumba",0.248397435897436,0.544444444444445,NA
+"215","kalimbaleza","kalumbaleza","sumbawanga.dc","rukwa","kalumbaleza","kalumbaleza","Muze","Sumbawanga DC","rukwa","kalumbaleza-kalumbaleza",0.21870882740448,0,NA
+"216","kalumbaleza","kalimbaleza","sumbawanga.dc","rukwa","kalumbaleza","kalumbaleza","Muze","Sumbawanga DC","rukwa","kalumbaleza-kalumbaleza",0.173913043478261,0,NA
+"217","kalundi","kalundi","nkasi.dc","rukwa","kalunde","kalunde","Kalunde","Tabora MC","tabora","kalunde-kalunde",0.247619047619048,0.544444444444445,NA
+"218","kalyalya","kalyalya","kigoma.dc","kigoma","kalya","kalya","Kalya","Uvinza DC","kigoma","kalya-kalya",0.153409090909091,0,NA
+"219","kamalmpaka","iñyonga","mlele.dc","katavi","kibamba","mpakani","Kwembe","Ubungo MC","dar es salaam","kibamba-mpakani",0.166666666666667,0.504273504273504,NA
+"220","kambanga","kibo","tanganyika","tanganyika","kambangwa","kambangwa","Mwananyamala","Kinondoni MC","dar es salaam","kambangwa-kambangwa",0.192982456140351,0.48974358974359,NA
+"221","kambi.ya.fisi","napupa","masasi.dc","mtwara","kisimba","kisimba","Kisiriri","Iramba DC","singida","kisimba-kisimba",0.32542735042735,0.563492063492063,NA
+"222","kamsabwa","kamsabwa","sumbawanga.dc","rukwa","kamsamba","kamsamba","Kamsamba","Momba DC","songwe","kamsamba-kamsamba",0.237745098039216,0.544444444444445,NA
+"223","kamsamba","kamsamba","sumbawanga.dc","rukwa","kamsamba","kamsamba","Kamsamba","Momba DC","songwe","kamsamba-kamsamba",0.176470588235294,0.544444444444445,NA
+"224","kamsanga","igalula","tanganyika","tanganyika","lukha","mapinga","Kerege","Bagamoyo DC","pwani","lukha-mapinga",0.195512820512821,0.366666666666667,NA
+"225","kamsanga","igalula","tanganyika","tanganyika","lukha","mapinga","Kerege","Bagamoyo DC","pwani","lukha-mapinga",0.195512820512821,0.366666666666667,NA
+"226","kamsisi","kamsisi","mlele.dc","katavi","nkwae","msisi","Msisi","Singida DC","singida","nkwae-msisi",0.121212121212121,0.563492063492063,NA
+"227","kangabilili","kangabilili","itilima.dc","simiyu","kangagai","majulai","Mwangoi","Lushoto DC","tanga","kangagai-majulai",0.257575757575758,1,NA
+"228","kangaga","chang.ombe.mawindi","mbarali.dc","mbeya","kanga","kanga","Kanga","Mafia DC","pwani","kanga-kanga",0.168831168831169,1,NA
+"229","kangaga","chang.ombe.mawindi","mbarali.dc","mbeya","kanga","kanga","Kanga","Songwe DC","songwe","kanga-kanga",0.168831168831169,1,NA
+"230","kangaga","chang.ombe.mawindi","mbarali.dc","mbeya","kanga","kanga","Kanga","Mvomero DC","morogoro","kanga-kanga",0.168831168831169,0.558333333333333,NA
+"231","kanindi","majimoto","sumbawanga.dc","rukwa","kaniha","kaniha","Kaniha","Biharamulo DC","kagera","kaniha-kaniha",0.227106227106227,0.422222222222222,NA
+"232","kanoge","sibwesa","tanganyika","tanganyika","kanoge","kanoge","Kanoge","Kaliua DC","tabora","kanoge-kanoge",0.17948717948718,0.4,NA
+"233","kanoge","uzega","inyonga","inyonga","kanoge","kanoge","Kanoge","Kaliua DC","tabora","kanoge-kanoge",0.17948717948718,0.46031746031746,NA
+"234","kapalamsenga","kapalamsenga","tanganyika","tanganyika","kapalamsenga","kapalamsenga","Kapalamsenga","Mpanda DC","katavi","kapalamsenga-kapalamsenga",0.173333333333333,0.394444444444444,NA
+"235","kapanga","katuma","tanganyika","tanganyika","kabanga","kabanga","Kabanga","Ngara DC","kagera","kabanga-kabanga",0.247619047619048,0.4,NA
+"236","kapanga","katuma","tanganyika","tanganyika","kahanga","kahanga","Nyakasimbi","Karagwe DC","kagera","kahanga-kahanga",0.247619047619048,0.4,NA
+"237","kapanga","katuma","tanganyika","tanganyika","kapanda","not set","Machimboni","Nsimbo DC","katavi","kapanda-not set",0.247619047619048,0.394444444444444,NA
+"238","kapanga","katuma","tanganyika","tanganyika","kasanga","kasanga","Kasanga","Kalambo DC","rukwa","kasanga-kasanga",0.247619047619048,0.566666666666667,NA
+"239","kapanga","katuma","tanganyika","tanganyika","kasange","kasange","Kirushya","Ngara DC","kagera","kasange-kasange",0.247619047619048,0.4,NA
+"240","kapanga","katuma","tanganyika","tanganyika","kamanga","kamanga","Nyamatongo","Sengerema DC","mwanza","kamanga-kamanga",0.247619047619048,0.4,NA
+"241","kapanga","katuma","tanganyika","tanganyika","kasanga","kasanga","Kasanga","Mufindi DC","iringa","kasanga-kasanga",0.247619047619048,0.566666666666667,NA
+"242","kapanga","katuma","tanganyika","tanganyika","kayanga","kayanga","Kayanga","Karagwe DC","kagera","kayanga-kayanga",0.247619047619048,0.4,NA
+"243","kaparamsenga","kaparamsenga","tanganyika","tanganyika","kaparamsenga","kaparamsenga","Sigunga","Uvinza DC","kigoma","kaparamsenga-kaparamsenga",0.173333333333333,0.655555555555556,NA
+"244","karenga","mofu","mlimba","mlimba","kahe","ngasinyi","Kahe","Moshi DC","kilimanjaro","kahe-ngasinyi",0.227106227106227,0.406565656565657,NA
+"245","kasekese","kasekese","tanganyika","tanganyika","kaseke","kaseke","Simbo","Uvinza DC","kigoma","kaseke-kaseke",0.128205128205128,0.655555555555556,NA
+"246","kasekese","sibwesa","tanganyika","tanganyika","kaseke","kaseke","Simbo","Uvinza DC","kigoma","kaseke-kaseke",0.128205128205128,0.655555555555556,NA
+"247","kashishi","kashishi","mpimbwe.dc","katavi","kashishi","kashishi","Kashishi","Kaliua DC","tabora","kashishi-kashishi",0.176470588235294,0.444444444444445,NA
+"248","kashishi","kashishi","mpimbwe.dc","katavi","kashishi","kashishi","Kashishi","Msalala DC","shinyanga","kashishi-kashishi",0.176470588235294,0.648148148148148,NA
+"249","kashishi","kashishi","mpimbwe.dc","katavi","kashishi","kashishi","Zagayu","Itilima DC","simiyu","kashishi-kashishi",0.176470588235294,0.555555555555556,NA
+"250","kashishi","kashishi","mpimbwe.dc","katavi","kashishi","kashishi","Nyakamwaga","Geita DC","geita","kashishi-kashishi",0.176470588235294,0.422222222222222,NA
+"251","kasisi","upendo","chunya.dc","mbeya","kasisa","kasisa","Nyakasungwa","Buchosa DC","mwanza","kasisa-kasisa",0.17948717948718,0.422222222222222,NA
+"252","kasisi","upendo","chunya.dc","mbeya","kasisi","kasisi","Kasisi","Urambo DC","tabora","kasisi-kasisi",0.17948717948718,0.422222222222222,NA
+"253","kasisi","upendo","chunya.dc","mbeya","kasitu","kasitu","Sopa","Kalambo DC","rukwa","kasitu-kasitu",0.17948717948718,0.533333333333333,NA
+"254","katuma","katuma","tanganyika","tanganyika","katuma","katuma","Katuma","Mpanda DC","katavi","katuma-katuma",0.17948717948718,0.394444444444444,NA
+"255","katumbila","katumbila","nkasi.dc","rukwa","katumbi","nkonkwa","Buhingu","Uvinza DC","kigoma","katumbi-nkonkwa",0.192592592592593,0.422222222222222,NA
+"256","kaulolo","inyonga","wilaya","wilaya","kalola","kakola","Mabama","Uyui DC","tabora","kalola-kakola",0.227106227106227,0.444444444444445,NA
+"257","kaulolo","inyonga","wilaya","wilaya","kalole","kalole","Sandulula","Sumbawanga DC","rukwa","kalole-kalole",0.227106227106227,0.544444444444445,NA
+"258","kayenze","katuma","tanganyika","tanganyika","kayenze","kayenze","Nyehunge","Buchosa DC","mwanza","kayenze-kayenze",0.177777777777778,0.4,NA
+"259","kayenze","katuma","tanganyika","tanganyika","kayenze","kayenze","Kafita","Nyang'hwale DC","geita","kayenze-kayenze",0.177777777777778,0.533333333333333,NA
+"260","kibatula","mzia","mvomero.dc","morogoro","kibati","salawe","Kibati","Mvomero DC","morogoro","kibati-salawe",0.243131868131868,0,NA
+"261","kibatula","mziha","mvomero.dc","morogoro","kibati","salawe","Kibati","Mvomero DC","morogoro","kibati-salawe",0.243131868131868,0,NA
+"262","kibatula.nyumbani","mziha","mvomero.dc","morogoro","kabasa","kalisumba/shuleni","Kabasa","Bunda TC","mara","kabasa-kalisumba/shuleni",0.282491201608849,0.416666666666667,NA
+"263","kiberenge","kiberenge","ifakara.tc","morogoro","kiberege","kiberege","Kiberege","Kilombero DC","morogoro","kiberege-kiberege",0.213507625272331,0,NA
+"264","kiberenge.nyumbani","kiberenge","ifakara.tc","morogoro","kerenge","makumba","Kerenge","Korogwe DC","tanga","kerenge-makumba",0.279124579124579,0.558333333333333,NA
+"265","kichangani","mgeta","mlimba","mlimba","kichangani","tununguo","Tununguo","Morogoro DC","morogoro","kichangani-tununguo",0.157894736842105,0.569444444444445,NA
+"266","kichangani","mgeta","mlimba","mlimba","kichangani","area six","Kichangani","Morogoro MC","morogoro","kichangani-area six",0.157894736842105,0.569444444444445,NA
+"267","kichangani","viwanja.sitini","ifakara.tc","morogoro","kichangani","tununguo","Tununguo","Morogoro DC","morogoro","kichangani-tununguo",0.157894736842105,0,NA
+"268","kichangani","viwanja.sitini","ifakara.tc","morogoro","kichangani","area six","Kichangani","Morogoro MC","morogoro","kichangani-area six",0.157894736842105,0,NA
+"269","kidalimanda","kidalimanda","bariadi.dc","simiyu","ilima","lubanda","Ilima","Rungwe DC","mbeya","ilima-lubanda",0.237244237244237,0.422222222222222,NA
+"270","kidinda","kidi","bariadi.dc","simiyu","kinda","kinda","Maskati","Mvomero DC","morogoro","kinda-kinda",0.24025974025974,0.569444444444445,NA
+"271","kidinda","kidinda","bariadi.dc","simiyu","kinda","kinda","Maskati","Mvomero DC","morogoro","kinda-kinda",0.24025974025974,0.569444444444445,NA
+"272","kidinda","kidinda","bariadi.tc","simiyu","kinda","kinda","Maskati","Mvomero DC","morogoro","kinda-kinda",0.24025974025974,0.569444444444445,NA
+"273","kidinda.mnadani","kidinda","bariadi.tc","simiyu","idunda","idumilavanu","Idunda","Mufindi DC","iringa","idunda-idumilavanu",0.302777777777778,0.444444444444445,NA
+"274","kidoka","kidoka","chemba.dc","dodoma","kidoka","kidoka","Chemba","Chemba DC","dodoma","kidoka-kidoka",0.17948717948718,0,NA
+"275","kidulya","kidinda","bariadi.tc","simiyu","kidalu","kidalu","Isakamaliwa","Igunga DC","tabora","kidalu-kidalu",0.282661782661783,1,NA
+"276","kidulya","kidulya","bariadi.dc","simiyu","kidalu","kidalu","Isakamaliwa","Igunga DC","tabora","kidalu-kidalu",0.282661782661783,1,NA
+"277","kidulya","kidulya","bariadi.tc","simiyu","kidalu","kidalu","Isakamaliwa","Igunga DC","tabora","kidalu-kidalu",0.282661782661783,1,NA
+"278","kiji","igangwe","chunya.dc","mbeya","kijima","kijima","Kijima","Misungwi DC","mwanza","kijima-kijima",0.230769230769231,0.422222222222222,NA
+"279","kiji","igangwe","chunya.dc","mbeya","kijima","kijima","Kijima","Misungwi DC","mwanza","kijima-kijima",0.230769230769231,0.422222222222222,NA
+"280","kijiji.cha.lyandu.nyumbani","uponera","ulanga.dc","morogoro","kilimani","madukani","Imboru","Mbulu TC","manyara","kilimani-madukani",0.319812540400776,0.488095238095238,NA
+"281","kijiji.cha.lyandu.nyumbani","uponera","ulanga.dc","morogoro","kilimani","madukani","Imboru","Mbulu TC","manyara","kilimani-madukani",0.319812540400776,0.488095238095238,NA
+"282","kijiji.mziha","mziha","mvomero.dc","morogoro","kijima","kijima","Kijima","Misungwi DC","mwanza","kijima-kijima",0.222934472934473,0.569444444444445,NA
+"283","kijiji.mziha","mziha","mvomero.dc","morogoro","kijima","kijima","Kijima","Misungwi DC","mwanza","kijima-kijima",0.222934472934473,0.569444444444445,NA
+"284","kikurukutu","namawala","mlimba","mlimba","kikuyu","kikuyu","Kikuyu Kusini","Dodoma MC","dodoma","kikuyu-kikuyu",0.194871794871795,0.444444444444445,NA
+"285","kikurukutu","namawala","mlimba","mlimba","kikuyu","kikuyu","Ipera","Mpwapwa DC","dodoma","kikuyu-kikuyu",0.194871794871795,0.444444444444445,NA
+"286","kikurukutu","namwawala","mlimba","mlimba","kikuyu","kikuyu","Kikuyu Kusini","Dodoma MC","dodoma","kikuyu-kikuyu",0.194871794871795,0.444444444444445,NA
+"287","kikurukutu","namwawala","mlimba","mlimba","kikuyu","kikuyu","Ipera","Mpwapwa DC","dodoma","kikuyu-kikuyu",0.194871794871795,0.444444444444445,NA
+"288","kilabela","banemhi","bariadi.dc","simiyu","kilambo","kilambo","Kala","Nkasi DC","rukwa","kilambo-kilambo",0.219444444444444,1,NA
+"289","kilangawana","iilangawqna","sumbawanga.dc","rukwa","kilangawana","kilangawana","Kipeta","Sumbawanga DC","rukwa","kilangawana-kilangawana",0.173913043478261,0,NA
+"290","kilangawana","kilangawana","sumbawanga.dc","rukwa","kilangawana","kilangawana","Kipeta","Sumbawanga DC","rukwa","kilangawana-kilangawana",0.173913043478261,0,NA
+"291","kilida","mfinga","mpimbwe.dc","katavi","kilida","kilida","Mamba","Mpimbwe DC","katavi","kilida-kilida",0.17948717948718,0,NA
+"292","kilyamatundu","kilyamatundu","sumbawanga.dc","rukwa","katoma","lukindo","Katoma","Bukoba DC","kagera","katoma-lukindo",0.257936507936508,0.422222222222222,NA
+"293","kiningi.na","kiningi.na","ifakara.tc","morogoro","kining'inila","kining'ila","Kining'ila","Igunga DC","tabora","kining'inila-kining'ila",0.236231884057971,0.472222222222222,NA
+"294","kintinku","kintinku","bahi.dc","dodoma","kintinku","not set","Kintinku","Manyoni DC","singida","kintinku-not set",0.166666666666667,0.563492063492063,NA
+"295","kinyampuma","nkung.ungu","chunya.dc","mbeya","kinyambuli","kinyambuli","Nkinto","Mkalama DC","singida","kinyambuli-kinyambuli",0.260846560846561,0.552380952380952,NA
+"296","kinyika","kinyika","iringa.dc","iringa","kimnyaki","kimnyaki","Kimnyaki","Arusha DC","arusha","kimnyaki-kimnyaki",0.243697478991597,0.444444444444445,NA
+"297","kinyope","kinyope","lindi.dc","lindi","kinyope","kinyope","Rutamba","Lindi DC","lindi","kinyope-kinyope",0.177777777777778,0,NA
+"298","kinyope.lindi","kinyope","lindi.dc","lindi","kinyope","kinyope","Rutamba","Lindi DC","lindi","kinyope-kinyope",0.235897435897436,0,NA
+"299","kinzoka","kinzoka","songwe.dc","songwe","kidoka","kidoka","Chemba","Chemba DC","dodoma","kidoka-kidoka",0.3003663003663,0.555555555555556,NA
+"300","kinzoka","kinzoka","songwe.dc","songwe","kinole","tandai","Kinole","Morogoro DC","morogoro","kinole-tandai",0.3003663003663,0.472222222222222,NA
+"301","kinzoka","kinzoka","songwe.dc","songwe","kizuka","kizuka","Magagura","Songea DC","ruvuma","kizuka-kizuka",0.3003663003663,1,NA
+"302","kinzoka","kinzoka","songwe.dc","songwe","mkindo","mkindo","Hembeti","Mvomero DC","morogoro","mkindo-mkindo",0.3003663003663,0.472222222222222,NA
+"303","kipingo","signal","kilombero.dc","morogoro","kipingu","not set","Ruhuhu","Ludewa DC","njombe","kipingu-not set",0.177777777777778,0.638888888888889,NA
+"304","kipingo","signali","ifakara.tc","morogoro","kipingu","not set","Ruhuhu","Ludewa DC","njombe","kipingu-not set",0.177777777777778,0.638888888888889,NA
+"305","kipingo","sugnal","ifakara.tc","morogoro","kipingu","not set","Ruhuhu","Ludewa DC","njombe","kipingu-not set",0.177777777777778,0.638888888888889,NA
+"306","kipingu","signal","ifakara.tc","morogoro","kipingu","not set","Ruhuhu","Ludewa DC","njombe","kipingu-not set",0.177777777777778,0.638888888888889,NA
+"307","kisasa","kisasa","dodoma.cc","dodoma","kisa","kisa","Milepa","Sumbawanga DC","rukwa","kisa-kisa",0.111111111111111,0.544444444444445,NA
+"308","kisasa","kisasa","iringa.dc","iringa","kisa","kisa","Milepa","Sumbawanga DC","rukwa","kisa-kisa",0.111111111111111,0.422222222222222,NA
+"309","kisasa","makuru","bahi.dc","dodoma","kisa","kisa","Milepa","Sumbawanga DC","rukwa","kisa-kisa",0.111111111111111,0.544444444444445,NA
+"310","kisesa","imalamoto","bariadi.dc","simiyu","kisesa","kisesa","Kisesa","Meatu DC","simiyu","kisesa-kisesa",0.17948717948718,0,NA
+"311","kisesa","imalamoto","bariadi.dc","simiyu","kisesa","kisesa","Somagedi","Kishapu DC","shinyanga","kisesa-kisesa",0.17948717948718,0.388888888888889,NA
+"312","kisii.kenya","kisii.kenya","kenya","kenya","kinesi","kinesi","Nyamunga","Rorya DC","mara","kinesi-kinesi",0.281614219114219,0.516666666666667,NA
+"313","kisima.cha.ndege","kisima.cha.ndege","bahi.dc","dodoma","kisima cha ndege","kisima cha ndege","Msisi","Bahi DC","dodoma","kisima cha ndege-kisima cha ndege",0.233585858585859,0,NA
+"314","kisima.ndege","kisima.cha.ndege","bahi.dc","dodoma","kisima cha ndege","kisima cha ndege","Msisi","Bahi DC","dodoma","kisima cha ndege-kisima cha ndege",0.25,0,NA
+"315","kitiwale","igawa","malinyi.dc","morogoro","kiwira","ntokela","Isongole","Rungwe DC","mbeya","kiwira-ntokela",0.24702380952381,0.558333333333333,NA
+"316","kitiwale","igawa","malinyi.dc","morogoro","kiwira","ntokela","Isongole","Rungwe DC","mbeya","kiwira-ntokela",0.24702380952381,0.558333333333333,NA
+"317","kitiwele.nyumbani","igawa","malinyi.dc","morogoro","ileje","itumba","Itumba","Ileje DC","songwe","ileje-itumba",0.259477124183007,0.472222222222222,NA
+"318","kivingu","kivungu","kilosa.dc","morogoro","kivungu","kivungu","Kilangali","Kilosa DC","morogoro","kivungu-kivungu",0.225396825396825,0,NA
+"319","kivungu","kivungu","kilosa.dc","morogoro","kivungu","kivungu","Kilangali","Kilosa DC","morogoro","kivungu-kivungu",0.177777777777778,0,NA
+"320","kiwanda.cha.kongoa.kibaha","kongoa","kibaha.dc","pwani","kitahana","kitahana","Kitahana","Kibondo DC","kigoma","kitahana-kitahana",0.265014005602241,1,NA
+"321","kizunguzi","ilonga","kilosa.dc","morogoro","kizungu","kizungu","Muze","Sumbawanga DC","rukwa","kizungu-kizungu",0.17037037037037,0.558333333333333,NA
+"322","kona.ya.miyagala","minyagala","tanganyika","tanganyika","afya","makanyagio","Makanyagio","Mpanda MC","katavi","afya-makanyagio",0.288888888888889,0.394444444444444,NA
+"323","kona.ya.miyagala","minyagala","tanganyika","tanganyika","afya","makanyagio","Makanyagio","Mpanda MC","katavi","afya-makanyagio",0.288888888888889,0.394444444444444,NA
+"324","kongogo","kongogo","bahi.dc","dodoma","kongogo","babayu","Babayu","Bahi DC","dodoma","kongogo-babayu",0.166666666666667,0,NA
+"325","kungwi","sibwesa","tanganyika","tanganyika","kungwi","kungwi","Baleni","Mafia DC","pwani","kungwi-kungwi",0.17948717948718,0.366666666666667,NA
+"326","kuuza.kenya","silali","silali","silali","ikuza","kasenyi","Ikuza","Muleba DC","kagera","ikuza-kasenyi",0.237244237244237,0.555555555555556,NA
+"327","kuuza.kenya","silali","silali","silali","ikuza","kasenyi","Ikuza","Muleba DC","kagera","ikuza-kasenyi",0.237244237244237,0.555555555555556,NA
+"328","kwabeko","mziha","mvomero.dc","morogoro","kwambe","kwambe","Chiwanda","Nyasa DC","ruvuma","kwambe-kwambe",0.227106227106227,0.569444444444445,NA
+"329","kwakonje","mziha","mvomero.dc","morogoro","kwakoa","ngulu","Kwakoa","Mwanga DC","kilimanjaro","kwakoa-ngulu",0.25,0.450757575757576,NA
+"330","kwarugulu","negolo","kilindi.dc","tanga","kwaraguru","taula","Kwedizinga","Handeni DC","tanga","kwaraguru-taula",0.207407407407407,0,NA
+"331","kwarugulu.nyumbani","negolo","kilindi.dc","tanga","makuyuni","makuyuni","Makuyuni","Korogwe DC","tanga","makuyuni-makuyuni",0.306372549019608,0,NA
+"332","kwarugulu.nyumbani","negolo","kilindi.dc","tanga","makuyuni","makuyuni","Makuyuni","Monduli DC","arusha","makuyuni-makuyuni",0.306372549019608,0.422222222222222,NA
+"333","laini","laini","itilima.dc","simiyu","lupatingatinga","lupa","Lupatingatinga","Chunya DC","mbeya","lupatingatinga-lupa",0.245614035087719,0.422222222222222,NA
+"334","laini.meatu.langangabiriri","laini.meatu.langangabiriri","itilima.na.meatu.maswa","itilima.na.meatu.maswa","lesing'ita","mundarara","Mundarara","Longido DC","arusha","lesing'ita-mundarara",0.288621794871795,0.525252525252525,NA
+"335","laini.migato","laini.migato","itilima.dc","simiyu","singida","zimamoto","Ipembe","Singida MC","singida","singida-zimamoto",0.297222222222222,0.357142857142857,NA
+"336","lalago.mwakidiga.mwangongo","kishapu.na.lalago","kishapu.na.maswa","kishapu.na.maswa","imalilo","wangama","Wangama","Wanging'ombe DC","njombe","imalilo-wangama",0.295115995115995,1,NA
+"337","lamadi","kata","lamadi","lamadi","lamadi","lamadi","Lamadi","Busega DC","simiyu","lamadi-lamadi",0.17948717948718,0.444444444444445,NA
+"338","lamadi","kata","lamadi","lamadi","lamadi","lamadi","Lamadi","Busega DC","simiyu","lamadi-lamadi",0.17948717948718,0.444444444444445,NA
+"339","likaye","igawa","malinyi.dc","morogoro","kigalye","kigalye","Kagongo","Kigoma DC","kigoma","kigalye-kigalye",0.283333333333333,0.638888888888889,NA
+"340","liloya","chikukwe","masasi.dc","mtwara","lufilyo","kipapa","Lufilyo","Busokelo DC","mbeya","lufilyo-kipapa",0.246031746031746,0.422222222222222,NA
+"341","lipangalala","lipangalala","ifakara.tc","morogoro","lupanga","lupanga","Lupanga","Ludewa DC","njombe","lupanga-lupanga",0.193939393939394,0.638888888888889,NA
+"342","luchingu.a","tulindane","newala.dc","mtwara","mchuo","igunga","Igunga","Igunga DC","tabora","mchuo-igunga",0.302777777777778,0.222222222222222,NA
+"343","luchingu.a","tulindane","newala.dc","mtwara","mchuo","igunga","Igunga","Igunga DC","tabora","mchuo-igunga",0.302777777777778,0.222222222222222,NA
+"344","lugala","mbalaawala","bahi.dc","dodoma","gula","gula","Lalago","Maswa DC","simiyu","gula-gula",0.166666666666667,0.555555555555556,NA
+"345","lugala","mbalaawala","bahi.dc","dodoma","gula","gula","Lalago","Maswa DC","simiyu","gula-gula",0.166666666666667,0.555555555555556,NA
+"346","lugoda","lugoda","mufindi.dc","iringa","lufingo","kalalo","Lufingo","Rungwe DC","mbeya","lufingo-kalalo",0.26984126984127,0.544444444444445,NA
+"347","lugoda","lugoda","mufindi.dc","iringa","lugoba","not set","Lugoba","Chalinze DC","pwani","lugoba-not set",0.26984126984127,0.588888888888889,NA
+"348","luhafwe","tongwe","tanganyika","tanganyika","lubaga","mwasele","Kambarage","Shinyanga MC","shinyanga","lubaga-mwasele",0.30952380952381,0.411111111111111,NA
+"349","luhafwe","tongwe","tanganyika","tanganyika","luhanga","kiseke","Ilemela","Ilemela MC","mwanza","luhanga-kiseke",0.30952380952381,0.4,NA
+"350","lukali","lukali","bahi.dc","dodoma","lukali","lukali","Lamaiti","Bahi DC","dodoma","lukali-lukali",0.17948717948718,0,NA
+"351","lukande","lukande","lukande","lukande","lukande","lukande","Lukande","Ulanga DC","morogoro","lukande-lukande",0.177777777777778,1,NA
+"352","lukoma","lukoma","uvinza.dc","kigoma","ufukoni","mbae","Ufukoni","Mtwara MC","mtwara","ufukoni-mbae",0.25,0.555555555555556,NA
+"353","lukungu","mwasamba","busega.dc","simiyu","lukungu","lukungu","Lamadi","Busega DC","simiyu","lukungu-lukungu",0.177777777777778,0,NA
+"354","lundelunde","mumbaka","masasi.dc","mtwara","ilunde","ilunde","Ilunde","Mlele DC","katavi","ilunde-ilunde",0.076923076923077,0.444444444444445,NA
+"355","lunyala","majengo","nkasi.dc","rukwa","lufingo","kalalo","Lufingo","Rungwe DC","mbeya","lufingo-kalalo",0.238095238095238,0.533333333333333,NA
+"356","lupaso","lupaso","masasi.dc","mtwara","lupaso","not set","Lipumburu","Masasi DC","mtwara","lupaso-not set",0.19047619047619,0,NA
+"357","lupemenda","igawa","malinyi.dc","morogoro","lupembe","not set","Lupembe","Njombe DC","njombe","lupembe-not set",0.251851851851852,0.638888888888889,NA
+"358","lupunga","lupunga","malinyi.dc","morogoro","lupunga","lupunga","Kikongo","Kibaha DC","pwani","lupunga-lupunga",0.177777777777778,1,NA
+"359","lutubiga","mwasamba","busega.dc","simiyu","lutubiga","lutubiga","Lutubiga","Busega DC","simiyu","lutubiga-lutubiga",0.176470588235294,0,NA
+"360","lyoma","ngudu","ngudu","ngudu","lyoma","lyoma","Lyoma","Kwimba DC","mwanza","lyoma-lyoma",0.181818181818182,1,NA
+"361","mabambasi","mabambasi","mpimbwe.dc","katavi","mbaha","mbaha","Mbaha","Nyasa DC","ruvuma","mbaha-mbaha",0.242905242905243,0.611111111111111,NA
+"362","mabambasi","mabambasi","mpimbwe.dc","katavi","mbala","mbala","Mwambani","Songwe DC","songwe","mbala-mbala",0.242905242905243,1,NA
+"363","mabambasi","mabambasi","mpimbwe.dc","katavi","mbaya","mbaya","Mbaya","Liwale DC","lindi","mbaya-mbaya",0.242905242905243,0.544444444444445,NA
+"364","machombe","machombe","masasi.dc","mtwara","mchombe","mchombe","Mchombe","Kilombero DC","morogoro","mchombe-mchombe",0.219444444444444,0.472222222222222,NA
+"365","machombe","machombe","masasi.dc","mtwara","mchombe","mchombe","Mchombe","Kilombero DC","morogoro","mchombe-mchombe",0.219444444444444,0.472222222222222,NA
+"366","madabadaba","minazini","malinyi.dc","morogoro","madale","madala","Wazo","Kinondoni MC","dar es salaam","madale-madala",0.194871794871795,0.599358974358974,NA
+"367","madizini","mziha","mvomero.dc","morogoro","madizini","madizini","Mtibwa","Mvomero DC","morogoro","madizini-madizini",0.176470588235294,0,NA
+"368","madukani","lipangalala","ifakara.tc","morogoro","madunga kati","madunga","Madunga","Babati DC","manyara","madunga kati-madunga",0.241666666666667,0.488095238095238,NA
+"369","mafinga","mafinga","mufindi.dc","iringa","mafinga","malingumu","Boma","Mafinga TC","iringa","mafinga-malingumu",0.196078431372549,0,NA
+"370","mafuluto","mafuluto","iringa.dc","iringa","mafuruto","not set","Mlowa","Iringa DC","iringa","mafuruto-not set",0.229166666666667,0,NA
+"371","magaga","chifutuka","bahi.dc","dodoma","magaga","magaga","Nondwa","Bahi DC","dodoma","magaga-magaga",0.17948717948718,0,NA
+"372","magigiwe","magigiwe","magigiwe","magigiwe","magadini","wiri","Gararagua","Siha DC","kilimanjaro","magadini-wiri",0.262820512820513,0.545454545454545,NA
+"373","magigiwe","magigiwe","magigiwe","magigiwe","magila","magila","Magila","Muheza DC","tanga","magila-magila",0.262820512820513,0.45,NA
+"374","magogo","sibwesa","tanganyika","tanganyika","mgao","mgao","Naumbu","Mtwara DC","mtwara","mgao-mgao",0.166666666666667,0.4,NA
+"375","magogo","sibwesa","tanganyika","tanganyika","maya","ugogoni","Nambambo","Nachingwea DC","lindi","maya-ugogoni",0.166666666666667,0.466666666666667,NA
+"376","magogo","sibwesa","tanganyika","tanganyika","maya","ugogoni","Nambambo","Nachingwea DC","lindi","maya-ugogoni",0.166666666666667,0.466666666666667,NA
+"377","magogo.sibwesa","sibwesa","tanganyika","tanganyika","msolwa","msoga","Msoga","Chalinze DC","pwani","msolwa-msoga",0.294973544973545,0.366666666666667,NA
+"378","magudugudu","magudugudu","chamwino.dc","dodoma","maguu","maguu","Maguu","Mbinga DC","ruvuma","maguu-maguu",0.157575757575758,0.444444444444445,NA
+"379","magula","magula","nsimbo.dc","katavi","magulilwa","maguliwa","Maguliwa","Iringa DC","iringa","magulilwa-maguliwa",0.222222222222222,0.555555555555556,NA
+"380","magunga","nkung.ungu","chunya.dc","mbeya","magunga","magunga","Maboga","Iringa DC","iringa","magunga-magunga",0.177777777777778,0.544444444444445,NA
+"381","mahaha","mahaha","magu.dc","mwanza","mahaha","mahaha","Shishani","Magu DC","mwanza","mahaha-mahaha",0.17948717948718,0,NA
+"382","mailisita","chanikanguo","masasi.dc","mtwara","maili sita rc","shiri njoro","Machame Kusini","Hai DC","kilimanjaro","maili sita rc-shiri njoro",0.213333333333333,0.409090909090909,NA
+"383","mailisita","chanikanguo","masasi.dc","mtwara","maili sita rc","shiri njoro","Machame Kusini","Hai DC","kilimanjaro","maili sita rc-shiri njoro",0.213333333333333,0.409090909090909,NA
+"384","majengo","majengo","mpanda.dc","katavi","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.444444444444445,NA
+"385","majengo","majengo","mpanda.dc","katavi","majengo","sokoni","Majengo","Moshi MC","kilimanjaro","majengo-sokoni",0.166666666666667,0.52020202020202,NA
+"386","majengo","majengo","mpanda.dc","katavi","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.444444444444445,NA
+"387","majengo","nkung.ungu","chunya.dc","mbeya","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.422222222222222,NA
+"388","majengo","nkung.ungu","chunya.dc","mbeya","majengo","sokoni","Majengo","Moshi MC","kilimanjaro","majengo-sokoni",0.166666666666667,0.472727272727273,NA
+"389","majengo","nkung.ungu","chunya.dc","mbeya","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.422222222222222,NA
+"390","majengo","upendo","chunya.dc","mbeya","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.422222222222222,NA
+"391","majengo","upendo","chunya.dc","mbeya","majengo","sokoni","Majengo","Moshi MC","kilimanjaro","majengo-sokoni",0.166666666666667,0.472727272727273,NA
+"392","majengo","upendo","chunya.dc","mbeya","majengo","biafra","Majengo","Mtwara MC","mtwara","majengo-biafra",0.166666666666667,0.422222222222222,NA
+"393","makambako","makambako","makambako.tc","njombe","makambako .","not set","Ubena","Makambako TC","njombe","makambako .-not set",0.175438596491228,0,NA
+"394","makambako","makambako","njombe.dc","njombe","makambako .","not set","Ubena","Makambako TC","njombe","makambako .-not set",0.175438596491228,0,NA
+"395","makambako","mji.mwema","njema","njema","makambako .","not set","Ubena","Makambako TC","njombe","makambako .-not set",0.175438596491228,0.3,NA
+"396","makong.onda","makong.onda","masasi.dc","mtwara","makong'onda","makong?onda","Mnavira","Masasi DC","mtwara","makong'onda-makong?onda",0.21870882740448,0,NA
+"397","makong.onda.sindano.mnavira","makong.onda","masasi.dc","mtwara","makong'onda","makong?onda","Mnavira","Masasi DC","mtwara","makong'onda-makong?onda",0.259432919705725,0,NA
+"398","malangali","upendo","chunya.dc","mbeya","malangali","malangali","Malangali","Ileje DC","songwe","malangali-malangali",0.175438596491228,1,NA
+"399","malangali","upendo","chunya.dc","mbeya","malangali","malangali","Luduga","Wanging'ombe DC","njombe","malangali-malangali",0.175438596491228,1,NA
+"400","malangali","upendo","chunya.dc","mbeya","malangali","mwilavile","Malangali","Mufindi DC","iringa","malangali-mwilavile",0.175438596491228,0.544444444444445,NA
+"401","maleza","kate","sumbawanga.dc","rukwa","maleza","maleza","Mbangala","Songwe DC","songwe","maleza-maleza",0.17948717948718,0.544444444444445,NA
+"402","maleza","kilangawana","sumbawanga.dc","rukwa","maleza","maleza","Mbangala","Songwe DC","songwe","maleza-maleza",0.17948717948718,0.544444444444445,NA
+"403","maleza","maleza","sumbawanga.dc","rukwa","maleza","maleza","Mbangala","Songwe DC","songwe","maleza-maleza",0.17948717948718,0.544444444444445,NA
+"404","maligisu.kasoli","maligisu.kasoli","kwimba.bariadi","kwimba.bariadi","maligisu","maligisu","Maligisu","Kwimba DC","mwanza","maligisu-maligisu",0.206372549019608,0.432539682539683,NA
+"405","maloto","kimamba","kilosa.dc","morogoro","matola","matola","Matola","Njombe TC","njombe","matola-matola",0.235042735042735,0.638888888888889,NA
+"406","maloto","kimamba","kilosa.dc","morogoro","makole","tofiki","Viwandani","Dodoma MC","dodoma","makole-tofiki",0.235042735042735,0.472222222222222,NA
+"407","mandang.ombe","mbaragane","maswa.dc","simiyu","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.238888888888889,0.52020202020202,NA
+"408","mandang.ombe","mbaragane","maswa.dc","simiyu","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.238888888888889,0.52020202020202,NA
+"409","mango","mango","bariadi.tc","simiyu","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.166666666666667,0.52020202020202,NA
+"410","mango","mango","bariadi.tc","simiyu","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.166666666666667,0.52020202020202,NA
+"411","mapili","mapili","mlele.dc","katavi","mapili","mapili","Chikolopola","Masasi DC","mtwara","mapili-mapili",0.17948717948718,0.444444444444445,NA
+"412","mapili","mapili","mlele.dc","katavi","mapili","mapili","Ilela","Mlele DC","katavi","mapili-mapili",0.17948717948718,0,NA
+"413","mapili","pwaga","mlele.dc","katavi","mapili","mapili","Chikolopola","Masasi DC","mtwara","mapili-mapili",0.17948717948718,0.444444444444445,NA
+"414","mapili","pwaga","mlele.dc","katavi","mapili","mapili","Ilela","Mlele DC","katavi","mapili-mapili",0.17948717948718,0,NA
+"415","mapo","mapo","mapo","mapo","maparoni","not set","Maparoni","Kibiti DC","pwani","maparoni-not set",0.25,0.516666666666667,NA
+"416","masasi","chanikanguo","masasi.dc","mtwara","masasi","not set","Masasi","Ludewa DC","njombe","masasi-not set",0.19047619047619,1,NA
+"417","masasi","masasi","masasi.dc","mtwara","masasi","not set","Masasi","Ludewa DC","njombe","masasi-not set",0.19047619047619,1,NA
+"418","masasi","masasi","nanyumbu.dc","mtwara","masasi","not set","Masasi","Ludewa DC","njombe","masasi-not set",0.19047619047619,1,NA
+"419","masasi.dar.es.salaam.newala","masasi.dar.es.salaam.newala","masasi.newala","masasi.newala","salasala","salasala","Wazo","Kinondoni MC","dar es salaam","salasala-salasala",0.302650689905592,0.360576923076923,NA
+"420","masasi.mjini","chipole","masasi.dc","mtwara","sima","sima","Sima","Sengerema DC","mwanza","sima-sima",0.231481481481482,0.222222222222222,NA
+"421","masasi.mjini","napupa","masasi.dc","mtwara","sima","sima","Sima","Sengerema DC","mwanza","sima-sima",0.231481481481482,0.222222222222222,NA
+"422","masasi.mtangalanga.chitekete.makonga","mitesa.mbuyuni.newala.mji","newala.masasi","newala.masasi","masanga","masanga","Masanga","Kishapu DC","shinyanga","masanga-masanga",0.285449735449736,0.478632478632479,NA
+"423","masasi.mtangalanga.chitekete.makonga","mitesa.mbuyuni.newala.mji","newala.masasi","newala.masasi","masanga","masanga","Gorong'a","Tarime DC","mara","masanga-masanga",0.285449735449736,0.448717948717949,NA
+"424","mashete","mashete","nkasi.dc","rukwa","kigoma","shede","Kigoma","Kigoma Ujiji MC","kigoma","kigoma-shede",0.214285714285714,0.422222222222222,NA
+"425","mashete","mashetw","nkasi.dc","rukwa","kigoma","shede","Kigoma","Kigoma Ujiji MC","kigoma","kigoma-shede",0.214285714285714,0.422222222222222,NA
+"426","masimba","masimba","chemba.dc","dodoma","masimba","masimba","Kibati","Mvomero DC","morogoro","masimba-masimba",0.177777777777778,0.472222222222222,NA
+"427","masinda","masinda","chemba.dc","dodoma","tumaini","ndatu","Poli","Meru DC","arusha","tumaini-ndatu",0.227106227106227,0.555555555555556,NA
+"428","maswa","maswa","maswa.dc","simiyu","maswa","sola","Binza","Maswa DC","simiyu","maswa-sola",0.166666666666667,0,NA
+"429","maswa","maswa","shinyanga.dc","shinyanga","maswa","sola","Binza","Maswa DC","simiyu","maswa-sola",0.166666666666667,0.388888888888889,NA
+"430","matawale","matawale","masasi.dc","mtwara","monga","sakale","Mbomole","Muheza DC","tanga","monga-sakale",0.25,0.3,NA
+"431","matawale","matawale","masasi.dc","mtwara","monga","sakale","Mbomole","Muheza DC","tanga","monga-sakale",0.25,0.3,NA
+"432","matemela","matemela","matemela","matemela","matemela","matemela","Ipwani","Mbarali DC","mbeya","matemela-matemela",0.176470588235294,0.452777777777778,NA
+"433","mavimba","mavimba","ulanga.dc","morogoro","miva","miva","Luponde","Njombe TC","njombe","miva-miva",0.214285714285714,0.638888888888889,NA
+"434","mavimba","milola","ulanga.dc","morogoro","miva","miva","Luponde","Njombe TC","njombe","miva-miva",0.214285714285714,0.638888888888889,NA
+"435","mavimba.itobanilo","milola","ulanga.dc","morogoro","mabibo","azimio","Mabibo","Ubungo MC","dar es salaam","mabibo-azimio",0.259838201014672,0.599358974358974,NA
+"436","mavimba.kaliagogo.nyumbani","milola","ulanga.dc","morogoro","mbagala kizuiani","mbagala","Mbagala","Temeke MC","dar es salaam","mbagala kizuiani-mbagala",0.278490028490029,0.599358974358974,NA
+"437","mavimba.kanyagatwende","milola","ulanga.dc","morogoro","moniba","kawajense","Kawajense","Mpanda MC","katavi","moniba-kawajense",0.267857142857143,1,NA
+"438","mavimba.kanyagatwende","milola","ulanga.dc","morogoro","moniba","kawajense","Kawajense","Mpanda MC","katavi","moniba-kawajense",0.267857142857143,1,NA
+"439","mavimba.kijijini","milola","ulanga.dc","morogoro","marise","midizini","Manzese","Ubungo MC","dar es salaam","marise-midizini",0.279166666666667,0.599358974358974,NA
+"440","mavimba.kijijini","milola","ulanga.dc","morogoro","marise","midizini","Manzese","Ubungo MC","dar es salaam","marise-midizini",0.279166666666667,0.599358974358974,NA
+"441","mawale","parakuyo","kilosa.dc","morogoro","makwale","makwale","Makwale","Kyela DC","mbeya","makwale-makwale",0.2,0.558333333333333,NA
+"442","mayale","mayale","wanging.ombe.dc","njombe","makale","kayui","Mgandu","Itigi DC","singida","makale-kayui",0.25,0.563492063492063,NA
+"443","mayamaya","mayamaya","bahi.dc","dodoma","mbaya","mbaya","Mbaya","Liwale DC","lindi","mbaya-mbaya",0.0909090909090908,0.544444444444445,NA
+"444","mayamaya","mayamaya","bahi.dc","dodoma","mwaya","mwaya","Mwaya","Kilombero DC","morogoro","mwaya-mwaya",0.0909090909090908,0.472222222222222,NA
+"445","mayamaya","mayamaya","bahi.dc","dodoma","malya","malya","Malya","Kwimba DC","mwanza","malya-malya",0.0909090909090908,0.555555555555556,NA
+"446","mayamaya","mayamaya","bahi.dc","dodoma","mwaya","mwaya","Mwaya","Ulanga DC","morogoro","mwaya-mwaya",0.0909090909090908,0.472222222222222,NA
+"447","mayamaya","mayamaya","bahi.dc","dodoma","mwaya","mwaya","Mwaya","Kilombero DC","morogoro","mwaya-mwaya",0.0909090909090908,0.472222222222222,NA
+"448","maziwa","maziwa","bahi.dc","dodoma","maziwa","maziwa","Makorongo","Chemba DC","dodoma","maziwa-maziwa",0.17948717948718,0,NA
+"449","maziwa","maziwa","chemba.dc","dodoma","maziwa","maziwa","Makorongo","Chemba DC","dodoma","maziwa-maziwa",0.17948717948718,0,NA
+"450","mbagalambuyuni","kata.mkonona","nanyumbu.dc","mtwara","azania","mbuyuni","Kigogo","Kinondoni MC","dar es salaam","azania-mbuyuni",0.19047619047619,0.423076923076923,NA
+"451","mbagalambuyuni","kata.mkonona","nanyumbu.dc","mtwara","azania","mbuyuni","Kigogo","Kinondoni MC","dar es salaam","azania-mbuyuni",0.19047619047619,0.423076923076923,NA
+"452","mbalagani","mbalagani","maswa.dc","simiyu","mbalagane","mbalagane","Lubiga","Meatu DC","simiyu","mbalagane-mbalagane",0.230019493177388,0,NA
+"453","mbangala","lupaso","masasi.dc","mtwara","mbangala","mbangala","Mbangala","Songwe DC","songwe","mbangala-mbangala",0.176470588235294,0.555555555555556,NA
+"454","mbao","mbao","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"455","mbao","mbao","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"456","mbao","mkomba","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"457","mbao","mkomba","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"458","mbao","ntungwa","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"459","mbao","ntungwa","momba.dc","songwe","mbaya","sokoni","Vwawa","Mbozi DC","songwe","mbaya-sokoni",0.222222222222222,0,NA
+"460","mbaragane","mbaragane","maswa.dc","simiyu","mara","mgeninani","Kijichi","Temeke MC","dar es salaam","mara-mgeninani",0.221560846560847,0.585470085470085,NA
+"461","mbeha","mbeha","mvomero.dc","morogoro","mbecha","mbecha","Nanganga","Ruangwa DC","lindi","mbecha-mbecha",0.205128205128205,1,NA
+"462","mbeya","mbeya","mbeya.dc","mbeya","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.229166666666667,0,NA
+"463","mbeya","mbeya","mbeya.dc","mbeya","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.229166666666667,0,NA
+"464","mbeya","mbeya","mwanjelwa","mwanjelwa","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.229166666666667,0.466666666666667,NA
+"465","mbeya","mbeya","mwanjelwa","mwanjelwa","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.229166666666667,0.466666666666667,NA
+"466","mbeya.iringa.na.newala","mbeya.iringa.na.newala","mbeya.iringa.na.newala","mbeya.iringa.na.newala","nyamagana","ziwa","Butimba","Nyamagana MC","mwanza","nyamagana-ziwa",0.298701298701299,0.383838383838384,NA
+"467","mbeya.mjini","mbeya.mjini","mbeya.dc","mbeya","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.243476430976431,0,NA
+"468","mbeya.mjini","mbeya.mjini","mbeya.dc","mbeya","mbeya","makanisani","Forest","Mbeya CC","mbeya","mbeya-makanisani",0.243476430976431,0,NA
+"469","mbugani","banemhi","bariadi.dc","simiyu","mbugani","mbugani","Mbugani","Chunya DC","mbeya","mbugani-mbugani",0.177777777777778,0.422222222222222,NA
+"470","mbugani","banemhi","bariadi.dc","simiyu","mbugani","mbugani","Kitandililo","Makambako TC","njombe","mbugani-mbugani",0.177777777777778,0.555555555555556,NA
+"471","mbuyu.kwa.mbuyu","mbuyu.kwa.mbuyu","nanyumbu.dc","mtwara","mbuyuni","mbuyuni","Makuyuni","Monduli DC","arusha","mbuyuni-mbuyuni",0.222222222222222,0.555555555555556,NA
+"472","mbuyu.kwa.mbuyu","mbuyu.kwa.mbuyu","nanyumbu.dc","mtwara","mbuyuni","mbuyuni","Mapogoro","Mbarali DC","mbeya","mbuyuni-mbuyuni",0.222222222222222,0.422222222222222,NA
+"473","mbuyu.kwa.mbuyu","mbuyu.kwa.mbuyu","nanyumbu.dc","mtwara","mbuyuni","mbuyuni","Mbuyuni","Masasi DC","mtwara","mbuyuni-mbuyuni",0.222222222222222,0,NA
+"474","mbuyu.kwa.mbuyu","mbuyu.kwa.mbuyu","nanyumbu.dc","mtwara","mbuyuni","mbuyuni","Oljoro","Arusha DC","arusha","mbuyuni-mbuyuni",0.222222222222222,0.555555555555556,NA
+"475","mbuyu.kwa.mbuyu","mbuyu.kwa.mbuyu","nanyumbu.dc","mtwara","mbuyuni","mbuyuni","Mbuyuni","Songwe DC","songwe","mbuyuni-mbuyuni",0.222222222222222,0.555555555555556,NA
+"476","mchauru","makong.onda","masasi.dc","mtwara","chanzuru","chanzulu","Chanzulu","Kilosa DC","morogoro","chanzuru-chanzulu",0.263305322128851,0.472222222222222,NA
+"477","mdenga.nandagala.mmbulu","nangoo.nandagala","nangoo.lindi","nangoo.lindi","madale","madala","Wazo","Kinondoni MC","dar es salaam","madale-madala",0.296172426607209,0.55982905982906,NA
+"478","meatu.simiyu","meatu","meatu.dc","simiyu","matuli","matuli","Matuli","Morogoro DC","morogoro","matuli-matuli",0.280982905982906,0.569444444444445,NA
+"479","meatu.simiyu","meatu","meatu.dc","simiyu","matuli","matuli","Bwilingu","Chalinze DC","pwani","matuli-matuli",0.280982905982906,0.544444444444445,NA
+"480","megelo","megelo","kilindi.dc","tanga","mungere","losirwa","Esilalei","Monduli DC","arusha","mungere-losirwa",0.255555555555556,0.422222222222222,NA
+"481","megelo","migelo","megelo","megelo","mungere","losirwa","Esilalei","Monduli DC","arusha","mungere-losirwa",0.255555555555556,1,NA
+"482","meta","meta","newala.dc","mtwara","mpeta","mpeta","Chiungutwa","Masasi DC","mtwara","mpeta-mpeta",0.212121212121212,0,NA
+"483","meta","meta","newala.dc","mtwara","mseta","mseta","Chamkoroma","Kongwa DC","dodoma","mseta-mseta",0.212121212121212,0.555555555555556,NA
+"484","meta","newala","newala.dc","mtwara","mpeta","mpeta","Chiungutwa","Masasi DC","mtwara","mpeta-mpeta",0.212121212121212,0,NA
+"485","meta","newala","newala.dc","mtwara","mseta","mseta","Chamkoroma","Kongwa DC","dodoma","mseta-mseta",0.212121212121212,0.555555555555556,NA
+"486","mgongoni","sibwesa","tanganyika","tanganyika","maya","ugogoni","Nambambo","Nachingwea DC","lindi","maya-ugogoni",0.180555555555556,0.466666666666667,NA
+"487","mgongoni","sibwesa","tanganyika","tanganyika","maya","ugogoni","Nambambo","Nachingwea DC","lindi","maya-ugogoni",0.180555555555556,0.466666666666667,NA
+"488","migato.laini.tundaburigi","tindaburigi","itilima.na.meatu","itilima.na.meatu","miganga","kinandili","Miganga","Mkalama DC","singida","miganga-kinandili",0.295311714429362,0.517857142857143,NA
+"489","mihale","mihale","bunda.dc","mara","mihale","mlimani","Mcharo","Bunda TC","mara","mihale-mlimani",0.19047619047619,0,NA
+"490","mikang.ombe","katuma","tanganyika","tanganyika","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.221212121212121,0.578787878787879,NA
+"491","mikang.ombe","katuma","tanganyika","tanganyika","mango","mloe","Okaoni","Moshi DC","kilimanjaro","mango-mloe",0.221212121212121,0.578787878787879,NA
+"492","mikochi","namwawala","mlimba","mlimba","mikocheni","not set","Endamaghang","Karatu DC","arusha","mikocheni-not set",0.196078431372549,0.555555555555556,NA
+"493","mikochi.nyumbani","namwawala","mlimba","mlimba","mikunya","mikunya","Liwale B","Liwale DC","lindi","mikunya-mikunya",0.286111111111111,0.422222222222222,NA
+"494","mikochini","namawala","mlimba","mlimba","tpm","mikoroshini","Msasani","Kinondoni MC","dar es salaam","tpm-mikoroshini",0.192592592592593,0.585470085470085,NA
+"495","mikochini","namawala","mlimba","mlimba","tpm","mikoroshini","Msasani","Kinondoni MC","dar es salaam","tpm-mikoroshini",0.192592592592593,0.585470085470085,NA
+"496","mikumbi","mikumbi","newala.dc","mtwara","mikumbi","not set","Chilangala","Newala DC","mtwara","mikumbi-not set",0.177777777777778,0,NA
+"497","milala","milala","tanganyika","tanganyika","milala","misunkumilo","Misunkumilo","Mpanda MC","katavi","milala-misunkumilo",0.222222222222222,0.394444444444444,NA
+"498","milimate","milimate","nsimbo.dc","katavi","mtili","mtili","Ifwagi","Mufindi DC","iringa","mtili-mtili",0.234848484848485,0.555555555555556,NA
+"499","milinda","mpembe","tanganyika","tanganyika","malindi","maringo","Malindi","Lushoto DC","tanga","malindi-maringo",0.225396825396825,0.166666666666667,NA
+"500","milola","milola","ulanga.dc","morogoro","milola","milola","Milola","Ulanga DC","morogoro","milola-milola",0.17948717948718,0,NA
+"501","milunda","milunda","masasi.dc","mtwara","milundikwa","milundikwa","Nkandasi","Nkasi DC","rukwa","milundikwa-milundikwa",0.222222222222222,0.422222222222222,NA
+"502","milundelunde","mumbaka","masasi.dc","mtwara","ilunde","ilunde","Ilunde","Mlele DC","katavi","ilunde-ilunde",0.0790598290598291,0.444444444444445,NA
+"503","minazini","minazini","malinyi.dc","morogoro","fm","minazini","Makumbusho","Kinondoni MC","dar es salaam","fm-minazini",0.0909090909090908,0.599358974358974,NA
+"504","minazini","minazini","malinyi.dc","morogoro","fm","minazini","Makumbusho","Kinondoni MC","dar es salaam","fm-minazini",0.0909090909090908,0.599358974358974,NA
+"505","minyagala","mnyagala","tanganyika","tanganyika","minyala","minyala","Vumari","Same DC","kilimanjaro","minyala-minyala",0.234259259259259,0.578787878787879,NA
+"506","minyagala","sibwesa","tanganyika","tanganyika","minyala","minyala","Vumari","Same DC","kilimanjaro","minyala-minyala",0.234259259259259,0.578787878787879,NA
+"507","minyula","kate","namanyere","namanyere","myula","myula","Kate","Nkasi DC","rukwa","myula-myula",0.277056277056277,0.562962962962963,NA
+"508","minyula","kate","namanyere","namanyere","iyula","iyula","Iyula","Mbozi DC","songwe","iyula-iyula",0.277056277056277,0.481481481481482,NA
+"509","miomboni","mofu","mlimba","mlimba","mboni","mboni","Mamba Kaskazini","Moshi DC","kilimanjaro","mboni-mboni",0.195075757575758,0.406565656565657,NA
+"510","miomboni","mofu","mlimba","mlimba","mboni","mboni","Mamba Kaskazini","Moshi DC","kilimanjaro","mboni-mboni",0.195075757575758,0.406565656565657,NA
+"511","miomboni.nyumbani","mofu","mlimba","mlimba","mayomboni","mayomboni","Mayomboni","Mkinga DC","tanga","mayomboni-mayomboni",0.247797094546321,0.544444444444445,NA
+"512","mirinda","kapalamsenga","tanganyika","tanganyika","mikindani","boma","Magengeni","Mtwara MC","mtwara","mikindani-boma",0.238095238095238,0.4,NA
+"513","misufini.uhuru.park","misufini","morogoro.mc","morogoro","isunura","isunura","Igava","Mbarali DC","mbeya","isunura-isunura",0.335300372142477,0.558333333333333,NA
+"514","mitesa","mitesa","masasi.dc","mtwara","mitesa","mitesa","Namalenga","Masasi DC","mtwara","mitesa-mitesa",0.17948717948718,0,NA
+"515","mitobo","burabujiga","bariadi.tc","simiyu","mitobo","mitobo","Budalabujiga","Itilima DC","simiyu","mitobo-mitobo",0.17948717948718,0,NA
+"516","mitumbati","mitumbati","mitumbati","mitumbati","mcdit","baruti","Kimara","Ubungo MC","dar es salaam","mcdit-baruti",0.212962962962963,0.603988603988604,NA
+"517","mitumbati","mkonona","mkonona","mkonona","mcdit","baruti","Kimara","Ubungo MC","dar es salaam","mcdit-baruti",0.212962962962963,0.593406593406593,NA
+"518","miula","miula","nkasi.dc","rukwa","mico sulumo","wami dakawa","Mvomero","Mvomero DC","morogoro","mico sulumo-wami dakawa",0.260869565217391,0.558333333333333,NA
+"519","miula","miula","nkasi.dc","rukwa","mico sulumo","wami dakawa","Mvomero","Mvomero DC","morogoro","mico sulumo-wami dakawa",0.260869565217391,0.558333333333333,NA
+"520","miwangani.idete","namwawala","mlimba","mlimba","mk","viwandani","Mwakibete","Mbeya CC","mbeya","mk-viwandani",0.290740740740741,0.422222222222222,NA
+"521","miwangani.idete","namwawala","mlimba","mlimba","mk","viwandani","Mwakibete","Mbeya CC","mbeya","mk-viwandani",0.290740740740741,0.422222222222222,NA
+"522","miyagala","sibwesa","tanganyika","tanganyika","miangalua","miangalua","Miangalua","Sumbawanga DC","rukwa","miangalua-miangalua",0.25219298245614,0.566666666666667,NA
+"523","miyomboni","mofu","mlimba","mlimba","miombo","miombo","Mtenga","Nkasi DC","rukwa","miombo-miombo",0.227920227920228,0.544444444444445,NA
+"524","miyula","kate","namanyere","namanyere","myula","myula","Kate","Nkasi DC","rukwa","myula-myula",0.237373737373737,0.562962962962963,NA
+"525","miyula","kate","namanyere","namanyere","iyula","iyula","Iyula","Mbozi DC","songwe","iyula-iyula",0.237373737373737,0.481481481481482,NA
+"526","mkalenda","mkalenda","newala.dc","mtwara","mnali","kitunda","Msanjihili","Lindi MC","lindi","mnali-kitunda",0.243131868131868,1,NA
+"527","mkochini","namawala","mlimba","mlimba","mkyeku","clinic","Mazwi","Sumbawanga MC","rukwa","mkyeku-clinic",0.262820512820513,0.544444444444445,NA
+"528","mkochini","namawala","mlimba","mlimba","mkyeku","clinic","Mazwi","Sumbawanga MC","rukwa","mkyeku-clinic",0.262820512820513,0.544444444444445,NA
+"529","mkokwa","mwamkulu","mpanda.dc","katavi","mkoka","mkoka","Mkoka","Nachingwea DC","lindi","mkoka-mkoka",0.237373737373737,0.544444444444445,NA
+"530","mkole","mkole","nkasi.dc","rukwa","makole","makole","Makole","Dodoma MC","dodoma","makole-makole",0.205128205128205,0.544444444444445,NA
+"531","mkole","mkole","nkasi.dc","rukwa","makole","makole","Kilole","Lushoto DC","tanga","makole-makole",0.205128205128205,0.533333333333333,NA
+"532","mkole","mkole","nkasi.dc","rukwa","makole","tofiki","Viwandani","Dodoma MC","dodoma","makole-tofiki",0.205128205128205,0.544444444444445,NA
+"533","mkomange","igawa","malinyi.dc","morogoro","bmk","madenge","Buguruni","Ilala MC","dar es salaam","bmk-madenge",0.234307359307359,0.599358974358974,NA
+"534","mkomange","igawa","malinyi.dc","morogoro","bmk","madenge","Buguruni","Ilala MC","dar es salaam","bmk-madenge",0.234307359307359,0.599358974358974,NA
+"535","mkomba","mkomba","momba.dc","songwe","mkomba","mkomba","Mkomba","Momba DC","songwe","mkomba-mkomba",0.17948717948718,0,NA
+"536","mkongeni","dakawa","mvomero.dc","morogoro","mkonge","mkonge","Luhunga","Mufindi DC","iringa","mkonge-mkonge",0.195512820512821,0.472222222222222,NA
+"537","mkudumba","newala","newala.dc","mtwara","manundu","mbeza","Manundu","Korogwe TC","tanga","manundu-mbeza",0.195512820512821,0.3,NA
+"538","mkudumba","newala","newala.dc","mtwara","manundu","mbeza","Manundu","Korogwe TC","tanga","manundu-mbeza",0.195512820512821,0.3,NA
+"539","mkumbwanye","boliboli","iringa.dc","iringa","mbutu","mkwajuni","Somangila","Kigamboni MC","dar es salaam","mbutu-mkwajuni",0.251190476190476,0.670940170940171,NA
+"540","mkundi","majembe","masasi.dc","mtwara","mkundi ya mtae","mkundi","Mnazi","Lushoto DC","tanga","mkundi ya mtae-mkundi",0.238095238095238,0.3,NA
+"541","mkunyikwa","mad","mb","mb","mkunkwa","mkunkwa","Kaniha","Biharamulo DC","kagera","mkunkwa-mkunkwa",0.251851851851852,1,NA
+"542","mkwaya","makong.onda","masasi.dc","mtwara","mwaya","mwaya","Mwaya","Kilombero DC","morogoro","mwaya-mwaya",0.237373737373737,0.472222222222222,NA
+"543","mkwaya","makong.onda","masasi.dc","mtwara","mwaya","mwaya","Mwaya","Ulanga DC","morogoro","mwaya-mwaya",0.237373737373737,0.472222222222222,NA
+"544","mkwaya","makong.onda","masasi.dc","mtwara","mwaya","mwaya","Mwaya","Kilombero DC","morogoro","mwaya-mwaya",0.237373737373737,0.472222222222222,NA
+"545","mmbwendi","mkangale","nkasi.dc","rukwa","mbweni","mbweni","Mbweni","Kinondoni MC","dar es salaam","mbweni-mbweni",0.262820512820513,0.648717948717949,NA
+"546","mmbwendi","mkangale","nkasi.dc","rukwa","rtmr","mtendeni","Kisutu","Ilala MC","dar es salaam","rtmr-mtendeni",0.262820512820513,0.648717948717949,NA
+"547","mmbwendi","mkangale","nkasi.dc","rukwa","rtmr","mtendeni","Kisutu","Ilala MC","dar es salaam","rtmr-mtendeni",0.262820512820513,0.648717948717949,NA
+"548","mnadani.kidinda","kidinda","bariadi.tc","simiyu","manda","manda","Manda","Chamwino DC","dodoma","manda-manda",0.288131313131313,0.555555555555556,NA
+"549","mnarani","mnarani","ifakara.tc","morogoro","mara","mgeninani","Kijichi","Temeke MC","dar es salaam","mara-mgeninani",0.238095238095238,0.599358974358974,NA
+"550","mnazi","kalumbaleza","sumbawanga.dc","rukwa","mngazi","mngazi","Mngazi","Morogoro DC","morogoro","mngazi-mngazi",0.205128205128205,0.558333333333333,NA
+"551","mnkola","mnkola","bahi.dc","dodoma","mnkola","ibihwa","Ibihwa","Bahi DC","dodoma","mnkola-ibihwa",0.17948717948718,0,NA
+"552","mnyagala","mnyagala","tanganyika","tanganyika","nguyami","italagwe","Iyogwe","Gairo DC","morogoro","nguyami-italagwe",0.229166666666667,0.591666666666667,NA
+"553","mnyagala","sibwesa","tanganyika","tanganyika","nguyami","italagwe","Iyogwe","Gairo DC","morogoro","nguyami-italagwe",0.229166666666667,0.591666666666667,NA
+"554","mnygala","mnyagala","tanganyika","tanganyika","minyala","minyala","Vumari","Same DC","kilimanjaro","minyala-minyala",0.247619047619048,0.578787878787879,NA
+"555","moba","kashishi","mpimbwe.dc","katavi","mkomba","mkomba","Mkomba","Momba DC","songwe","mkomba-mkomba",0.230769230769231,1,NA
+"556","mofu","mofu","mlimba","mlimba","mofu","mofu","Mofu","Kilombero DC","morogoro","mofu-mofu",0.185185185185185,0.569444444444445,NA
+"557","mofu","mofu","mlimba","mlimba","mofu","mofu","Mofu","Kilombero DC","morogoro","mofu-mofu",0.185185185185185,0.569444444444445,NA
+"558","mofu.nyumbani","mofu","mlimba","mlimba","mboni","mboni","Mamba Kaskazini","Moshi DC","kilimanjaro","mboni-mboni",0.275058275058275,0.406565656565657,NA
+"559","mofu.nyumbani","mofu","mlimba","mlimba","mboni","mboni","Mamba Kaskazini","Moshi DC","kilimanjaro","mboni-mboni",0.275058275058275,0.406565656565657,NA
+"560","mondo","mnyagala","tanganyika","tanganyika","mondo","mondo","Mondo","Chemba DC","dodoma","mondo-mondo",0.181818181818182,0.577777777777778,NA
+"561","mondo","mnyagala","tanganyika","tanganyika","mondo","mondo","Mondo","Misungwi DC","mwanza","mondo-mondo",0.181818181818182,0.4,NA
+"562","mpanda","majalila","mpanda.dc","katavi","mpanda","mpanda","Lupata","Busokelo DC","mbeya","mpanda-mpanda",0.17948717948718,0.544444444444445,NA
+"563","mpanda","majalila","mpanda.dc","katavi","mpanda","mpanda","Nyimbili","Mbozi DC","songwe","mpanda-mpanda",0.17948717948718,1,NA
+"564","mpemba.tunduma","mpemba","momba.dc","songwe","upendo mam","butiama","Kijichi","Temeke MC","dar es salaam","upendo mam-butiama",0.257427757427757,0.670940170940171,NA
+"565","mpemba.tunduma","mpemba","momba.dc","songwe","upendo mam","butiama","Kijichi","Temeke MC","dar es salaam","upendo mam-butiama",0.257427757427757,0.670940170940171,NA
+"566","mpembe","katuma","tanganyika","tanganyika","membe","membe","Membe","Chamwino DC","dodoma","membe-membe",0.237373737373737,0.577777777777778,NA
+"567","mpembe","katuma","tanganyika","tanganyika","mpera","mpela","Ipunga","Mbozi DC","songwe","mpera-mpela",0.237373737373737,0.488888888888889,NA
+"568","mpembe","katuma","tanganyika","tanganyika","mpeta","mpeta","Chiungutwa","Masasi DC","mtwara","mpeta-mpeta",0.237373737373737,0.4,NA
+"569","mpembe","katuma","tanganyika","tanganyika","mpeto","mpeto","Ramadhani","Njombe TC","njombe","mpeto-mpeto",0.237373737373737,0.577777777777778,NA
+"570","mpembe","katuma","tanganyika","tanganyika","mpepo","mpepo","Tingi","Nyasa DC","ruvuma","mpepo-mpepo",0.237373737373737,0.577777777777778,NA
+"571","mpembe","katuma","tanganyika","tanganyika","mpera","mpera","Isagehe","Kahama TC","shinyanga","mpera-mpera",0.237373737373737,0.411111111111111,NA
+"572","mpembe","katuma","tanganyika","tanganyika","mpepo","mpepo","Tingi","Nyasa DC","ruvuma","mpepo-mpepo",0.237373737373737,0.577777777777778,NA
+"573","mpembe","katuma","tanganyika","tanganyika","mpera","mpera","Isagehe","Kahama TC","shinyanga","mpera-mpera",0.237373737373737,0.411111111111111,NA
+"574","mpembe","mpembe","tanganyika","tanganyika","membe","membe","Membe","Chamwino DC","dodoma","membe-membe",0.237373737373737,0.577777777777778,NA
+"575","mpembe","mpembe","tanganyika","tanganyika","mpera","mpela","Ipunga","Mbozi DC","songwe","mpera-mpela",0.237373737373737,0.488888888888889,NA
+"576","mpembe","mpembe","tanganyika","tanganyika","mpeta","mpeta","Chiungutwa","Masasi DC","mtwara","mpeta-mpeta",0.237373737373737,0.4,NA
+"577","mpembe","mpembe","tanganyika","tanganyika","mpeto","mpeto","Ramadhani","Njombe TC","njombe","mpeto-mpeto",0.237373737373737,0.577777777777778,NA
+"578","mpembe","mpembe","tanganyika","tanganyika","mpepo","mpepo","Tingi","Nyasa DC","ruvuma","mpepo-mpepo",0.237373737373737,0.577777777777778,NA
+"579","mpembe","mpembe","tanganyika","tanganyika","mpera","mpera","Isagehe","Kahama TC","shinyanga","mpera-mpera",0.237373737373737,0.411111111111111,NA
+"580","mpembe","mpembe","tanganyika","tanganyika","mpepo","mpepo","Tingi","Nyasa DC","ruvuma","mpepo-mpepo",0.237373737373737,0.577777777777778,NA
+"581","mpembe","mpembe","tanganyika","tanganyika","mpera","mpera","Isagehe","Kahama TC","shinyanga","mpera-mpera",0.237373737373737,0.411111111111111,NA
+"582","mpete","mwadui","sumbawanga.dc","rukwa","mpeta","mpeta","Chiungutwa","Masasi DC","mtwara","mpeta-mpeta",0.181818181818182,0.422222222222222,NA
+"583","mpete","mwadui","sumbawanga.dc","rukwa","mpete","mpete","Mfinga","Sumbawanga DC","rukwa","mpete-mpete",0.181818181818182,0,NA
+"584","mpete","mwadui","sumbawanga.dc","rukwa","mpeto","mpeto","Ramadhani","Njombe TC","njombe","mpeto-mpeto",0.181818181818182,1,NA
+"585","mpinga","kigwe","kigwe","kigwe","mfinga","mfinga","Shighatini","Mwanga DC","kilimanjaro","mfinga-mfinga",0.260683760683761,0.472727272727273,NA
+"586","mpinga","kigwe","kigwe","kigwe","mfinga","mfinga","Mfinga","Sumbawanga DC","rukwa","mfinga-mfinga",0.260683760683761,0.533333333333333,NA
+"587","mpinga","kigwe","kigwe","kigwe","mkinga","mkinga","Kipili","Nkasi DC","rukwa","mkinga-mkinga",0.260683760683761,0.533333333333333,NA
+"588","mpinga","kigwe","kigwe","kigwe","mpindo","tamanu","Mpindo","Maswa DC","simiyu","mpindo-tamanu",0.260683760683761,0.544444444444445,NA
+"589","mpinga","kigwe","kigwe","kigwe","mzinga","mzinga","Toangoma","Temeke MC","dar es salaam","mzinga-mzinga",0.260683760683761,0.574358974358974,NA
+"590","mpinga","kigwe","kigwe","kigwe","omulinga","soko","Gongoni","Tabora MC","tabora","omulinga-soko",0.260683760683761,1,NA
+"591","mpinga","mpinga","bahi.dc","dodoma","mfinga","mfinga","Shighatini","Mwanga DC","kilimanjaro","mfinga-mfinga",0.260683760683761,0.494949494949495,NA
+"592","mpinga","mpinga","bahi.dc","dodoma","mfinga","mfinga","Mfinga","Sumbawanga DC","rukwa","mfinga-mfinga",0.260683760683761,0.544444444444445,NA
+"593","mpinga","mpinga","bahi.dc","dodoma","mkinga","mkinga","Kipili","Nkasi DC","rukwa","mkinga-mkinga",0.260683760683761,0.544444444444445,NA
+"594","mpinga","mpinga","bahi.dc","dodoma","mpindo","tamanu","Mpindo","Maswa DC","simiyu","mpindo-tamanu",0.260683760683761,0.555555555555556,NA
+"595","mpinga","mpinga","bahi.dc","dodoma","mzinga","mzinga","Toangoma","Temeke MC","dar es salaam","mzinga-mzinga",0.260683760683761,0.504273504273504,NA
+"596","mpinga","mpinga","bahi.dc","dodoma","omulinga","soko","Gongoni","Tabora MC","tabora","omulinga-soko",0.260683760683761,0.444444444444445,NA
+"597","mpolo","utengule.usangu","utengule.usangu","utengule.usangu","mpolo","mpolo","Utengule Usangu","Mbarali DC","mbeya","mpolo-mpolo",0.181818181818182,0.577777777777778,NA
+"598","mria","kalumbaleza","sumbawanga.dc","rukwa","muriba","muriba","Muriba","Tarime DC","mara","muriba-muriba",0.230769230769231,0.516666666666667,NA
+"599","msadia","nyambwe","mpimbwe.dc","katavi","shadi","shadi","Mkolani","Nyamagana MC","mwanza","shadi-shadi",0.237373737373737,0.444444444444445,NA
+"600","msalama","songea","songea.dc","ruvuma","komsala","komsala","Kwamatuku","Handeni DC","tanga","komsala-komsala",0.177777777777778,0.544444444444445,NA
+"601","msembeta","msembeta","dodoma.cc","dodoma","mwembetayari","bungo","Mkuza","Kibaha TC","pwani","mwembetayari-bungo",0.24537037037037,1,NA
+"602","msembeta","msembeta","dodoma.cc","dodoma","mwembetayari","bungo","Mkuza","Kibaha TC","pwani","mwembetayari-bungo",0.24537037037037,1,NA
+"603","msikisi.farm.17.ndomoni.ndomondo","msikisi.nachingwea","masasi.nachingwea","masasi.nachingwea","masinono","masinono","Bugwema","Musoma DC","mara","masinono-masinono",0.338521241830065,0.357843137254902,NA
+"604","mtakuja","minyagala","tanganyika","tanganyika","mtakuja","mpomvu","Mtakuja","Geita TC","geita","mtakuja-mpomvu",0.166666666666667,0.533333333333333,NA
+"605","mtakuja","sibwesa","tanganyika","tanganyika","mtakuja","mpomvu","Mtakuja","Geita TC","geita","mtakuja-mpomvu",0.166666666666667,0.533333333333333,NA
+"606","mtapenda","kilangawana","sumbawanga.dc","rukwa","mtapenda","mtapenda","Mtapenda","Nsimbo DC","katavi","mtapenda-mtapenda",0.176470588235294,0.422222222222222,NA
+"607","mufindi","mufindi","mufindi.dc","iringa","mufindi tea company","ifupira","Ifwagi","Mufindi DC","iringa","mufindi tea company-ifupira",0.246913580246914,0,NA
+"608","mufindi","mufindi","mufindi.dc","iringa","mufindi tea company","ifupira","Ifwagi","Mufindi DC","iringa","mufindi tea company-ifupira",0.246913580246914,0,NA
+"609","muhunze","kata","kishapu.dc","shinyanga","mhunze","mhunze","Mhunze","Itilima DC","simiyu","mhunze-mhunze",0.282661782661783,0.388888888888889,NA
+"610","mumbaka","mumbaka","masasi.dc","mtwara","mumbaka","mumbaka","Marika","Masasi TC","mtwara","mumbaka-mumbaka",0.177777777777778,0,NA
+"611","mumbulu","nangoo","masasi.dc","mtwara","mkumbululu","not set","Mchauru","Masasi DC","mtwara","mkumbululu-not set",0.203703703703704,0,NA
+"612","muze","muze","mpimbwe.dc","katavi","muze","muze","Muze","Sumbawanga DC","rukwa","muze-muze",0.185185185185185,0.422222222222222,NA
+"613","mwabuhi","kabila","kwimba.dc","mwanza","mwabaluhi","ofisini","Mwabaluhi","Sengerema DC","mwanza","mwabaluhi-ofisini",0.196078431372549,0,NA
+"614","mwagoli","kabila","magu.dc","mwanza","mwagala","binza","Binza","Maswa DC","simiyu","mwagala-binza",0.227106227106227,0.555555555555556,NA
+"615","mwagoli","kabila","magu.dc","mwanza","mwagala","binza","Binza","Maswa DC","simiyu","mwagala-binza",0.227106227106227,0.555555555555556,NA
+"616","mwakibiga","mwakidiga","maswa.dc","simiyu","mwakibuga","wala","Nyakabindi","Bariadi TC","simiyu","mwakibuga-wala",0.17989417989418,0,NA
+"617","mwakulu","mwakulu","tanganyika","tanganyika","mwamkulu","mwamkulu","Kakese","Mpanda MC","katavi","mwamkulu-mwamkulu",0.196078431372549,0.394444444444444,NA
+"618","mwamagisi","chamngasa","busega.dc","simiyu","mwasingu","mwasingu","Lyabusalu","Shinyanga DC","shinyanga","mwasingu-mwasingu",0.230936819172113,0.388888888888889,NA
+"619","mwamagisi","mwasamba","busega.dc","simiyu","mwasingu","mwasingu","Lyabusalu","Shinyanga DC","shinyanga","mwasingu-mwasingu",0.230936819172113,0.388888888888889,NA
+"620","mwamashindike","mwabaratulu","maswa.dc","simiyu","mwakashindye","mwakasindye","Ibiri","Uyui DC","tabora","mwakashindye-mwakasindye",0.204059829059829,1,NA
+"621","mwamkulu","mwamkulu","mpanda.dc","katavi","mwamkulu","mwamkulu","Kakese","Mpanda MC","katavi","mwamkulu-mwamkulu",0.176470588235294,0,NA
+"622","mwamkulu","mwamkulu","nkasi.dc","rukwa","mwamkulu","mwamkulu","Kakese","Mpanda MC","katavi","mwamkulu-mwamkulu",0.176470588235294,0.422222222222222,NA
+"623","mwamkulu","mwamkulu","nsimbo.dc","katavi","mwamkulu","mwamkulu","Kakese","Mpanda MC","katavi","mwamkulu-mwamkulu",0.176470588235294,0,NA
+"624","mwamnkulu","mwamnkulu","tanganyika","tanganyika","mwamkulu","mwamkulu","Kakese","Mpanda MC","katavi","mwamkulu-mwamkulu",0.213507625272331,0.394444444444444,NA
+"625","mwamwapuli","sibwesa","tanganyika","tanganyika","mwali","mwali","Nyachenda","Kasulu DC","kigoma","mwali-mwali",0.157575757575758,0.655555555555556,NA
+"626","mwanangwa","mwanangwa","masasi.dc","mtwara","mwanhale","ng'wanhale","Mkula","Busega DC","simiyu","mwanhale-ng'wanhale",0.175438596491228,0.555555555555556,NA
+"627","mwanangwa","mwanangwa","misungwi.dc","mwanza","mwanhale","ng'wanhale","Mkula","Busega DC","simiyu","mwanhale-ng'wanhale",0.175438596491228,0.555555555555556,NA
+"628","mwankulu","mwamnkulu","tanganyika","tanganyika","mwankulwe","mwankulwe","Mwankulwe","Kwimba DC","mwanza","mwankulwe-mwankulwe",0.192982456140351,0.4,NA
+"629","mwankwaya","banehmi","bariadi.dc","simiyu","mwasenkwa","luwala","Mwansekwa","Mbeya CC","mbeya","mwasenkwa-luwala",0.203703703703704,0.422222222222222,NA
+"630","mwanza.machinjioni","mwanza.machinjioni","mwanza.machinjioni","mwanza.machinjioni","mwananchi","machinjioni","Makongolosi","Chunya DC","mbeya","mwananchi-machinjioni",0.23098544973545,0.496296296296296,NA
+"631","mwanza.machinjioni","mwanza.machinjioni","mwanza.machinjioni","mwanza.machinjioni","mwananchi","machinjioni","Makongolosi","Chunya DC","mbeya","mwananchi-machinjioni",0.23098544973545,0.496296296296296,NA
+"632","mwanzo.mgumu","nkung.ungu","chunya.dc","mbeya","mwanzomgumu","msimbu","Msimbu","Kisarawe DC","pwani","mwanzomgumu-msimbu",0.157407407407407,1,NA
+"633","mwanzoya","itubukilo","bariadi.dc","simiyu","mwandoya","mwandoya","Mwandoya","Meatu DC","simiyu","mwandoya-mwandoya",0.237745098039216,0,NA
+"634","mwasamba","mwasamba","busega.dc","simiyu","mwasa","mwasa","Kidete","Kilosa DC","morogoro","mwasa-mwasa",0.162878787878788,0.569444444444445,NA
+"635","mwaya.nyumbani.na.wengine.mnada.wa.lukande","kata.ya.mwaya.na.kata.ya.lukande","ulanga.dc","morogoro","mwamanyuda","mwamanyuda","Imesela","Shinyanga DC","shinyanga","mwamanyuda-mwamanyuda",0.330687830687831,0.587962962962963,NA
+"636","mwaya.nyumbani.na.wengine.mnada.wa.lukande","kata.ya.mwaya.na.kata.ya.lukande","ulanga.dc","morogoro","mwanambaya","mwanambaya","Tambani","Mkuranga DC","pwani","mwanambaya-mwanambaya",0.330687830687831,1,NA
+"637","mweniemba","mkuru","momba.dc","songwe","menonite","muleba","Muleba","Muleba DC","kagera","menonite-muleba",0.192592592592593,0.444444444444445,NA
+"638","mweniemba","mkuru","momba.dc","songwe","menonite","muleba","Muleba","Muleba DC","kagera","menonite-muleba",0.192592592592593,0.444444444444445,NA
+"639","mwese","mwese","tanganyika","tanganyika","mwese","mwese","Mwese","Mpanda DC","katavi","mwese-mwese",0.181818181818182,0.394444444444444,NA
+"640","mwiji","mwiji","chunya.dc","mbeya","mwime","mwime","Mwendakulima","Kahama TC","shinyanga","mwime-mwime",0.278787878787879,0.459259259259259,NA
+"641","mwiji","mwiji","chunya.dc","mbeya","mwisi","mwisi","Lighwa","Ikungi DC","singida","mwisi-mwisi",0.278787878787879,0.552380952380952,NA
+"642","myula","myula","nkasi.dc","rukwa","myula","myula","Kate","Nkasi DC","rukwa","myula-myula",0.181818181818182,0,NA
+"643","mzia","mzia","mvomero.dc","morogoro","mziha","mziha","Kanga","Mvomero DC","morogoro","mziha-mziha",0.212121212121212,0,NA
+"644","mziha","mziha","mvomero.dc","morogoro","mziha","mziha","Kanga","Mvomero DC","morogoro","mziha-mziha",0.181818181818182,0,NA
+"645","mziha.kwakonji","mziha","mvomero.dc","morogoro","kishamba","sokoni","Majengo","Moshi MC","kilimanjaro","kishamba-sokoni",0.273015873015873,0.450757575757576,NA
+"646","mziha.kwakonji","mziha","mvomero.dc","morogoro","kishamba","sokoni","Majengo","Moshi MC","kilimanjaro","kishamba-sokoni",0.273015873015873,0.450757575757576,NA
+"647","mziha.nyumbani","mziha","mvomero.dc","morogoro","mbugani","mbugani","Mbugani","Chunya DC","mbeya","mbugani-mbugani",0.23968253968254,0.558333333333333,NA
+"648","mziha.nyumbani","mziha","mvomero.dc","morogoro","mbugani","mbugani","Kitandililo","Makambako TC","njombe","mbugani-mbugani",0.23968253968254,0.638888888888889,NA
+"649","mziha.nyumbani","mziha","mvomero.dc","morogoro","mbulani","mbulani","Panzuo","Mkuranga DC","pwani","mbulani-mbulani",0.23968253968254,1,NA
+"650","mzogole","mpinga","bahi.dc","dodoma","mzogole","kigwe","Kigwe","Bahi DC","dodoma","mzogole-kigwe",0.153846153846154,0,NA
+"651","n.gwang.wale","kamondo","bariadi.tc","simiyu","kongwa","kongwa","Mvuha","Morogoro DC","morogoro","kongwa-kongwa",0.239316239316239,0.569444444444445,NA
+"652","n.gwang.wale","kamondo","bariadi.tc","simiyu","nyugwa","nyugwa","Nyugwa","Nyang'hwale DC","geita","nyugwa-nyugwa",0.239316239316239,0.544444444444445,NA
+"653","n.gwang.wale","kamondo","bariadi.tc","simiyu","kongwa","kongwa","Kongwa","Kongwa DC","dodoma","kongwa-kongwa",0.239316239316239,0.555555555555556,NA
+"654","n.gwang.wale","kamondo","bariadi.tc","simiyu","songwa","songwa","Songwa","Kishapu DC","shinyanga","songwa-songwa",0.239316239316239,0.388888888888889,NA
+"655","nachingwea","nachingwea","nachingwea.dc","lindi","nachingwea","not set","Ugawaji","Nachingwea DC","lindi","nachingwea-not set",0.148148148148148,0,NA
+"656","nairombo","nairombo","masasi.dc","mtwara","natiro","tema","Mbokomu","Moshi DC","kilimanjaro","natiro-tema",0.234848484848485,0.409090909090909,NA
+"657","nairombo","nairombo","masasi.dc","mtwara","natiro","tema","Mbokomu","Moshi DC","kilimanjaro","natiro-tema",0.234848484848485,0.409090909090909,NA
+"658","nakarara","makong.onda","masasi.dc","mtwara","nyakahoja","nera","Isamilo","Nyamagana MC","mwanza","nyakahoja-nera",0.208333333333333,0.222222222222222,NA
+"659","nakarara","makong.onda","masasi.dc","mtwara","nyakahoja","nera","Isamilo","Nyamagana MC","mwanza","nyakahoja-nera",0.208333333333333,0.222222222222222,NA
+"660","nakarara","nakarara","masasi.dc","mtwara","nyakahoja","nera","Isamilo","Nyamagana MC","mwanza","nyakahoja-nera",0.208333333333333,0.222222222222222,NA
+"661","nakarara","nakarara","masasi.dc","mtwara","nyakahoja","nera","Isamilo","Nyamagana MC","mwanza","nyakahoja-nera",0.208333333333333,0.222222222222222,NA
+"662","namanyere","isunta","nkasi.dc","rukwa","namanyere","ilegeza","Namanyere","Nkasi DC","rukwa","namanyere-ilegeza",0.156862745098039,0,NA
+"663","namatumbusi","namatumbusi","nachingwea.dc","lindi","namatumbusi","namatumbisi","Naipingo","Nachingwea DC","lindi","namatumbusi-namatumbisi",0.173913043478261,0,NA
+"664","namatumbusi.nachingwea.nahoro.liwale.namajani.masasi","nang.ondo","nachingwea.dc","lindi","namangale","namangale","Namangwale","Lindi DC","lindi","namangale-namangale",0.328074144637612,0,NA
+"665","namatumbuzi","namatumbusi","nachingwea.dc","lindi","namatumbusi","namatumbisi","Naipingo","Nachingwea DC","lindi","namatumbusi-namatumbisi",0.21870882740448,0,NA
+"666","nambunda","mijejele","masasi.dc","mtwara","nyambunda","nyambunda","Bungu","Kibiti DC","pwani","nyambunda-nyambunda",0.192982456140351,0.422222222222222,NA
+"667","nambunda","mijelejele","masasi.dc","mtwara","nyambunda","nyambunda","Bungu","Kibiti DC","pwani","nyambunda-nyambunda",0.192982456140351,0.422222222222222,NA
+"668","namwawala","namwawala","malinyi.dc","morogoro","ngeta","mtawala","Mwembesongo","Morogoro MC","morogoro","ngeta-mtawala",0.165242165242165,0,NA
+"669","namwawala","namwawala","malinyi.dc","morogoro","ngeta","mtawala","Mwembesongo","Morogoro MC","morogoro","ngeta-mtawala",0.165242165242165,0,NA
+"670","namwawala","namwawala","mlimba","mlimba","ngeta","mtawala","Mwembesongo","Morogoro MC","morogoro","ngeta-mtawala",0.165242165242165,0.569444444444445,NA
+"671","namwawala","namwawala","mlimba","mlimba","ngeta","mtawala","Mwembesongo","Morogoro MC","morogoro","ngeta-mtawala",0.165242165242165,0.569444444444445,NA
+"672","nandangala","nandagala","rungwe.dc","mbeya","ngana","ngana","Ngana","Kyela DC","mbeya","ngana-ngana",0.157575757575758,0,NA
+"673","nangoo","nangoo","masasi.dc","mtwara","kinango","yichobela","Nyigogo","Magu DC","mwanza","kinango-yichobela",0.215686274509804,0.222222222222222,NA
+"674","nangoo","nangoo","masasi.dc","mtwara","nangombo","nangombo","Kilosa","Nyasa DC","ruvuma","nangombo-nangombo",0.215686274509804,0.555555555555556,NA
+"675","nangoo","nangoo","masasi.dc","mtwara","nyangoto","nyangoto","Matongo","Tarime DC","mara","nyangoto-nyangoto",0.215686274509804,0.111111111111111,NA
+"676","nangoo","nangoo","masasi.dc","mtwara","nangombo","nangombo","Kilosa","Nyasa DC","ruvuma","nangombo-nangombo",0.215686274509804,0.555555555555556,NA
+"677","nangwala","nangwala","newala.dc","mtwara","nangwa","nangwa","Nangwa","Hanang DC","manyara","nangwa-nangwa",0.195512820512821,0.337301587301587,NA
+"678","nangwala","nangwala","newala.dc","mtwara","nangwa","nangwa","Nangwa","Hanang DC","manyara","nangwa-nangwa",0.195512820512821,0.337301587301587,NA
+"679","nanji.igumbilo","milola","ulanga.dc","morogoro","nuraifo","mbezi luis","Mbezi","Ubungo MC","dar es salaam","nuraifo-mbezi luis",0.31005291005291,0.599358974358974,NA
+"680","nanji.igumbilo","milola","ulanga.dc","morogoro","nuraifo","mbezi luis","Mbezi","Ubungo MC","dar es salaam","nuraifo-mbezi luis",0.31005291005291,0.599358974358974,NA
+"681","nanyumbu.masasi.mjini.maparawe","nanyumbu.napupa.mchauru","masasi.nanyumbu","masasi.nanyumbu","nansama","namsama","Isansa","Mbozi DC","songwe","nansama-namsama",0.295238095238095,0.511111111111111,NA
+"682","nanyumbu.tabora.mbeya.sumbawanga","nanyumbu.mbeya.sumbawanga.tabora","nanyumbu.mbeya.tabora.sumbawanga","nanyumbu.mbeya.tabora.sumbawanga","mwanambaya","mwanambaya","Tambani","Mkuranga DC","pwani","mwanambaya-mwanambaya",0.288369514472456,0.679166666666667,NA
+"683","napupa","napupa","masasi.dc","mtwara","lupa","lupa","Lupatingatinga","Chunya DC","mbeya","lupa-lupa",0.27037037037037,0.422222222222222,NA
+"684","nasa","nyashimo","busega.dc","simiyu","nyasa","nyasa","Seleli","Kaliua DC","tabora","nyasa-nyasa",0.212121212121212,1,NA
+"685","nasa","nyashimo","busega.dc","simiyu","nzasa","nzasa","Chihanga","Dodoma MC","dodoma","nzasa-nzasa",0.212121212121212,0.555555555555556,NA
+"686","nchinila","nchinila","bahi.dc","dodoma","mengwe chini","ngareni","Ngoyoni","Rombo DC","kilimanjaro","mengwe chini-ngareni",0.258333333333333,0.494949494949495,NA
+"687","ndagalu","kabila","magu.dc","mwanza","inala","ngulla","Ngulla","Kwimba DC","mwanza","inala-ngulla",0.26984126984127,0,NA
+"688","ndapo","kinyika","makete.dc","njombe","ndapo","ndapo","Matamba","Makete DC","njombe","ndapo-ndapo",0.181818181818182,0,NA
+"689","ndibwa","ndibwa","masasi.dc","mtwara","upendo","kibaoni","Hai Mjini","Hai DC","kilimanjaro","upendo-kibaoni",0.26984126984127,0.409090909090909,NA
+"690","ndibwa","ndibwa","masasi.dc","mtwara","upendo","kibaoni","Hai Mjini","Hai DC","kilimanjaro","upendo-kibaoni",0.26984126984127,0.409090909090909,NA
+"691","ndomoni","nachingwea","nachingwea.dc","lindi","upendo morden","kizinga","Mbagala","Temeke MC","dar es salaam","upendo morden-kizinga",0.222222222222222,0.574358974358974,NA
+"692","ndomoni","nachingwea","nachingwea.dc","lindi","upendo morden","kizinga","Mbagala","Temeke MC","dar es salaam","upendo morden-kizinga",0.222222222222222,0.574358974358974,NA
+"693","nduha","kabila","kwimba.dc","mwanza","mendo","ihalo","Ilola","Shinyanga DC","shinyanga","mendo-ihalo",0.278787878787879,0.5,NA
+"694","newala","newala","masasi.dc","mtwara","newala","majengo","Mtonya","Newala TC","mtwara","newala-majengo",0.19047619047619,0,NA
+"695","newala","newala","newala.dc","mtwara","newala","majengo","Mtonya","Newala TC","mtwara","newala-majengo",0.19047619047619,0,NA
+"696","newala.na.nanyumbu","newala.na.nanyumbu","newala.na.nanyumbu","newala.na.nanyumbu","nala","nala","Nala","Dodoma MC","dodoma","nala-nala",0.277777777777778,0.592592592592593,NA
+"697","ng.wang.aranga","ng.wang.aranga","kwimba.dc","mwanza","ngana","ngana","Ngana","Kyela DC","mbeya","ngana-ngana",0.253727753727754,0.422222222222222,NA
+"698","ngalaiwa","nkungu.ngu","chunya.dc","mbeya","ngala","mnara","Mnara","Lindi DC","lindi","ngala-mnara",0.234848484848485,1,NA
+"699","ngalaiwa","nkungu.ngu","chunya.dc","mbeya","ngala","mnara","Mnara","Lindi DC","lindi","ngala-mnara",0.234848484848485,1,NA
+"700","ngalaiwe","igangwe","chunya.dc","mbeya","usangi","kilaweni","Kighare","Mwanga DC","kilimanjaro","usangi-kilaweni",0.280555555555556,0.472727272727273,NA
+"701","ngalaiwe","ngalaiwe","chunya.dc","mbeya","usangi","kilaweni","Kighare","Mwanga DC","kilimanjaro","usangi-kilaweni",0.280555555555556,0.472727272727273,NA
+"702","ngalaiwe","nkung.ungu","chunya.dc","mbeya","usangi","kilaweni","Kighare","Mwanga DC","kilimanjaro","usangi-kilaweni",0.280555555555556,0.472727272727273,NA
+"703","ngeme","mwamaplalal","bariadi.tc","simiyu","ngeme","ngeme","Mwamapalala","Itilima DC","simiyu","ngeme-ngeme",0.181818181818182,0,NA
+"704","ngeme","mwamaplalal","bariadi.tc","simiyu","ngeme","ngeme","Mwakipoya","Kishapu DC","shinyanga","ngeme-ngeme",0.181818181818182,0.388888888888889,NA
+"705","ngudu","ngudu","ngudu","ngudu","ngudu","amani","Makonde","Lindi MC","lindi","ngudu-amani",0.181818181818182,0.533333333333333,NA
+"706","ngudu","ngudu","ngudu","ngudu","ngudu","amani","Makonde","Lindi MC","lindi","ngudu-amani",0.181818181818182,0.533333333333333,NA
+"707","nhundi","gatuli","kwimba.dc","mwanza","nkundi","nkundi","Kipande","Nkasi DC","rukwa","nkundi-nkundi",0.260683760683761,0.422222222222222,NA
+"708","njaula","mzia","mvomero.dc","morogoro","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.26984126984127,0.472222222222222,NA
+"709","njaula","mzia","mvomero.dc","morogoro","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.26984126984127,0.472222222222222,NA
+"710","njeula.nyumbani","mziha","mvomero.dc","morogoro","nanyamba","namdimba","Chilangala","Newala DC","mtwara","nanyamba-namdimba",0.290196078431373,0.472222222222222,NA
+"711","njeura","mziha","mvomero.dc","morogoro","njombe","ramadhani","Ramadhani","Njombe TC","njombe","njombe-ramadhani",0.284722222222222,0.638888888888889,NA
+"712","njombe","anasambaza.kata.mbali.mbali","njombe.dc","njombe","njombe","kwivaha","Njombe Mjini","Njombe TC","njombe","njombe-kwivaha",0.19047619047619,0,NA
+"713","njombe","chaugingi","njombe.dc","njombe","njombe","kwivaha","Njombe Mjini","Njombe TC","njombe","njombe-kwivaha",0.19047619047619,0,NA
+"714","njombe","chaugingi","rujewa","rujewa","njombe","kwivaha","Njombe Mjini","Njombe TC","njombe","njombe-kwivaha",0.19047619047619,0.444444444444445,NA
+"715","njombe","njombe","njombe.dc","njombe","njombe","kwivaha","Njombe Mjini","Njombe TC","njombe","njombe-kwivaha",0.19047619047619,0,NA
+"716","nkhome","nkhome","bahi.dc","dodoma","nkhome","ibugule","Ibugule","Bahi DC","dodoma","nkhome-ibugule",0.19047619047619,0,NA
+"717","nkhwenda","nkhwenda","bahi.dc","dodoma","nkwenda","nkwenda","Nhinhi","Chamwino DC","dodoma","nkwenda-nkwenda",0.219444444444444,0,NA
+"718","nkhwenda","nkhwenda","bahi.dc","dodoma","nkwenda","nkwenda","Nkwenda","Kyerwa DC","kagera","nkwenda-nkwenda",0.219444444444444,0.555555555555556,NA
+"719","nkome","nkome","bahi.dc","dodoma","nkome","ihumilo","Nkome","Geita DC","geita","nkome-ihumilo",0.205128205128205,0.544444444444445,NA
+"720","nkuli","ikungu","bariadi.dc","simiyu","nkulabi","nkulabi","Mpunguzi","Dodoma MC","dodoma","nkulabi-nkulabi",0.222222222222222,0.555555555555556,NA
+"721","nkung.ungu","nkung.ungu","chunya.dc","mbeya","nkung'ungu","nkung`ungu","Lupatingatinga","Chunya DC","mbeya","nkung'ungu-nkung`ungu",0.223809523809524,0,NA
+"722","nkungwi","sibwesa","tanganyika","tanganyika","nkungwe","nkungwe","Mahembe","Kigoma DC","kigoma","nkungwe-nkungwe",0.247619047619048,0.655555555555556,NA
+"723","nkuswe","nkuswe","nkuswe","nkuswe","nkungwe","nkungwe","Mahembe","Kigoma DC","kigoma","nkungwe-nkungwe",0.277777777777778,0.555555555555556,NA
+"724","nkwavii","isangawana","chunya.dc","mbeya","nkwae","msisi","Msisi","Singida DC","singida","nkwae-msisi",0.199134199134199,0.552380952380952,NA
+"725","nobola","nobola","magu.dc","mwanza","nhobola","nhobola","Nkungulu","Magu DC","mwanza","nhobola-nhobola",0.2,0,NA
+"726","ntalamila","intamila","sumbawanga.dc","rukwa","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.422222222222222,NA
+"727","ntalamila","intamila","sumbawanga.dc","rukwa","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.422222222222222,NA
+"728","ntalamila","ivuna","nkasi.dc","rukwa","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.422222222222222,NA
+"729","ntalamila","ivuna","nkasi.dc","rukwa","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.422222222222222,NA
+"730","ntalamila","ntalamila","namanyere","namanyere","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.481481481481482,NA
+"731","ntalamila","ntalamila","namanyere","namanyere","nyabula","mlanda","Maguliwa","Iringa DC","iringa","nyabula-mlanda",0.240740740740741,0.481481481481482,NA
+"732","ntatumbila","ntatumbila","nkasi.dc","rukwa","ntatumbila","kisala","Namanyere","Nkasi DC","rukwa","ntatumbila-kisala",0.137254901960784,0,NA
+"733","ntuchi","ntuchi","namanyere","namanyere","ntuchi","ntuchi","Isale","Nkasi DC","rukwa","ntuchi-ntuchi",0.17948717948718,0.562962962962963,NA
+"734","ntuchi","ntuchi","nkasi.dc","rukwa","ntuchi","ntuchi","Isale","Nkasi DC","rukwa","ntuchi-ntuchi",0.17948717948718,0,NA
+"735","ntuchi","tuchi","nkasi.dc","rukwa","ntuchi","ntuchi","Isale","Nkasi DC","rukwa","ntuchi-ntuchi",0.17948717948718,0,NA
+"736","ntula","kashishi","mpimbwe.dc","katavi","ntulya","ntulya","Mondo","Misungwi DC","mwanza","ntulya-ntulya",0.205128205128205,0.444444444444445,NA
+"737","ntungwa","mbao","momba.dc","songwe","ntungwa","ntungwa","Ivuna","Momba DC","songwe","ntungwa-ntungwa",0.177777777777778,0,NA
+"738","ntungwa","mkomba","mkomba","mkomba","ntungwa","ntungwa","Ivuna","Momba DC","songwe","ntungwa-ntungwa",0.177777777777778,0.555555555555556,NA
+"739","ntungwa","mkomba","momba.dc","songwe","ntungwa","ntungwa","Ivuna","Momba DC","songwe","ntungwa-ntungwa",0.177777777777778,0,NA
+"740","ntungwa","mkuu","momba.dc","songwe","ntungwa","ntungwa","Ivuna","Momba DC","songwe","ntungwa-ntungwa",0.177777777777778,0,NA
+"741","nyakiswa","nyakiswa","musoma.dc","mara","nyakisasa","kashinga","Nyakisasa","Ngara DC","kagera","nyakisasa-kashinga",0.24537037037037,0.25,NA
+"742","nyamatala","nyamatala","misungwi.dc","mwanza","nyaumata","nyaumata","Somanda","Bariadi TC","simiyu","nyaumata-nyaumata",0.213507625272331,0.555555555555556,NA
+"743","nyambwe","nyambwe","mpimbwe.dc","katavi","ntambwe","mweteni","Bwambo","Same DC","kilimanjaro","ntambwe-mweteni",0.247619047619048,0.52020202020202,NA
+"744","nyamikoma","nyamikoma","busega.dc","simiyu","nyamikoma","nyashana","Iseni","Kwimba DC","mwanza","nyamikoma-nyashana",0.166666666666667,0.555555555555556,NA
+"745","nyamswa","nyamuswa","bariadi.tc","simiyu","nyamswa","nyamswa","Gambosi","Bariadi DC","simiyu","nyamswa-nyamswa",0.177777777777778,0,NA
+"746","nyashimo","kalemela","magu.dc","mwanza","nyashimba","nyasimba","Ng'wigwa","Maswa DC","simiyu","nyashimba-nyasimba",0.24537037037037,0.555555555555556,NA
+"747","nyashimo","kibinda","busega.dc","simiyu","nyashimba","nyasimba","Ng'wigwa","Maswa DC","simiyu","nyashimba-nyasimba",0.24537037037037,0,NA
+"748","nyashimo","nyashimo","busega.dc","simiyu","nyashimba","nyasimba","Ng'wigwa","Maswa DC","simiyu","nyashimba-nyasimba",0.24537037037037,0,NA
+"749","nyatwali","nyatwali","bunda.dc","mara","nyatwali","mashariki","Nyatwali","Bunda TC","mara","nyatwali-mashariki",0.185185185185185,0,NA
+"750","nyumbani.lukande","lukande","lukande","lukande","nyumbani","stamico","Ludete","Geita DC","geita","nyumbani-stamico",0.291666666666667,0.552380952380952,NA
+"751","nyumbani.lukande","lukande","lukande","lukande","nyumbani","stamico","Ludete","Geita DC","geita","nyumbani-stamico",0.291666666666667,0.552380952380952,NA
+"752","nyumbani.mnadani","mnadani","maswa.dc","simiyu","nyumbanitu","nyumbanitu","Igima","Wanging'ombe DC","njombe","nyumbanitu-nyumbanitu",0.215125152625153,0.555555555555556,NA
+"753","paramawe","paramawe","namanyere","namanyere","mawa","mawa","Hanga","Namtumbo DC","ruvuma","mawa-mawa",0.273148148148148,0.481481481481482,NA
+"754","paramawe","paramawe","nkasi.dc","rukwa","mawa","mawa","Hanga","Namtumbo DC","ruvuma","mawa-mawa",0.273148148148148,0.3,NA
+"755","pugu","pugu","kibaha.dc","pwani","pugu","itubukilo","Sakwe","Bariadi DC","simiyu","pugu-itubukilo",0.238095238095238,0.544444444444445,NA
+"756","pugu","pugu","pugu","pugu","pugu","itubukilo","Sakwe","Bariadi DC","simiyu","pugu-itubukilo",0.238095238095238,0.527777777777778,NA
+"757","pwani.dar.es.salaam","pwani.dar.es.salaam","pwani.dar.es.salaam","pwani.dar.es.salaam","b.a.p swaminarayan","kisutu","Kisutu","Ilala MC","dar es salaam","b.a.p swaminarayan-kisutu",0.336842105263158,0.312845049687155,NA
+"758","pwani.dar.es.salaam","pwani.dar.es.salaam","pwani.dar.es.salaam","pwani.dar.es.salaam","b.a.p swaminarayan","kisutu","Kisutu","Ilala MC","dar es salaam","b.a.p swaminarayan-kisutu",0.336842105263158,0.312845049687155,NA
+"759","sagamaganga","signal","ifakara.tc","morogoro","sagamaganga","sagamaganga","Kiberege","Kilombero DC","morogoro","sagamaganga-sagamaganga",0.173913043478261,0,NA
+"760","sagamaganga","signali","ifakara.tc","morogoro","sagamaganga","sagamaganga","Kiberege","Kilombero DC","morogoro","sagamaganga-sagamaganga",0.173913043478261,0,NA
+"761","sagamaganga.nyumbani","signal","ifakara.tc","morogoro","ngamanga","ngamanga","Ipinda","Kyela DC","mbeya","ngamanga-ngamanga",0.25406162464986,0.558333333333333,NA
+"762","sagamaganga.nyumbani","signal","ifakara.tc","morogoro","ngamanga","ngamanga","Ipinda","Kyela DC","mbeya","ngamanga-ngamanga",0.25406162464986,0.558333333333333,NA
+"763","saja","nagelo","handeni.dc","tanga","saja","saja","Saja","Wanging'ombe DC","njombe","saja-saja",0.185185185185185,0.544444444444445,NA
+"764","saja","tanga","kilindi.dc","tanga","saja","saja","Saja","Wanging'ombe DC","njombe","saja-saja",0.185185185185185,0.544444444444445,NA
+"765","salama","haya","kwimba.dc","mwanza","salamabugatu","salama","Ng'haya","Magu DC","mwanza","salamabugatu-salama",0.228070175438597,0,NA
+"766","salulu","signali","ifakara.tc","morogoro","galula","galula","Galula","Songwe DC","songwe","galula-galula",0.260683760683761,0.472222222222222,NA
+"767","salulu","signali","ifakara.tc","morogoro","maluga","maluga","Kinampanda","Iramba DC","singida","maluga-maluga",0.260683760683761,0.577380952380952,NA
+"768","salulu","signali","ifakara.tc","morogoro","malula","malula","King'ori","Meru DC","arusha","malula-malula",0.260683760683761,0.569444444444445,NA
+"769","sanga","sanga","busega.dc","simiyu","sange","sange","Mkwaja","Pangani DC","tanga","sange-sange",0.181818181818182,1,NA
+"770","sanga","sanga","busega.dc","simiyu","sange","sange","Sange","Ileje DC","songwe","sange-sange",0.181818181818182,0.555555555555556,NA
+"771","sanga","sanga","busega.dc","simiyu","sango","sango","Kimochi","Moshi DC","kilimanjaro","sango-sango",0.181818181818182,0.52020202020202,NA
+"772","santa.maria","mwamkulu","tanganyika","tanganyika","sanawari","naura","Sekei","Arusha CC","arusha","sanawari-naura",0.233766233766234,0.488888888888889,NA
+"773","santa.maria","mwamkulu","tanganyika","tanganyika","sanawari","naura","Sekei","Arusha CC","arusha","sanawari-naura",0.233766233766234,0.488888888888889,NA
+"774","santamaria","kabwaga","tanganyika","tanganyika","sanawari","naura","Sekei","Arusha CC","arusha","sanawari-naura",0.20952380952381,0.488888888888889,NA
+"775","santamaria","kabwaga","tanganyika","tanganyika","sanawari","naura","Sekei","Arusha CC","arusha","sanawari-naura",0.20952380952381,0.488888888888889,NA
+"776","sante","mkomba","momba.dc","songwe","sant'egidio","sabasaba","Gangilonga","Iringa MC","iringa","sant'egidio-sabasaba",0.25,0.444444444444445,NA
+"777","sante","mkomba","momba.dc","songwe","sayuni","katesh stendi","Katesh","Hanang DC","manyara","sayuni-katesh stendi",0.25,0.563492063492063,NA
+"778","sante","mkomba","momba.dc","songwe","sant'egidio","sabasaba","Gangilonga","Iringa MC","iringa","sant'egidio-sabasaba",0.25,0.444444444444445,NA
+"779","sante","mkomba","momba.dc","songwe","sayuni","katesh stendi","Katesh","Hanang DC","manyara","sayuni-katesh stendi",0.25,0.563492063492063,NA
+"780","sebwesa","sibwesa","tanganyika","tanganyika","msewe","msewe","Ubungo","Ubungo MC","dar es salaam","msewe-msewe",0.277056277056277,0.48974358974359,NA
+"781","senga","kamsamba","kamsamba","kamsamba","senga","senga","Senga","Geita DC","geita","senga-senga",0.181818181818182,0.558333333333333,NA
+"782","senga","kamsamba","kamsamba","kamsamba","senga","senga","Senga","Sumbawanga MC","rukwa","senga-senga",0.181818181818182,0.45,NA
+"783","sentaunyenya","madiru","mpimbwe.dc","katavi","sengenya","sengenya","Sengenya","Nanyumbu DC","mtwara","sengenya-sengenya",0.226143790849673,0.444444444444445,NA
+"784","sentemalaria","sibwesa","tanganyika","tanganyika","shengena","marieni","Chome","Same DC","kilimanjaro","shengena-marieni",0.266203703703704,0.578787878787879,NA
+"785","serengeti","nyatwali","bunda.tc","mara","serengeti","kimamba b","Kimamba B","Kilosa DC","morogoro","serengeti-kimamba b",0.175438596491228,0.416666666666667,NA
+"786","serengeti","nyatwali","bunda.tc","mara","serengeti","kimamba b","Kimamba B","Kilosa DC","morogoro","serengeti-kimamba b",0.175438596491228,0.416666666666667,NA
+"787","serengeti","nyatwali","mara","mara","serengeti","kimamba b","Kimamba B","Kilosa DC","morogoro","serengeti-kimamba b",0.175438596491228,0.416666666666667,NA
+"788","serengeti","nyatwali","mara","mara","serengeti","kimamba b","Kimamba B","Kilosa DC","morogoro","serengeti-kimamba b",0.175438596491228,0.416666666666667,NA
+"789","shinyanga.mwenge","shinyanga.mwenge","maswa.dc","simiyu","shinyangamwenge","shinyanga","Dakama","Maswa DC","simiyu","shinyangamwenge-shinyanga",0.154166666666667,0,NA
+"790","sibwesa","sibwesa","tanganyika","tanganyika","sibwesa","sibwesa","Sibwesa","Mpanda DC","katavi","sibwesa-sibwesa",0.177777777777778,0.394444444444444,NA
+"791","sibwesa","sibwesa","tanganyika","tanganyika","sibwesa","sibwesa","Kalya","Uvinza DC","kigoma","sibwesa-sibwesa",0.177777777777778,0.655555555555556,NA
+"792","sibwesa","simbwesa","tanganyika","tanganyika","sibwesa","sibwesa","Sibwesa","Mpanda DC","katavi","sibwesa-sibwesa",0.177777777777778,0.394444444444444,NA
+"793","sibwesa","simbwesa","tanganyika","tanganyika","sibwesa","sibwesa","Kalya","Uvinza DC","kigoma","sibwesa-sibwesa",0.177777777777778,0.655555555555556,NA
+"794","signal.kipingo","signal","ifakara.tc","morogoro","signali","siginali","Kiberege","Kilombero DC","morogoro","signali-siginali",0.253571428571429,0,NA
+"795","signal.kipingo","signal","ifakara.tc","morogoro","signali","siginali","Kiberege","Kilombero DC","morogoro","signali-siginali",0.253571428571429,0,NA
+"796","silali","silali","silali","silali","sali","sali","Sali","Ulanga DC","morogoro","sali-sali",0.166666666666667,1,NA
+"797","silali","silali","silali","silali","sali","sali","Sali","Ulanga DC","morogoro","sali-sali",0.166666666666667,1,NA
+"798","songambele","inyonga","inyonga","inyonga","songambele","not set","Idibo","Gairo DC","morogoro","songambele-not set",0.148148148148148,0.488095238095238,NA
+"799","songambele","kamsisi","mlele.dc","katavi","songambele","not set","Idibo","Gairo DC","morogoro","songambele-not set",0.148148148148148,1,NA
+"800","songea","songea","songea.dc","ruvuma","songe","songe","Songe","Kilindi DC","tanga","songe-songe",0.237373737373737,0.544444444444445,NA
+"801","songea","songea","songea.mc","ruvuma","songe","songe","Songe","Kilindi DC","tanga","songe-songe",0.237373737373737,0.544444444444445,NA
+"802","songwe","ukululu","mbozi.dc","songwe","songe","songe","Songe","Kilindi DC","tanga","songe-songe",0.237373737373737,0.422222222222222,NA
+"803","sulu","mbalagane","maswa.dc","simiyu","suli","suli","Fufu","Chamwino DC","dodoma","suli-suli",0.185185185185185,0.555555555555556,NA
+"804","sulu","mbalagane","maswa.dc","simiyu","sulu","sulu","Lalago","Maswa DC","simiyu","sulu-sulu",0.185185185185185,0,NA
+"805","sulu","mbalagani","maswa.dc","simiyu","suli","suli","Fufu","Chamwino DC","dodoma","suli-suli",0.185185185185185,0.555555555555556,NA
+"806","sulu","mbalagani","maswa.dc","simiyu","sulu","sulu","Lalago","Maswa DC","simiyu","sulu-sulu",0.185185185185185,0,NA
+"807","sulu","mbaragane","maswa.dc","simiyu","suli","suli","Fufu","Chamwino DC","dodoma","suli-suli",0.185185185185185,0.555555555555556,NA
+"808","sulu","mbaragane","maswa.dc","simiyu","sulu","sulu","Lalago","Maswa DC","simiyu","sulu-sulu",0.185185185185185,0,NA
+"809","sululu","signal","ifakara.tc","morogoro","sulu","sulu","Lalago","Maswa DC","simiyu","sulu-sulu",0.166666666666667,0.569444444444445,NA
+"810","sumabwanga","sumabwanga","sumbawanga.dc","rukwa","sumbawanga","nhc","Mazwi","Sumbawanga MC","rukwa","sumbawanga-nhc",0.128571428571429,0,NA
+"811","sumaha","sumaha","kwimba.dc","mwanza","suma","suma","Suma","Rungwe DC","mbeya","suma-suma",0.203703703703704,0.422222222222222,NA
+"812","sumbawanga","kantalamba","sumbawanga.dc","rukwa","sumbawanga","nhc","Mazwi","Sumbawanga MC","rukwa","sumbawanga-nhc",0.0952380952380952,0,NA
+"813","sumbawanga","maswi","sumbawanga.dc","rukwa","sumbawanga","nhc","Mazwi","Sumbawanga MC","rukwa","sumbawanga-nhc",0.0952380952380952,0,NA
+"814","sunsula","sunsula","bariadi.dc","simiyu","sunzula","sunzula","Mbita","Itilima DC","simiyu","sunzula-sunzula",0.273015873015873,0,NA
+"815","tabora","tabora","tabora.mc","tabora","itambo","itambo","Mfriga","Njombe DC","njombe","itambo-itambo",0.260683760683761,0.611111111111111,NA
+"816","tabora","tabora","tabora.mc","tabora","mtambo","mtambo","Litapunga","Nsimbo DC","katavi","mtambo-mtambo",0.260683760683761,0.444444444444445,NA
+"817","tanga","tanga","malinyi.dc","morogoro","tanga","tanga","Tanga","Songea MC","ruvuma","tanga-tanga",0.181818181818182,0.569444444444445,NA
+"818","tanga","tanga","malinyi.dc","morogoro","tanga","tanga","Ngoheranga","Malinyi DC","morogoro","tanga-tanga",0.181818181818182,0,NA
+"819","tanga","tanga","malinyi.dc","morogoro","tanga","bombo","Central","Tanga CC","tanga","tanga-bombo",0.181818181818182,0.558333333333333,NA
+"820","tanga.kilwa","zinga","kilwa.dc","lindi","itwaga","itwaga","Mgama","Iringa DC","iringa","itwaga-itwaga",0.275058275058275,0.411111111111111,NA
+"821","tatumbila","tatumbila","nkasi.dc","rukwa","ntatumbila","kisala","Namanyere","Nkasi DC","rukwa","ntatumbila-kisala",0.156862745098039,0,NA
+"822","tegeta","tegeta","kinondoni.mc","dar.es.salaam","tegeta","tegeta","Kunduchi","Kinondoni MC","dar es salaam","tegeta-tegeta",0.17948717948718,0.102564102564103,NA
+"823","tulindane","tulindane","newala.dc","mtwara","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.227920227920228,0,NA
+"824","tulindane","tulindane","newala.dc","mtwara","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.227920227920228,0,NA
+"825","tuliza.moyo","milola","ulanga.dc","morogoro","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.260780885780886,0.472222222222222,NA
+"826","tuliza.moyo","milola","ulanga.dc","morogoro","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.260780885780886,0.472222222222222,NA
+"827","tulizamoyo.igumbiro","milola","ulanga.dc","morogoro","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.301484480431849,0.472222222222222,NA
+"828","tulizamoyo.igumbiro","milola","ulanga.dc","morogoro","tulizo","nangoo","Nanganga","Masasi DC","mtwara","tulizo-nangoo",0.301484480431849,0.472222222222222,NA
+"829","tumaini","itenka","tumaini","tumaini","tumaini","ccm","Mjini","Songea MC","ruvuma","tumaini-ccm",0.121212121212121,0.357142857142857,NA
+"830","tumaini","itenka","tumaini","tumaini","tumaini","ccm","Mjini","Songea MC","ruvuma","tumaini-ccm",0.121212121212121,0.357142857142857,NA
+"831","tunduma","mwaka","momba.dc","songwe","tunduma","majengo c","Majengo","Tunduma TC","songwe","tunduma-majengo c",0.196078431372549,0,NA
+"832","tunduma","sogea","songwe.dc","songwe","tunduma","majengo c","Majengo","Tunduma TC","songwe","tunduma-majengo c",0.196078431372549,0,NA
+"833","tunduma","tunduma","momba.dc","songwe","tunduma","majengo c","Majengo","Tunduma TC","songwe","tunduma-majengo c",0.196078431372549,0,NA
+"834","tunduru","tunduru","tunduru.dc","ruvuma","tunduru","kalanje","Majengo","Tunduru DC","ruvuma","tunduru-kalanje",0.177777777777778,0,NA
+"835","tunduru","tunduru","tunduru.dc","ruvuma","tunduru","kalanje","Majengo","Tunduru DC","ruvuma","tunduru-kalanje",0.177777777777778,0,NA
+"836","tunduru","tunduru","tunduru.dc","ruvuma","tunduru","kalanje","Majengo","Tunduru DC","ruvuma","tunduru-kalanje",0.177777777777778,0,NA
+"837","tupendane","tulindane","newala.dc","mtwara","tupendane","tupendane","Mang'onyi","Ikungi DC","singida","tupendane-tupendane",0.175438596491228,0.563492063492063,NA
+"838","turiani","turiani","mvomero.dc","morogoro","turiani","not set","Not set","Mvomero DC","morogoro","turiani-not set",0.177777777777778,0,NA
+"839","udimaa","kintinku","bahi.dc","dodoma","uzima","kaswa","Milambo","Kaliua DC","tabora","uzima-kaswa",0.237373737373737,0.444444444444445,NA
+"840","udimaa","kintinku","bahi.dc","dodoma","uzima","kaswa","Milambo","Kaliua DC","tabora","uzima-kaswa",0.237373737373737,0.444444444444445,NA
+"841","udui","udui","bariadi.dc","simiyu","budushi","budushi","Budushi","Nzega DC","tabora","budushi-budushi",0.244444444444444,1,NA
+"842","udui","udui","bariadi.dc","simiyu","bunduki","bunduki","Bunduki","Mvomero DC","morogoro","bunduki-bunduki",0.244444444444444,0.569444444444445,NA
+"843","ugoda","lugoda","mufindi.dc","iringa","trust god","kakola","Bulyanhulu","Msalala DC","shinyanga","trust god-kakola",0.229166666666667,0.37962962962963,NA
+"844","uhenga","uhenga","wanging.ombe.dc","njombe","uhenga","uhenga","Saja","Wanging'ombe DC","njombe","uhenga-uhenga",0.17948717948718,0,NA
+"845","uingo","kabale","misungwi.dc","mwanza","lufingo","kalalo","Lufingo","Rungwe DC","mbeya","lufingo-kalalo",0.214285714285714,0.422222222222222,NA
+"846","uingo","kabale","misungwi.dc","mwanza","ubinga","not set","Muhugi","Nzega DC","tabora","ubinga-not set",0.214285714285714,0.444444444444445,NA
+"847","ukombozi","nkung.ungu","chunya.dc","mbeya","ukombozi","matosa","Goba","Ubungo MC","dar es salaam","ukombozi-matosa",0.155555555555556,0.648717948717949,NA
+"848","ukombozi","nkung.ungu","chunya.dc","mbeya","ukombozi","balili","Balili","Bunda TC","mara","ukombozi-balili",0.155555555555556,0.366666666666667,NA
+"849","ukombozi","nkung.ungu","chunya.dc","mbeya","ukombozi","matosa","Goba","Ubungo MC","dar es salaam","ukombozi-matosa",0.155555555555556,0.648717948717949,NA
+"850","ukombozi","nkung.ungu","chunya.dc","mbeya","ukombozi","balili","Balili","Bunda TC","mara","ukombozi-balili",0.155555555555556,0.366666666666667,NA
+"851","ukwangu","upendo","chunya.dc","mbeya","bukwangu","bukwangu","Ntobo","Msalala DC","shinyanga","bukwangu-bukwangu",0.196078431372549,0.459259259259259,NA
+"852","ululu","idiwili","mbozi.dc","songwe","lufu","lufu","Lufu","Mpwapwa DC","dodoma","lufu-lufu",0.214814814814815,0.555555555555556,NA
+"853","ulwilaulwila","ulwilaulwila","nsimbo.dc","katavi","ilula","ilula","Ilula","Kwimba DC","mwanza","ilula-ilula",0.152525252525253,0.444444444444445,NA
+"854","upanga","silabu","masasi.dc","mtwara","lupanga","lupanga","Lupanga","Ludewa DC","njombe","lupanga-lupanga",0.2,1,NA
+"855","upendo","upendo","chunya.dc","mbeya","upendo","janga","Janga","Kibaha DC","pwani","upendo-janga",0.166666666666667,1,NA
+"856","upendo","upendo","chunya.dc","mbeya","upendo","janga","Janga","Kibaha DC","pwani","upendo-janga",0.166666666666667,1,NA
+"857","uponera.ibuyu","uponera","ulanga.dc","morogoro","hope","ruaha mbuyuni","Ruaha Mbuyuni","Kilolo DC","iringa","hope-ruaha mbuyuni",0.291737891737892,0.472222222222222,NA
+"858","uponera.ibuyu","uponera","ulanga.dc","morogoro","hope","ruaha mbuyuni","Ruaha Mbuyuni","Kilolo DC","iringa","hope-ruaha mbuyuni",0.291737891737892,0.472222222222222,NA
+"859","urulu","idiwili","mbozi.dc","songwe","duru","duru","Duru","Babati DC","manyara","duru-duru",0.251851851851852,0.563492063492063,NA
+"860","ushirika","mahango","mbarali.dc","mbeya","ushirika","ushirika","Ushirika","Mbogwe DC","geita","ushirika-ushirika",0.176470588235294,0.4,NA
+"861","utende","mamba.moja","mlele.dc","katavi","utende","utende","Utende","Mlele DC","katavi","utende-utende",0.17948717948718,0,NA
+"862","uwanja.fisi","napupa","masasi.dc","mtwara","ruanda","matiri","Matiri","Mbinga DC","ruvuma","ruanda-matiri",0.331002331002331,0.555555555555556,NA
+"863","uwanja.fisi","napupa","masasi.dc","mtwara","bulwa","misilai","Misalai","Muheza DC","tanga","bulwa-misilai",0.331002331002331,0.3,NA
+"864","uwanja.wa.fisi","napupa","masasi.dc","mtwara","wasa","wasa","Wasa","Iringa DC","iringa","wasa-wasa",0.301587301587302,0.555555555555556,NA
+"865","uwanja.wa.fisi","wapiwapi","masasi.dc","mtwara","wasa","wasa","Wasa","Iringa DC","iringa","wasa-wasa",0.301587301587302,0.555555555555556,NA
+"866","viwanja.sitini","viwanja.sitini","ifakara.tc","morogoro","happy","viwanja sitini","Viwanja Sitini","Ifakara TC","morogoro","happy-viwanja sitini",0.23021978021978,0,NA
+"867","viwanja.sitini","viwanja.sitini","ifakara.tc","morogoro","happy","viwanja sitini","Viwanja Sitini","Ifakara TC","morogoro","happy-viwanja sitini",0.23021978021978,0,NA
+"868","viwanjasitini.nyumbani","viwanjasitini","ifakara.tc","morogoro","niko","viwanja sitini","Viwanja Sitini","Ifakara TC","morogoro","niko-viwanja sitini",0.287347155768208,0,NA
+"869","wala","suma","kwimba.dc","mwanza","kwala","kwala","Kwala","Kibaha DC","pwani","kwala-kwala",0.212121212121212,0.3,NA
+"870","wala","sumaha","kwimba.dc","mwanza","kwala","kwala","Kwala","Kibaha DC","pwani","kwala-kwala",0.212121212121212,0.3,NA
+"871","wami.sokoine","dakawa","mvomero.dc","morogoro","hamu","sokoni","Njoro","Moshi MC","kilimanjaro","hamu-sokoni",0.243686868686869,0.450757575757576,NA
+"872","wami.sokoine","dakawa","mvomero.dc","morogoro","hamu","sokoni","Njoro","Moshi MC","kilimanjaro","hamu-sokoni",0.243686868686869,0.450757575757576,NA
+"873","wapiwapi","napupa","masasi.dc","mtwara","kwai","kwai","Kwai","Lushoto DC","tanga","kwai-kwai",0.194444444444445,0.3,NA
+"874","wapiwapi","silabu","masasi.dc","mtwara","kwai","kwai","Kwai","Lushoto DC","tanga","kwai-kwai",0.194444444444445,0.3,NA
+"875","zinga.kibaoni","zinga","kilwa.dc","lindi","zinga kibaoni","zingakibaoni","Miguruwe","Kilwa DC","lindi","zinga kibaoni-zingakibaoni",0.205128205128205,0,NA
+"876","zingakibaoni","zingakibaoni","kilwa.dc","lindi","zinga kibaoni","zingakibaoni","Miguruwe","Kilwa DC","lindi","zinga kibaoni-zingakibaoni",0.17948717948718,0,NA

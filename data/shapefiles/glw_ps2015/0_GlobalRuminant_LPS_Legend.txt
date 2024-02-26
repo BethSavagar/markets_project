@@ -1,0 +1,45 @@
+Raster layer (.tif)
+Cell res. 0.0833333
+Extent: 90 -180 180 -90
+Ncolmns: 4320
+NRows: 2160
+
+Description: Global livestock production systems (GLPS)
+Value and Class:
+1	LGY Livestock only systems HyperArid
+2	LGA Livestock only systems Arid
+3	LGH Livestock only systems Humid
+4	LGT Livestock only systems Temperate (and Tropical Highlands)
+
+5	MRY Mixed rainfed HyperArid
+6	MRA Mixed rainfed Arid
+7	MRH Mixed rainfed Humid
+8	MRT Mixed rainfed Temperate (and Tropical Highlands)
+
+9	MIY Mixed irrigated HyperArid
+10	MIA Mixed irrigated Arid
+11	MIH Mixed irrigated Humid
+12	MIT Mixed irrigated Temperate (and Tropical Highlands)
+
+13	Urban areas (GLC2k) This is the class below in the original GLC2k legend
+			22 : 4 /* 22: Artificial surfaces and associated areas
+
+14 	Other_Tree based systems (these are the tree cover classes in the original GLC2k, namely classes (from GLC2k global layer original legend).
+	class 15 below (regularly flooded shrub and/or herbaceous cover is the only exception). considering that the hybrid crop cover is the principal source of 
+	information on the extent of the cropped area, pixels under the Other_Tree based systems class should be assigned to the GRASSLANDS in GLEAM)
+			1 : Tree Cover, broadleaved, evergreen
+			2 : Tree Cover, broadleaved, deciduous, closed
+			4 : Tree Cover, needle-leaved, evergreen
+			5 : Tree Cover, needle-leaved, deciduous
+			6 : Tree Cover, mixed leaf type
+			7 : Tree Cover, regularly flooded, fresh water
+			8 : Tree Cover, regularly flooded, saline water
+			10 : Tree Cover, burnt
+
+			15 : Regularly flooded shrub and/or herbaceous cover
+
+15 Unsuitable  This class includes the following classes in the original GLC2k legend
+
+			20 : Water Bodies
+			21 : Snow and Ice
+			23 : No data
