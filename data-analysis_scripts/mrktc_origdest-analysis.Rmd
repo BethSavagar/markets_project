@@ -41,7 +41,10 @@ mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %
 # Market Survey C data
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
   select(-`...1`)
-
+mrktc_coords <- mrktc_gps %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+mrktc_sf <- st_as_sf(mrktc_coords, coords = c("long","lat"),  crs = 4326)
 
 # Market Survey C origins and destinations
 mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv")) %>%
@@ -75,10 +78,6 @@ Market Identifiers:
 - origin.ndstrct
 - origin.nwards
 
-- dest.maxdist
-- dest.area
-- dest.ndstrct
-- dest.nwards
 
 ```{r origins}
 
@@ -101,8 +100,13 @@ mrktc_origins_sf <- mrktc_origins %>%
 
 mrktc_origins_sf <- st_as_sf(mrktc_origins_sf)
 
+
 mrktc_originspt_sf <- mrktc_origins_sf
 mrktc_originspt_sf$geometry <- st_point_on_surface(mrktc_originspt_sf$geometry)
+mrktc_originspt_gps <- mrktc_originspt_sf %>%
+  st_drop_geometry() %>%
+  mutate(origlong = st_coordinates(mrktc_originspt_sf)[,1],
+         origlat = st_coordinates(mrktc_originspt_sf)[,2])
 
 ggplot() +
   geom_sf(data = twards_shp)+
@@ -111,12 +115,23 @@ ggplot() +
   #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
   coord_sf()
 
+
+ggplot() +
+  geom_sf(data = twards_shp, fill = NA)+
+  geom_sf(data = twards_shp %>% filter(Region20_N %in% mrkta_gps$region), aes(fill = Region20_N), alpha = 0.5)+
+  # geom_sf(data = mrktc_origins_sf, fill = "blue", alpha = 0.5)+
+  geom_sf(data = mrktc_originspt_sf, col = "red", alpha = 0.5)+
+  #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
+  coord_sf()
+
 ```
 
 
-```{r}
+```{r orig catchment}
+library(geosphere)
 
-mrktc_mrktorig <- mrktc_origins %>%
+mrktc_mrktorig <- mrktc_originspt_gps %>%
+  # join market location:
   left_join(mrktc_gps %>% rename(
     mrkt.region = region,
     mrkt.district = district20,
@@ -125,21 +140,65 @@ mrktc_mrktorig <- mrktc_origins %>%
     mrkt.name = market
   ) %>%
     select(-c(district)), 
-  by = "fid")
+  by = "fid") %>%
+  # variables for market lat and long:
+  mutate(mrktlong = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2],
+         mrktlong = as.numeric(mrktlong),
+         mrktlat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         mrktlat = as.numeric(mrktlat)
+         ) %>%
+  # distance between origin and market:
+  mutate(origmrkt_dist = distHaversine(matrix(c(origlong, origlat), ncol = 2), 
+                                  matrix(c(mrktlong, mrktlat), ncol = 2)),
+         origmrkt_distkm = origmrkt_dist/1000
+  )
 
-mrktc_mrktorig %>% 
+mrktc_origsummary <- mrktc_mrktorig %>% 
   group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
   summarise(
+    origin.nmvmts = n(),
     origin.nregs = n_distinct(`2.sell.place.region.final`),
     origin.ndists = n_distinct(`2.sell.place.district.final`),
-    origin.nwards = n_distinct(`2.sell.place.ward.final`)) 
+    origin.nwards = n_distinct(`2.sell.place.ward.final`),
+    origin.maxdistkm = max(origmrkt_distkm),
+    origin.meandistkm = mean(origmrkt_distkm),
+    origin.meddistkm = median(origmrkt_distkm)
+    ) 
 
 
-# calc distance travelled to market:
+# catchment area:
 
+mrktc_mrktorig_geom <- mrktc_originspt_sf %>%
+  # join market location:
+  left_join(mrktc_gps %>% rename(
+    mrkt.region = region,
+    mrkt.district = district20,
+    mrkt.ward = ward,
+    mrkt.village = village,
+    mrkt.name = market
+  ) %>%
+    select(-c(district)), 
+  by = "fid") 
+
+# Group by origin_id and create a convex hull for each group
+catchment_areas <- mrktc_mrktorig_geom %>%
+  group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
+  summarise(geometry = st_convex_hull(st_union(geometry))) %>%
+  ungroup() %>%
+  mutate(origin.areakm2 = st_area(.) / 10^6) # / 10^6 to convert m2 to km2
+
+ggplot() +
+  geom_sf(data = twards_shp, fill = NA) +
+  geom_sf(data = catchment_areas, fill = 'blue', alpha = 0.3) +
+  geom_sf(data = mrktc_originspt_sf, col = "red", alpha = 0.5)+
+  geom_sf(data = mrktc_sf, color = 'black') +
+  theme_minimal()
 
 
 ```
+
+furthest distance travelled to market
+
 
 
 
@@ -171,6 +230,10 @@ mrktc_dests_sf <- st_as_sf(mrktc_dests_sf)
 
 mrktc_destspt_sf <- mrktc_dests_sf
 mrktc_destspt_sf$geometry <- st_point_on_surface(mrktc_destspt_sf$geometry)
+mrktc_destspt_gps <- mrktc_destspt_sf %>%
+  st_drop_geometry() %>%
+  mutate(destlong = st_coordinates(mrktc_destspt_sf)[,1],
+         destlat = st_coordinates(mrktc_destspt_sf)[,2])
 
 ggplot() +
   geom_sf(data = twards_shp)+
@@ -179,12 +242,21 @@ ggplot() +
   #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
   coord_sf()
 
+ggplot() +
+  geom_sf(data = twards_shp, fill = NA)+
+  geom_sf(data = twards_shp %>% filter(Region20_N %in% mrkta_gps$region), aes(fill = Region20_N), alpha = 0.5)+
+  # geom_sf(data = mrktc_origins_sf, fill = "blue", alpha = 0.5)+
+  geom_sf(data = mrktc_destspt_sf, col = "red", alpha = 0.5)+
+  #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
+  coord_sf()
+
+
 ```
 
 
 ```{r}
 
-mrktc_mrktdest <- mrktc_dests %>%
+mrktc_mrktdest <- mrktc_destspt_gps %>%
   left_join(mrktc_gps %>% rename(
     mrkt.region = region,
     mrkt.district = district20,
@@ -193,15 +265,29 @@ mrktc_mrktdest <- mrktc_dests %>%
     mrkt.name = market
   ) %>%
     select(-c(district)), 
-  by = "fid")
+  by = "fid") %>%
+  # variables for market lat and long:
+  mutate(mrktlong = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2],
+         mrktlong = as.numeric(mrktlong),
+         mrktlat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         mrktlat = as.numeric(mrktlat)
+         ) %>%
+  # distance between destination and market:
+  mutate(destmrkt_dist = distHaversine(matrix(c(mrktlong, mrktlat), ncol = 2), 
+                                  matrix(c(destlong, destlat), ncol = 2)),
+         destmrkt_distkm = destmrkt_dist/1000
+  )
 
-mrktc_mrktdest %>% 
+mrktc_destsummary <- mrktc_mrktdest %>% 
   group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
   summarise(
+    dest.nmvmts = n(),
     dest.nregs = n_distinct(`6.buy.place.region.final`),
     dest.ndists = n_distinct(`6.buy.place.district.final`),
-    dest.nwards = n_distinct(`6.buy.place.ward.final`)) %>%
-  View()
+    dest.nwards = n_distinct(`6.buy.place.ward.final`),
+    dest.maxdistkm = max(destmrkt_distkm),
+    dest.meandistkm = mean(destmrkt_distkm),
+    dest.meddistkm = median(destmrkt_distkm))
 
 mrktc_mrktdest %>% 
   group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name,
@@ -215,6 +301,34 @@ mrktc_mrktdest %>%
 
 # calc distance travelled to market:
 
+
+# catchment area:
+
+mrktc_mrktdest_geom <- mrktc_destspt_sf %>%
+  # join market location:
+  left_join(mrktc_gps %>% rename(
+    mrkt.region = region,
+    mrkt.district = district20,
+    mrkt.ward = ward,
+    mrkt.village = village,
+    mrkt.name = market
+  ) %>%
+    select(-c(district)), 
+  by = "fid") 
+
+# Group by origin_id and create a convex hull for each group
+destcatchment_areas <- mrktc_mrktdest_geom %>%
+  group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
+  summarise(geometry = st_convex_hull(st_union(geometry))) %>%
+  ungroup() %>%
+  mutate(dest.areakm2 = st_area(.) / 10^6) # / 10^6 to convert m2 to km2
+
+ggplot() +
+  geom_sf(data = twards_shp, fill = NA) +
+  geom_sf(data = destcatchment_areas, fill = 'blue', alpha = 0.3) +
+  geom_sf(data = mrktc_destspt_sf, col = "red", alpha = 0.5)+
+  geom_sf(data = mrktc_sf, color = 'black') +
+  theme_minimal()
 
 
 ```
