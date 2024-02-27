@@ -927,12 +927,6 @@ unmatched_join <- unmatched %>%
 
 ```
 
-
-
-
-
-
-
 ```{r}
 
 unmatched_final <- unmatched_join %>% 
@@ -954,22 +948,35 @@ origdest_join <- origdest_lkpunique %>%
     unmatched_join %>% select(-c(wdr.A, acceptWR0, acceptHF, acceptHFZ, acceptHFY, acceptHFW, acceptHF6)),
     by = c("place", "ward.A", "dist.A", "reg.A")
   ) %>%
-  mutate(acceptAll.final = if_else(is.na(acceptWDR), acceptAll, acceptWDR)) # %>%
+  mutate(acceptAll.final = if_else(is.na(acceptWDR), acceptAll, acceptWDR),
+         "ward.Bclean" = coalesce(ward.B, ward.C, ward.W, ward.X, ward.Y, ward.Z, ward.6),
+         "dist.Bclean" = coalesce(dist.B, dist.C, dist.W, dist.X, dist.Y, dist.Z, dist.6),
+         "region.Bclean" = coalesce(reg.B, reg.C, reg.W, reg.X, reg.Y, reg.Z, reg.6)
+         ) # %>%
   # group_by(acceptAll.final) %>% count() %>%
   # filter(is.na(acceptAll.final))
 
 origdest_lkp %>%
   left_join(
-    origdest_join %>% select(place,ward.A,dist.A,reg.A,acceptAll.final),
+    origdest_join %>% select(place,ward.A,dist.A,reg.A, ward.Bclean, dist.Bclean, region.Bclean, acceptAll.final),
     by = c("place", "ward" = "ward.A", "district.clean" = "dist.A", "region.clean" = "reg.A")
   )
   
-
-fidNA <- origdest_lkp %>%
+fidorigdest <- origdest_lkp %>%
   left_join(
-    origdest_join %>% select(place,ward.A,dist.A,reg.A,acceptAll.final),
+    origdest_join %>% select(place,ward.A,dist.A,reg.A, ward.Bclean, dist.Bclean, region.Bclean, acceptAll.final),
     by = c("place", "ward" = "ward.A", "district.clean" = "dist.A", "region.clean" = "reg.A")
   ) %>% 
+  select(
+    fid, 
+    origdest,
+    ward.Bclean,
+    dist.Bclean,
+    region.Bclean,
+    acceptAll.final
+  )
+
+fidNA <- fidorigdest %>% 
   select(
     fid,
     origdest,
@@ -978,6 +985,53 @@ fidNA <- origdest_lkp %>%
 
 ```
 
+
+# Joining the cleaned data to the original origdest dataframe: 
+
+```{r lastjoin}
+
+fidorigdest_complete <- fidorigdest %>% filter(!is.na(acceptAll.final))
+
+mrktc_origdest_df <- mrktc_actvty %>%
+  select(
+    fid,
+    `2.sell.place.name`,
+    `2.sell.place.ward`,
+    `2.sell.place.district`,
+    `6.buy.place.name`,
+    `6.buy.place.ward`,
+    `6.buy.place.district`
+    ) %>%
+  # correct origin place data:
+  left_join(
+    fidorigdest_complete %>% 
+      filter(origdest == "orig") %>%
+      select(-c(origdest)),
+    by = "fid"
+  ) %>%
+  rename(
+    `2.sell.place.ward.final` = ward.Bclean,
+    `2.sell.place.district.final` = dist.Bclean,
+    `2.sell.place.region.final` = region.Bclean,
+  ) %>%
+  # correct destination place data:
+  left_join(
+    fidorigdest_complete %>% 
+      filter(origdest == "dest")%>%
+      select(-c(origdest)),
+    by = "fid"
+  ) %>%
+  rename(
+    `6.buy.place.ward.final` = ward.Bclean,
+    `6.buy.place.district.final` = dist.Bclean,
+    `6.buy.place.region.final` = region.Bclean,
+  )
+
+if(filesave){
+  write.csv(mrktc_origdest_df, file = here("data/tanzania_data/mrktc_origdest_tanzania_final.csv"))
+}
+
+```
 
 ```{r }
 # 

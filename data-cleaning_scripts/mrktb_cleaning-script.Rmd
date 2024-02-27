@@ -42,7 +42,8 @@ mrktb_general <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania.cs
 # use market a lookups for ward and region as market c lookups are blank
 
 # Market A location data:
-mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+  select(-`...1`)
 
 # Market A locations gps lookup:
 mrkta_gps_manualgeomatchlkp <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"))
@@ -50,18 +51,7 @@ mrkta_lkpward <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpward.csv"
 mrkta_lkpregion <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpregion.csv"))
 
 
-twards_shp <- st_read(here("data/shapefiles/tza_admbnda_adm3_20181019.shp")) %>% # with ward boundaries
-    rename(
-    "Country_N"=ADM0_EN,    
-    "Country_NSw" = ADM0_SW,
-    "Country_C"=ADM0_PCODE,
-    "Region_Nam" = ADM1_EN,
-    "Region_Cod" = ADM1_PCODE,
-    "District_N" = ADM2_EN,
-    "District_C" = ADM2_PCODE,
-    "Ward_Name"=ADM3_EN,
-    "Ward_Code"= ADM3_PCODE
-  )
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp")) 
 
 ```
 
@@ -153,11 +143,45 @@ mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
 
 # B mapdata 
 
-mrktb_clean %>% 
-  filter(is.na(`gps.coordinates.of.the.market`))
+dupes <- mrktb_clean %>% 
+  group_by(date, district.region.name, ward.name, village, market.name) %>% 
+  mutate(dupe = n()>1) %>% 
+  filter(dupe == T) %>%
+  summarise(immature.sheep.less.1.B = mean(immature.sheep.less.1.),
+            adult.sheep.more.1.B = mean(adult.sheep.more.1.),
+            immature.goats.less.1.B = mean(immature.goats.less.1.),
+            adult.goats.more.1.B = mean(adult.goats.more.1.))
+  
+mrktb_clean2 <- mrktb_clean %>%
+  
+  left_join(dupes, 
+            by = c("date", "district.region.name", "ward.name", "village", "market.name")) %>%
+  mutate(
+    immature.sheep.less.1.B = if_else(is.na(immature.sheep.less.1.B), immature.sheep.less.1., immature.sheep.less.1.B),
+            adult.sheep.more.1.B = if_else(is.na(adult.sheep.more.1.B), adult.sheep.more.1., adult.sheep.more.1.B),
+            immature.goats.less.1.B = if_else(is.na(immature.goats.less.1.B), immature.goats.less.1., immature.goats.less.1.B),
+            adult.goats.more.1.B = if_else(is.na(adult.goats.more.1.B), adult.goats.more.1., adult.goats.more.1.B)
+  ) %>% 
+  group_by(date, district.region.name, ward.name, village, market.name) %>% 
+  mutate(dupe = n()>1)  %>%
+  distinct(date, district.region.name, ward.name, village, market.name, .keep_all = T) %>%
+  select(-dupe) %>% 
+  ungroup()
 
-mrktb_mapdata <- mrktb_clean %>% 
-  filter(!is.na(`gps.coordinates.of.the.market`)) %>% # mtwara - nangoo
+# Check NAs in mrktB gps coords:
+# A tibble: 2 × 5
+# Groups:   date, district.region.name, ward.name, village, market.name [2]
+#   date       district.region.name ward.name village  market.name
+#   <date>     <chr>                <chr>     <chr>    <chr>      
+# 1 2022-05-18 mtwara               mkundi    mkundi   mkundi     
+# 2 2022-06-08 mtwara               nangoo    mwongozo nangoo  
+
+mrktb_mapdata <- mrktb_clean2 %>% 
+  # mtwara - nangoo AND mtwara - mkundi complete GPS from A
+  left_join(mrkta_gps %>% select(region, market, gps.A = gps.coordinates.of.the.market), by = c("district.region.name" = "region", "market.name" = "market")) %>%
+  mutate(gps.coordinates.of.the.market = if_else(is.na(gps.coordinates.of.the.market), gps.A, gps.coordinates.of.the.market)) %>%
+  select(-c(gps.A)) %>%
+  filter(!is.na(`gps.coordinates.of.the.market`)) %>% 
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
   # arrange(gps.coordinates.of.the.market) %>% 
@@ -168,8 +192,7 @@ mrktb_sf <- st_as_sf(mrktb_mapdata, coords = c("long","lat"),  crs = 4326)
 
 
 # Join geomatched location data (from tanzania shapefile) to mrtka location data
-mrktb_linkA_gps <- mrktb_clean %>%
-  filter(!is.na(gps.coordinates.of.the.market)) %>%
+mrktb_linkA_gps <- mrktb_mapdata %>%
   mutate(mrktaID = st_nearest_feature(mrktb_sf, mrkta_sf)) %>% 
   # join matched location data. by rowid (twardID)
   left_join(
@@ -177,11 +200,12 @@ mrktb_linkA_gps <- mrktb_clean %>%
       mutate(mrktaID = 1:nrow(.)) %>%
       select(
         mrktaID,
-        "region.geomatch.final.A" = "region.geomatch.final",
-        "district.geomatch.final.A" = "district.geomatch.final",
-        "ward.geomatch.final.A" = "ward.geomatch.final",
-        "village.manual.final.A" = "village.manual.final" ,
-        "market.manual.final.A" = "market.manual.final"
+        "region.geomatch.final.A" = "region",
+        "district.geomatch.final.A" = "district",
+        "district20.geomatch.final.A" = "district20",
+        "ward.geomatch.final.A" = "ward",
+        "village.manual.final.A" = "village" ,
+        "market.manual.final.A" = "market"
         # "reg.ward.mrkt.final.A" = "reg.ward.mrkt.final"
       ),
     by = c("mrktaID")) %>%
@@ -194,12 +218,9 @@ mrktb_linkA_gps %>% mutate(mrktIDb = paste(district.region.name, ward.name, vill
   distinct(mrktIDa, mrktIDb) %>%
   View()
 
+mrktb_linkA_mapdata <- mrktb_linkA_gps
 
-
-
-mrktb_linkA_mapdata <- mrktb_linkA_gps %>% 
-  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+mrktb_linkA_gps <- mrktb_linkA_mapdata %>% select(-c(lat,long))
   # arrange(gps.coordinates.of.the.market) %>% 
   # filter(!is.na(lat), !is.na(long))
 
@@ -217,13 +238,13 @@ for(i in 1:length(regions)){
   region_i <- regions[i]
   
   map_plots[[i]] <- ggplot() +
-   geom_sf(data = twards_shp %>% filter(Region_Nam %in% str_to_title(region_i)), linewidth = 0.1) +
-    geom_sf(data = mrkta_sf %>% filter(region.geomatch.final %in% region_i), 
-            aes(col = ward.geomatch.final), alpha = 0.5, size = 3)+
+   geom_sf(data = twards_shp %>% filter(Region20_N %in% region_i), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region %in% region_i), 
+            aes(col = ward), alpha = 0.5, size = 3)+
     geom_sf(data = mrktb_linkA_sf %>% filter(region.geomatch.final.A %in% region_i), 
             aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
     scale_colour_manual(values = rep(market_pal,2))+
-    facet_wrap(~Region_Nam)+
+    facet_wrap(~Region20_N)+
    coord_sf()+
    labs(col = "Ward of market"
         #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
@@ -238,24 +259,27 @@ map_plots[[13]]
 
 
 mrktb_final <- mrktb_linkA_gps %>% 
+  filter(!(is.na(sheep.0to12) & is.na(sheep.adult))) %>% View()
   select(
     fid,
     date,
     date.final = date.end,
     country,
-    region.final = region.geomatch.final.A,
-    district.final = district.geomatch.final.A,
-    ward.final = ward.geomatch.final.A,
-    village.final = village.manual.final.A,
-    market.final = market.manual.final.A,
+    region = region.geomatch.final.A,
+    district = district.geomatch.final.A,
+    district20 = district20.geomatch.final.A,
+    ward = ward.geomatch.final.A,
+    village = village.manual.final.A,
+    market = market.manual.final.A,
     market.type,
-    sheep.0to12 = immature.sheep.less.1.,
-    sheep.adult = adult.sheep.more.1.,
-    goat.0to12 = immature.goats.less.1.,
-    goat.adult = adult.goats.more.1.,
+    sheep.0to12 = immature.sheep.less.1.B,
+    sheep.adult = adult.sheep.more.1.B,
+    goat.0to12 = immature.goats.less.1.B,
+    goat.adult = adult.goats.more.1.B,
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.
-  )
+  ) %>%
+  distinct(region, district20, ward, village, market, .keep_all = T)
 
 if(filesave){
   write.csv(mrktb_final, file = here("data/data-cleaning_data/mrktb_generalinfo_tanzania_final.csv"))
