@@ -452,36 +452,37 @@ mrktc_activities_v5 <- mrktc_activities_v4 %>%
      ### reason
   mutate(
     `7.buy.business` = if_else(grepl("1", `7.buy.reason`), 1, 0), 
-    `7.buy.business` = if_else(grepl("business", `7.buy.reason.other`), 1, `7.buy.business`),
+    `7.buy.business` = if_else(grepl("business", `7.buy.reason.other.code`), 1, `7.buy.business`),
     
     `7.buy.restock` = if_else(grepl("2", `7.buy.reason`), 1, 0), 
-    `7.buy.restock` = if_else(grepl("restock", `7.buy.reason.other`), 1, `7.buy.restock`),
+    `7.buy.restock` = if_else(grepl("restock", `7.buy.reason.other.code`), 1, `7.buy.restock`),
     
     `7.buy.breedstock` = if_else(grepl("3", `7.buy.reason`), 1, 0), 
-    `7.buy.breedstock` = if_else(grepl("breedstock", `7.buy.reason.other`), 1, `7.buy.breedstock`),
+    `7.buy.breedstock` = if_else(grepl("breedstock", `7.buy.reason.other.code`), 1, `7.buy.breedstock`),
     
     `7.buy.fattening` = if_else(grepl("4", `7.buy.reason`), 1, 0), 
-    `7.buy.fattening` = if_else(grepl("fattening", `7.buy.reason.other`), 1, `7.buy.fattening`),
+    `7.buy.fattening` = if_else(grepl("fattening", `7.buy.reason.other.code`), 1, `7.buy.fattening`),
     
     `7.buy.rearing` = if_else(grepl("5", `7.buy.reason`), 1, 0), 
-    `7.buy.rearing` = if_else(grepl("rearing", `7.buy.reason.other`), 1, `7.buy.rearing`),
+    `7.buy.rearing` = if_else(grepl("rearing", `7.buy.reason.other.code`), 1, `7.buy.rearing`),
     
     `7.buy.homeconsumption` = if_else(grepl("6", `7.buy.reason`), 1, 0), 
-    `7.buy.homeconsumption` = if_else(grepl("home", `7.buy.reason.other`), 1, `7.buy.homeconsumption`),
+    `7.buy.homeconsumption` = if_else(grepl("home", `7.buy.reason.other.code`), 1, `7.buy.homeconsumption`),
     
     `7.buy.religious` = if_else(grepl("7", `7.buy.reason`), 1, 0), 
-    `7.buy.religious` = if_else(grepl("religious", `7.buy.reason.other`), 1, `7.buy.religious`),
+    `7.buy.religious` = if_else(grepl("religious", `7.buy.reason.other.code`), 1, `7.buy.religious`),
     
     `7.buy.slaughter` = if_else(grepl("8", `7.buy.reason`), 1, 0),
-    `7.buy.slaughter` = if_else(grepl("slaughter", `7.buy.reason.other`), 1, `7.buy.slaughter`),
+    `7.buy.slaughter` = if_else(grepl("slaughter", `7.buy.reason.other.code`), 1, `7.buy.slaughter`),
     
     # other categories:
-    `7.buy.food` = if_else(grepl("food", `7.buy.reason.other`), 1, 0),
-    `7.buy.informaltrade` = if_else(grepl("informaltrade", `7.buy.reason.other`), 1,0),
-    `7.buy.income` = if_else(grepl("income", `7.buy.reason.other`), 1, 0),
+    `7.buy.food` = if_else(grepl("food", `7.buy.reason.other.code`), 1, 0),
+    `7.buy.informaltrade` = if_else(grepl("informaltrade", `7.buy.reason.other.code`), 1,0),
+    `7.buy.income` = if_else(grepl("income", `7.buy.reason.other.code`), 1, 0),
     
-    `7.buy.otherreason` =  if_else(grepl("other", `7.buy.reason.other`), 1, 0)
+    `7.buy.otherreason` =  if_else(grepl("other", `7.buy.reason.other.code`), 1, 0)
     ) %>%
+  rowwise() %>%
     mutate(`7.buyreason.multi` = if_else(sum(`7.buy.business`,
                                             `7.buy.restock`,
                                             `7.buy.breedstock`,
@@ -495,7 +496,8 @@ mrktc_activities_v5 <- mrktc_activities_v4 %>%
                                             `7.buy.income`,
                                             `7.buy.otherreason`
                                             )>1, 1, 0)
-    )
+    ) %>% 
+  ungroup()
 
 # Other buy reason
 # 
