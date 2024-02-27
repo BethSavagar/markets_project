@@ -34,160 +34,404 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```
 
 ```{r load-data, include = F}
+
 # Market survey A data:
-
 mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-  rename(region.final = region.geomatch.final, 
-         district.final = district.geomatch.final,
-         ward.final = ward.geomatch.final, 
-         village.final = village.manual.final,
-         market.final = market.manual.final)
-
-mrkta_info <-  read_csv(here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv")) %>%
-  rename(region.final = region.geomatch.final, 
-         district.final = district.geomatch.final,
-         ward.final = ward.geomatch.final, 
-         village.final = village.manual.final,
-         market.final = market.manual.final)
+  select(-`...1`)
+mrkta_info <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv")) %>%
+  select(-`...1`)
+mrkta_spatial <- read_csv(here("data/tanzania_data/mrkta_withfeatures_tanzania_final.csv"))
 
 # Market Survey B data
-mrktb_info <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania_final.csv"))
+mrktb_info <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania_final.csv")) %>%
+  select(-`...1`)
 
 # Market Survey C data
-mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
-mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
+  select(-`...1`)
+mrktc_info <-  read_csv(here("data/tanzania_data/mrktc_generalinfo_tanzania_final.csv")) %>%
+  select(-`...1`)
 mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+# write.csv(mrktc_actvty, file = "data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv")
 
-# Tanzania Towns Data: 
-ttownsOth_shp <- st_read(here("data/shapefiles/tz_towns/tz-othertowns.shp")) # Major town locations
-ttownsMaj_shp <- st_read(here("data/shapefiles/tz_towns/tz-majortowns.shp")) # Other town locations
-ttownsAll_shp <- bind_rows(ttownsMaj_shp %>% mutate(town.type = "major"), ttownsOth_shp %>% mutate(town.type = "other"))
 ```
 
 # Data Overview:
 
-## 1) Market Survey A
+Market Identifiers:
+- fid
+- date
+- region
+- district
+- district20
+- ward
+- village
+- market
 
-- For purpose of market type definition and MVA, market survey A provides:
-    - Reference database for market locations
-    - Summary of number animals sold
+## 1) Market Characteristics: 
+
+### (i) Environment
+
+- humpop_density1km
+- shppop_10km
+- gtpop_10km
+- anmlpop_10km
+- prod.sys
+- town.distkm
+- town.type
+- road.distkm
+- road.type
+
+Data Sources:
+- WorldPop Data (via HumData Exchange)
+- GLW Data (FAO)
+- Africover (FAO - via HumData Exchange)
+
+```{r spatial}
+
+mrkts_master_v1 <- mrkta_spatial
+
+```
+
+### (ii) Size & structure
+
+- num.srvy (C)
+- num.sales (A)
+- num.anmls (B) 
+- prop.shp (B)
+- prop.goat (B)
+- prop.shpA (B)
+- prop.shpY (B)
+- prop.goatA (B)
+- prop.goatY (B)
+
 
 ```{r mrkta, include = F}
 
 head(mrkta_info)
 
-mrkts_master_v1 <-  mrkta_info %>%
+num.srvy <- mrktc_gps %>% 
+  group_by(region,district20,ward,village,market) %>%
+  summarise(num.srvy = n())
+
+num.sales <- mrkta_info %>%
   mutate(`3c.all.sales` = `3a.sheep.sales` + `3b.goat.sales`) %>%
+  select(fid, 
+         num.sales = `3c.all.sales`,
+         shp.sales = `3a.sheep.sales`,
+         goat.sales = `3b.goat.sales`)
+
+num.anmlsdf <- mrktb_info %>%
+  select(fid,
+         region,
+         district,
+         district20,
+         ward,
+         village,
+         market,
+         market.type, 
+         starts_with("sheep."), 
+         starts_with("goat."), 
+         -"date.final") %>%
+  rowwise() %>% 
+  mutate(num.anmls = sum(c_across(`sheep.0to12`:`goat.adult`), na.rm = T)) %>%
+  ungroup() %>%
+  mutate(
+    prop.shp = (sheep.0to12+sheep.adult)/num.anmls,
+    prop.goat = (goat.0to12+goat.adult)/num.anmls,
+    prop.shpY = sheep.0to12/num.anmls,
+    prop.shpA = sheep.adult/num.anmls,
+    prop.goatY = goat.0to12/num.anmls,
+    prop.goatA = goat.adult/num.anmls) %>%
   select(
-    fid,
-    date,
-    country,
-    region.final,
-    district.final,
-    ward.final,
-    village.final,
-    market.final,
-    all.sales = `3c.all.sales`,
-    gps.coordinates.of.the.market,
-    unique.row.identifier.uuid.
-  )
+         region,
+         district,
+         district20,
+         ward,
+         village,
+         market, 
+         num.anmls, 
+         starts_with("prop."))
+
+num.anmlsdf <- num.anmlsdf %>%
+  # calc most animals sold:
+  rowwise() %>%
+  mutate(main.anml = names(num.anmlsdf %>% select(prop.shpY:prop.goatA))[which.max(c_across(c(prop.shpY:prop.goatA)))],
+         main.anml = gsub("prop.", "", main.anml)) %>%
+  ungroup()
+
+mrkts_master_v2 <- mrkts_master_v1 %>%
+  left_join(num.srvy,
+            by = c("region",
+                   "district20",
+                   "ward",
+                   "village",
+                   "market")) %>%
+  left_join(num.sales, 
+            by = "fid") %>%
+  left_join(num.anmlsdf, 
+            by = c("region",
+                   "district",
+                   "district20",
+                   "ward",
+                   "village",
+                   "market"))
+
   
 ```
 
-## 2) Nearest Town Location:
+## 2) Market Catchment Characteristics:
 
-- Compute distance to nearest town using tanzania-towns database:
-    - Source: <https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/41f6d923-9e22-4d30-9046-5ede043f4aa6>
-    - Compute distance between market and nearest town ("major", or "other" town)
-    - Use to Type Markets based on EcoPPR market type definitions.
+* Not yet available *
 
-```{r nearestTown}
+```{r mrktcathement}
 
-# Market A Map Data
-mrkta_mapdata <- mrkta_gps %>%
-  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>%
-  filter(!is.na(lat), !is.na(long))
-
-mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
-
-# Location of nearest town:
-townsId <- st_nearest_feature(mrkta_sf, ttownsAll_shp)
-
-towns_forjoin <- mrkta_sf %>% 
-  mutate(
-    # identify closest town to market:
-    townsId = st_nearest_feature(mrkta_sf, ttownsAll_shp),
-    # calc distance to closest town:
-    town.dist = st_distance(mrkta_sf, ttownsAll_shp[townsId, ], by_element = T) %>% as.numeric(),
-    town.distkm = round(town.dist/1000, digits = 2)) %>%
-  # id towns as "major" or "other"
-  left_join(ttownsAll_shp %>% st_drop_geometry() %>% mutate(townsId = 1:nrow(.)) %>% select(townsId, town.type),
-            by = "townsId") %>%
-  select(-c("townsId", "town.dist")) %>%
-  st_drop_geometry()
-
-mrkts_master_v2 <- mrkts_master_v1 %>%
-  left_join(towns_forjoin %>% select("fid", "town.dist" = town.distkm, "town.type"),
-            by = c("fid"))
+# mrkts_master_v3 <- mrkts_master_v2
 
 ```
 
-## 3) Market Survey B, Market Observations:
-- For purpose of market type definition and MVA, Market Survey B provides:
-    - Number of animals at the market by age and species group:
-        - sheep <1y, sheep >1y, goat <1y, goat >1y
-        
 
-```{r mrktb, include = F}
+## 3) Stakeholder Characteristics:
 
-head(mrktb_info)
+(i) Stakeholder activities at market:
 
-mrktb_summary <- mrktb_info %>%
-  select(fid,ends_with(".final"),market.type, starts_with("sheep."), starts_with("goat."), - "date.final") %>%
-  rowwise() %>% 
-  mutate(num.animals.all = sum(c_across(`sheep.0to12`:`goat.adult`), na.rm = T)) %>%
-  ungroup() %>%
-  mutate(prop.sheep.0to12 = sheep.0to12/num.animals.all,
-         prop.sheep.adult = sheep.adult/num.animals.all,
-         prop.goat.0to12 = goat.0to12/num.animals.all,
-         prop.goat.adult = goat.adult/num.animals.all) %>%
-  select(ends_with(".final"), "num.animals.all", starts_with("prop."))
+- activity.main
+- prop.trader
+- prop.buy
+-	prop.sell
+-	prop.trade
+-	prop.middleman
+-	prop.otheractvty
+	
+(ii) Stakeholder market attendance	
 
-mrktb_forjoin <- mrktb_summary %>%
-  rowwise() %>%
-  mutate(prop.animal.main = names(mrktb_summary %>% select(prop.sheep.0to12:prop.goat.adult))[which.max(c_across(c(prop.sheep.0to12:prop.goat.adult)))],
-         prop.animal.main = gsub("prop.", "", prop.animal.main)) %>%
-  ungroup()
+- visits.othermrkt
+-	visits.thismrkt
 
-mrkts_master_v3a <- mrkts_master_v2 %>%
-  left_join(mrktb_forjoin,
-            by = c("region.final", "district.final","ward.final","village.final","market.final"))
+(iii) Trade (buy,sell) reason
 
-```
-
-## 3) Market Survey C, part I (Info) :
-
-- For purpose of market type definition and MVA, Market Survey C, part I provides:
-    - Number of respondents surveyed at each market (proxy for market size)
-    - Number of markets visited by each respondent (summarised as mean per market)
-    - Proportion traders at each market
 
 ```{r mrktc, include = F}
 
 head(mrktc_info)
 
-mrktc_forjoin <- mrktc_info %>%
-  select(fid,ends_with(".final"),other.market.visited,number.markets.visited,trader) %>%
-  group_by(region.final,district.final,ward.final,village.final,market.final) %>%
-  summarise(num.srvy = n(),
-            other.markets = mean(number.markets.visited),
-            prop.trader = sum(trader)/num.srvy) %>%
+mrktc_characteristics <- mrktc_info %>%
+  left_join(mrktc_actvty, by = "fid") %>%
+  group_by(region,district20,ward,village,market) %>%
+  summarise(
+    num.srvy = n(),
+    
+    # 3) Stakeholder Characteristics 
+    
+    # (i) Stakeholder activity 
+    # actvty.main = ###
+    prop.trader = sum(trader)/num.srvy,
+
+    # prop of stakeholders undertaking X activity:
+    prop.buy = sum(`1.activity.buy`)/num.srvy,
+    prop.sell = sum(`1.activity.sell`)/num.srvy,
+    prop.middleman = sum(`1.activity.middleman`)/num.srvy,
+    prop.trade = sum(`1.activity.trade`)/num.srvy, 
+    prop.slaughter = sum(`1.activity.slaughter`)/num.srvy, 
+    prop.food = sum(`1.activity.food`)/num.srvy, 
+    prop.otheractvty = sum(`1.activity.other`)/num.srvy,
+    prop.multiactvty = sum(`1.activity.multi`)/num.srvy,
+    
+    # num.buy = sum(`1.activity.buy`), # for calcs
+    # num.sell = sum(`1.activity.sell`), # for calcs
+    
+    # (ii) Stakeholder market attendance
+    visits.thismrkt = sum(na.omit(`12.buy.sell.per.month`))/num.srvy,
+    visits.othermrkt = mean(`number.markets.visited`),
+    
+    # (iii) Stakeholder motivation (TBC)
+    ## Sales
+    sellreason.business = sum(`3.sell.business`)/num.srvy,
+    sellreason.household = sum(`3.sell.household`)/num.srvy,
+    sellreason.medical = sum(`3.sell.medical`)/num.srvy,
+    sellreason.school = sum(`3.sell.school`)/num.srvy,
+    sellreason.livestocktreatment = sum(`3.sell.livestocktreatment`)/num.srvy,
+    sellreason.restock = sum(`3.sell.restock`)/num.srvy,
+    sellreason.religious = sum(`3.sell.religious`)/num.srvy,
+    sellreason.slaughter = sum(`3.sell.slaughter`)/num.srvy,
+    sellreason.income = sum(`3.sell.income`)/num.srvy,
+    sellreason.agriculture = sum(`3.sell.agriculture`)/num.srvy,
+    sellreason.food = sum(`3.sell.food`)/num.srvy,
+    sellreason.otherreason = sum(`3.sell.otherreason`)/num.srvy,
+    sellreason.multi = sum(`3.sellreason.multi`)/num.srvy,
+    
+    ## Purchases:
+    buyreason.business = sum(`7.buy.business`)/num.srvy,
+    buyreason.restock = sum(`7.buy.restock`)/num.srvy,
+    buyreason.breedstock = sum(`7.buy.breedstock`)/num.srvy,
+    buyreason.fattening = sum(`7.buy.fattening`)/num.srvy,
+    buyreason.rearing = sum(`7.buy.rearing`)/num.srvy,
+    buyreason.homeconsumption = sum(`7.buy.homeconsumption`)/num.srvy,
+    buyreason.religious = sum(`7.buy.religious`)/num.srvy,
+    buyreason.slaughter = sum(`7.buy.slaughter`)/num.srvy,
+    buyreason.income = sum(`7.buy.income`)/num.srvy,
+    buyreason.informaltrade = sum(`7.buy.informaltrade`)/num.srvy,
+    buyreason.food = sum(`7.buy.food`)/num.srvy,
+    buyreason.otherreason = sum(`7.buy.otherreason`)/num.srvy,
+    buyreason.multi = sum(`7.buyreason.multi`)/num.srvy,
+    
+    # 4) Origin Characteristics 
+
+    # (i) origin placetype (/num.sell)
+    origin.village = sum(`2.sell.village`)/num.srvy,
+    origin.town = sum(`2.sell.town`)/num.srvy,
+    origin.market = sum(`2.sell.market`)/num.srvy,
+    origin.abattoir = sum(`2.sell.abattoir`)/num.srvy,
+    origin.otherplace = sum(`2.sell.otherplace`)/num.srvy,
+
+    # (ii) origin transport type: (/num.sell)
+    origin.foot = sum(`4.sell.foot`)/num.srvy,
+    origin.vehicle = sum(`4.sell.vehicle`)/num.srvy,
+    origin.cart = sum(`4.sell.cart`)/num.srvy,
+    origin.frommrkt = sum(`4.sell.frommrkt`)/num.srvy,
+    origin.othertransport = sum(`4.sell.othertransport`)/num.srvy,
+    origin.unknowntransport = sum(`4.sell.unknowntransport`)/num.srvy,
+
+    # 5) Destination Characteristics 
+
+    # (i) destination placetype (/num.buy?)
+    dest.village = sum(`6.buy.village`)/num.srvy,
+    dest.town = sum(`6.buy.town`)/num.srvy,
+    dest.market = sum(`6.buy.market`)/num.srvy,
+    dest.abattoir = sum(`6.buy.abattoir`)/num.srvy,
+    dest.otherplace = sum(`6.buy.otherplace`)/num.srvy,
+
+    # (ii) destination transport type: (/num.buy?)
+    dest.foot = sum(`8.buy.foot`)/num.srvy,
+    dest.vehicle = sum(`8.buy.vehicle`)/num.srvy,
+    dest.cart = sum(`8.buy.cart`)/num.srvy,
+    dest.motorbike = sum(`8.buy.motorbike`)/num.srvy,
+    dest.mrktslaughter = sum(`8.buy.slaughter`)/num.srvy,
+    dest.atmrkt = sum(`8.buy.atmarket`)/num.srvy,
+    dest.othertransport = sum(`8.buy.othertransport`)/num.srvy,
+    dest.unknowntransport = sum(`8.buy.unknowntransport`)/num.srvy,
+
+  ) %>%
   ungroup()
 
-mrkts_master_v3 <- mrkts_master_v3a %>%
+
+
+mrktc_forjoin <- mrktc_characteristics %>%
+  rowwise() %>%
+  mutate(
+    # main activity
+    actvty.main = names(mrktc_characteristics %>% select(prop.buy:prop.otheractvty))[which.max(c_across(c(prop.buy:prop.otheractvty)))],
+    
+    # main sell reason
+    sellreason.main = names(mrktc_characteristics %>% select(sellreason.business:sellreason.otherreason))[which.max(c_across(c(sellreason.business:sellreason.otherreason)))],
+    
+    # main buy reason
+    buyreason.main = names(mrktc_characteristics %>% select(buyreason.business:buyreason.otherreason))[which.max(c_across(c(buyreason.business:buyreason.otherreason)))],
+    
+    # main origin type
+    origin.main = names(
+      mrktc_characteristics %>% select(origin.village:origin.otherplace)
+    )[which.max(c_across(c(origin.village:origin.otherplace)))],
+    # main origin transport
+    origin.transport.main = names(
+      mrktc_characteristics %>% select(origin.foot:origin.unknowntransport)
+    )[which.max(c_across(c(origin.foot:origin.unknowntransport)))],
+    # main destination
+    dest.main = names(
+      mrktc_characteristics %>% select(dest.village:dest.otherplace)
+    )[which.max(c_across(c(dest.village:dest.otherplace)))],
+    # main destination transport
+    dest.transport.main = names(
+      mrktc_characteristics %>% select(dest.foot:dest.unknowntransport)
+    )[which.max(c_across(c(dest.foot:dest.unknowntransport)))]
+  ) %>%
+  ungroup() %>%
+  select(
+    region,
+    district20,
+    ward,
+    village,
+    market,
+    
+    #stakeholder characteristics
+    prop.trader,
+    actvty.main,
+    prop.buy,
+    prop.sell,
+    prop.trade,
+    prop.middleman,
+    prop.otheractvty,
+    
+    visits.othermrkt,
+    visits.thismrkt,
+    
+    # stakeholder motivation (sales)
+    sellreason.main,
+    sellreason.business,
+    sellreason.household,
+    sellreason.medical,
+    sellreason.school,
+    sellreason.livestocktreatment,
+    sellreason.restock,
+    sellreason.religious,
+    sellreason.slaughter,
+    sellreason.income,
+    sellreason.agriculture,
+    sellreason.food,
+    sellreason.otherreason,
+    
+    # stakehold motivation (purchases)
+    buyreason.main,
+    buyreason.business,
+    buyreason.restock,
+    buyreason.breedstock,
+    buyreason.fattening,
+    buyreason.rearing,
+    buyreason.homeconsumption,
+    buyreason.religious,
+    buyreason.slaughter,
+    buyreason.income,
+    buyreason.informaltrade,
+    buyreason.food,
+    buyreason.otherreason,
+    
+    # origin characteristics
+    origin.main,
+    origin.village,
+    origin.town,
+    origin.market,
+    origin.abattoir,
+    origin.otherplace,
+    
+    origin.transport.main,
+    origin.foot,
+    origin.vehicle,
+    origin.cart,
+    origin.othertransport,
+    origin.unknowntransport,
+    
+    # destination characteristics
+    dest.main,
+    dest.village,
+    dest.town,
+    dest.market,
+    dest.abattoir,
+    dest.otherplace,
+    
+    dest.transport.main,
+    dest.foot,
+    dest.vehicle,
+    dest.cart,
+    dest.othertransport,
+    dest.unknowntransport,
+  ) %>%
+  ungroup()
+
+
+
+mrkts_master_v4 <- mrkts_master_v3 %>%
   left_join(mrktc_forjoin,
-            by = c("region.final", "district.final","ward.final","village.final","market.final"))
+            by = c("region", "district20","ward","village","market"))
 
 ```
 
