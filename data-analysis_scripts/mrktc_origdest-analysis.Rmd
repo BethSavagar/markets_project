@@ -1,0 +1,220 @@
+---
+title: "mrktc_origdest_catchment"
+output: html_document
+date: "2024-02-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+```{r load-data, include = F}
+
+# Market survey A data:
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+  select(-`...1`)
+
+# Market Survey C data
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
+  select(-`...1`)
+
+
+# Market Survey C origins and destinations
+mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv")) %>%
+  select(-`...1`)
+
+# Load Tanzania Shapefile:
+sf_use_s2(FALSE)
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
+
+```
+
+# Data Overview:
+
+Market Identifiers:
+- fid
+- date
+- region
+- district
+- district20
+- ward
+- village
+- market
+
+
+## 2) Market Catchment Characteristics:
+
+- total.area
+
+- origin.maxdist
+- origin.area
+- origin.ndstrct
+- origin.nwards
+
+- dest.maxdist
+- dest.area
+- dest.ndstrct
+- dest.nwards
+
+```{r origins}
+
+mrktc_origins <- mrktc_origdest %>%
+  select(
+    fid,
+    `2.sell.place.ward.final`,
+    `2.sell.place.district.final`,
+    `2.sell.place.region.final`
+  ) %>%
+  drop_na()
+
+mrktc_origins_sf <- mrktc_origins %>%
+  left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`2.sell.place.ward.final` = "Ward_N", 
+           `2.sell.place.district.final` = "Dist20_N",
+           `2.sell.place.region.final` = "Region20_N")
+  )
+
+mrktc_origins_sf <- st_as_sf(mrktc_origins_sf)
+
+mrktc_originspt_sf <- mrktc_origins_sf
+mrktc_originspt_sf$geometry <- st_point_on_surface(mrktc_originspt_sf$geometry)
+
+ggplot() +
+  geom_sf(data = twards_shp)+
+  geom_sf(data = mrktc_origins_sf, fill = "blue", alpha = 0.5)+
+  geom_sf(data = mrktc_originspt_sf, col = "red", alpha = 0.5)+
+  #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
+  coord_sf()
+
+```
+
+
+```{r}
+
+mrktc_mrktorig <- mrktc_origins %>%
+  left_join(mrktc_gps %>% rename(
+    mrkt.region = region,
+    mrkt.district = district20,
+    mrkt.ward = ward,
+    mrkt.village = village,
+    mrkt.name = market
+  ) %>%
+    select(-c(district)), 
+  by = "fid")
+
+mrktc_mrktorig %>% 
+  group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
+  summarise(
+    origin.nregs = n_distinct(`2.sell.place.region.final`),
+    origin.ndists = n_distinct(`2.sell.place.district.final`),
+    origin.nwards = n_distinct(`2.sell.place.ward.final`)) 
+
+
+# calc distance travelled to market:
+
+
+
+```
+
+
+
+- dest.maxdist
+- dest.area
+- dest.ndstrct
+- dest.nwards
+
+```{r destinations}
+
+mrktc_dests <- mrktc_origdest %>%
+  select(
+    fid,
+    `6.buy.place.ward.final`,
+    `6.buy.place.district.final`,
+    `6.buy.place.region.final`
+  ) %>%
+  drop_na()
+
+mrktc_dests_sf <- mrktc_dests %>%
+  left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`6.buy.place.ward.final` = "Ward_N", 
+           `6.buy.place.district.final` = "Dist20_N",
+           `6.buy.place.region.final` = "Region20_N")
+  )
+
+mrktc_dests_sf <- st_as_sf(mrktc_dests_sf)
+
+mrktc_destspt_sf <- mrktc_dests_sf
+mrktc_destspt_sf$geometry <- st_point_on_surface(mrktc_destspt_sf$geometry)
+
+ggplot() +
+  geom_sf(data = twards_shp)+
+  geom_sf(data = mrktc_dests_sf, fill = "blue", alpha = 0.5)+
+  geom_sf(data = mrktc_destspt_sf, col = "red", alpha = 0.5)+
+  #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
+  coord_sf()
+
+```
+
+
+```{r}
+
+mrktc_mrktdest <- mrktc_dests %>%
+  left_join(mrktc_gps %>% rename(
+    mrkt.region = region,
+    mrkt.district = district20,
+    mrkt.ward = ward,
+    mrkt.village = village,
+    mrkt.name = market
+  ) %>%
+    select(-c(district)), 
+  by = "fid")
+
+mrktc_mrktdest %>% 
+  group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name) %>%
+  summarise(
+    dest.nregs = n_distinct(`6.buy.place.region.final`),
+    dest.ndists = n_distinct(`6.buy.place.district.final`),
+    dest.nwards = n_distinct(`6.buy.place.ward.final`)) %>%
+  View()
+
+mrktc_mrktdest %>% 
+  group_by(mrkt.region,mrkt.district,mrkt.ward,mrkt.village, mrkt.name,
+           `6.buy.place.region.final`, `6.buy.place.district.final`, `6.buy.place.ward.final`) %>%
+  count() %>% 
+  # filter(mrkt.district !=`6.buy.place.district.final`) %>%
+  # filter(mrkt.ward !=`6.buy.place.ward.final`) %>%
+  View() 
+
+
+
+# calc distance travelled to market:
+
+
+
+```
