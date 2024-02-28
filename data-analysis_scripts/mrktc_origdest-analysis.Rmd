@@ -332,3 +332,31 @@ ggplot() +
 
 
 ```
+
+
+
+```{r joindata}
+
+mrkt_origdest_join <- mrkta_gps %>% 
+  # origins summary
+  left_join(
+    mrktc_origsummary, 
+    by = c(region = "mrkt.region", district20 = "mrkt.district", ward = "mrkt.ward", village = "mrkt.village", market = "mrkt.name")
+    ) %>%
+  left_join(
+    catchment_areas %>% st_drop_geometry(),
+    by = c(region = "mrkt.region", district20 = "mrkt.district", ward = "mrkt.ward", village = "mrkt.village", market = "mrkt.name")
+  ) %>%
+  # destinations summary
+  left_join(
+    mrktc_destsummary, 
+    by = c(region = "mrkt.region", district20 = "mrkt.district", ward = "mrkt.ward", village = "mrkt.village", market = "mrkt.name")
+  ) %>% 
+  left_join(
+    destcatchment_areas %>% st_drop_geometry(),
+    by = c(region = "mrkt.region", district20 = "mrkt.district", ward = "mrkt.ward", village = "mrkt.village", market = "mrkt.name")
+  )
+
+write_csv(mrkt_origdest_join, file = here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
+
+```
