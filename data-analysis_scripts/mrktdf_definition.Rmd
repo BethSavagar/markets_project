@@ -54,6 +54,9 @@ mrktc_info <-  read_csv(here("data/tanzania_data/mrktc_generalinfo_tanzania_fina
 mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
 # write.csv(mrktc_actvty, file = "data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv")
 
+
+mrkt_origdest_join <- read_csv(here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
+
 ```
 
 # Data Overview:
@@ -143,6 +146,7 @@ num.anmlsdf <- mrktb_info %>%
     prop.shpA = sheep.adult/num.anmls,
     prop.goatY = goat.0to12/num.anmls,
     prop.goatA = goat.adult/num.anmls) %>%
+  mutate_at(c('prop.shp','prop.goat', 'prop.shpY','prop.goatY','prop.shpA','prop.goatA'), ~replace_na(.,0)) %>%
   select(
          region,
          district,
@@ -184,10 +188,14 @@ mrkts_master_v2 <- mrkts_master_v1 %>%
 
 * Not yet available *
 
-```{r mrktcathement}
+```{r mrktcatchment}
 
-# mrkts_master_v3 <- mrkts_master_v2
+# See mrktc_origdest_analysis for df:
 
+mrkts_master_v3 <- mrkts_master_v2 %>%
+  left_join(
+    mrkt_origdest_join
+  )
 ```
 
 
@@ -210,6 +218,18 @@ mrkts_master_v2 <- mrkts_master_v1 %>%
 
 (iii) Trade (buy,sell) reason
 
+    - Activity at market for each respondent 
+      - *Summarised as proportion respondents undertaking X activity at market*
+    - Number of times each respondent visits the market (to buy/sell) each month:
+      - *Summarised as mean visits to the market per month*
+    - Origin placetypes for animals sold at the market
+      - *Summarised as proportion of origin placetypes for animals sold at market*
+    - Origin transport for animals sold at the market
+      - *Summarised as proportion of origin transport types for animals sold at market*
+    - Destination placetypes for animals bought at the market
+      - *Summarised as proportion animals destination placetypes for animals bought at market*
+    - Destination transport for animals sold at the market
+      - *Summarised as proportion of destination transport types for animals bought at market*
 
 ```{r mrktc, include = F}
 
@@ -360,6 +380,8 @@ mrktc_forjoin <- mrktc_characteristics %>%
     prop.sell,
     prop.trade,
     prop.middleman,
+    prop.slaughter, 
+    prop.food, 
     prop.otheractvty,
     
     visits.othermrkt,
@@ -407,6 +429,7 @@ mrktc_forjoin <- mrktc_characteristics %>%
     origin.foot,
     origin.vehicle,
     origin.cart,
+    origin.frommrkt,
     origin.othertransport,
     origin.unknowntransport,
     
@@ -422,6 +445,9 @@ mrktc_forjoin <- mrktc_characteristics %>%
     dest.foot,
     dest.vehicle,
     dest.cart,
+    dest.motorbike,
+    dest.mrktslaughter,
+    dest.atmrkt,
     dest.othertransport,
     dest.unknowntransport,
   ) %>%
@@ -436,115 +462,6 @@ mrkts_master_v4 <- mrkts_master_v3 %>%
 ```
 
 
-## 4) Market Survey C, Part II (Activities):
-
-- For purpose of market type definition and MVA, Market Survey C, part II provides:
-    - Activity at market for each respondent 
-      - *Summarised as proportion respondents undertaking X activity at market*
-    - Number of times each respondent visits the market (to buy/sell) each month:
-      - *Summarised as mean visits to the market per month*
-    - Origin placetypes for animals sold at the market
-      - *Summarised as proportion of origin placetypes for animals sold at market*
-    - Origin transport for animals sold at the market
-      - *Summarised as proportion of origin transport types for animals sold at market*
-    - Destination placetypes for animals bought at the market
-      - *Summarised as proportion animals destination placetypes for animals bought at market*
-    - Destination transport for animals sold at the market
-      - *Summarised as proportion of destination transport types for animals bought at market*
-
-```{r mrktcactivities, include = F}
-
-# prop.buy	prop.sell	prop.trade	prop.broker	prop.otheractvty	prop.multiactvty	main.actvty
-# origin.placetype	origin.village	origin.town	origin.market	origin.abattoir
-
-colnames(mrktc_actvty)
-
-mrktc_actvty_summary <- mrktc_info %>%
-  select(fid, ends_with(".final")) %>% 
-  left_join(mrktc_actvty, by = "fid") %>%
-  group_by(region.final, district.final, ward.final, village.final, market.final) %>%
-  summarise(
-    num.srvy = n(),
-    
-    # market activity
-    prop.buy = sum(`1.activity.buy`)/num.srvy,
-    prop.sell = sum(`1.activity.sell`)/num.srvy,
-    prop.middleman = sum(`1.activity.middleman`)/num.srvy,
-    prop.trade = sum(`1.activity.trade`)/num.srvy, 
-    prop.otheractvty = sum(`1.activity.other`)/num.srvy,
-    prop.multiactvty = sum(`1.activity.multi`)/num.srvy,
-    # actvty.main = ###
-    
-    # origin placetype
-    origin.village = sum(`2.sell.village`)/num.srvy,
-    origin.town = sum(`2.sell.town`)/num.srvy,
-    origin.market = sum(`2.sell.market`)/num.srvy,
-    origin.abattoir = sum(`2.sell.abattoir`)/num.srvy,
-    origin.otherplace = sum(`2.sell.otherplace`)/num.srvy,
-    # origin.main = ###
-    
-    # origin transport type:
-    origin.foot = sum(`4.sell.foot`)/num.srvy,
-    origin.vehicle = sum(`4.sell.vehicle`)/num.srvy,
-    origin.cart = sum(`4.sell.cart`)/num.srvy,
-    origin.othertransport = sum(`4.sell.othertransport`)/num.srvy,
-    origin.unknowntransport = sum(`4.sell.unknowntransport`)/num.srvy,
-    # origin.transport.main = ###
-    
-    # destination placetype
-    dest.village = sum(`6.buy.village`)/num.srvy,
-    dest.town = sum(`6.buy.town`)/num.srvy,
-    dest.market = sum(`6.buy.market`)/num.srvy,
-    dest.abattoir = sum(`6.buy.abattoir`)/num.srvy,
-    dest.otherplace = sum(`6.buy.otherplace`)/num.srvy,
-    # dest.main = ###
-    
-    # destination transport type:
-    dest.foot = sum(`8.buy.foot`)/num.srvy,
-    dest.vehicle = sum(`8.buy.vehicle`)/num.srvy,
-    dest.cart = sum(`8.buy.cart`)/num.srvy,
-    dest.othertransport = sum(`8.buy.othertransport`)/num.srvy,
-    dest.unknowntransport = sum(`8.buy.unknowntransport`)/num.srvy,
-    # dest.transport.main = ###
-    
-    # mean buy/sell at market each month (ignore NA)
-    buysell.month = sum(na.omit(`12.buy.sell.per.month`))/num.srvy)  %>%
-  ungroup() %>% 
-  select(ends_with(".final"), 
-         starts_with("num."),
-         starts_with("prop."),
-         starts_with("origin."),
-         starts_with("dest"),
-         "buysell.month")
-
-
-mrktc_actvty_forjoin <- mrktc_actvty_summary %>%
-  rowwise() %>%
-  mutate(
-    prop.actvty.main = names(mrktc_actvty_summary %>% select(prop.buy:prop.otheractvty))[which.max(c_across(c(prop.buy:prop.otheractvty)))],
-    origin.main = names(mrktc_actvty_summary %>% select(origin.village:origin.otherplace))[which.max(c_across(c(origin.village:origin.otherplace)))],
-    origin.transport.main = names(mrktc_actvty_summary %>% select(origin.foot:origin.unknowntransport))[which.max(c_across(c(origin.foot:origin.unknowntransport)))],
-    dest.main = names(mrktc_actvty_summary %>% select(dest.village:dest.otherplace))[which.max(c_across(c(dest.village:dest.otherplace)))],
-    dest.transport.main = names(mrktc_actvty_summary %>% select(dest.foot:dest.unknowntransport))[which.max(c_across(c(dest.foot:dest.unknowntransport)))]
-    ) %>%
-   ungroup() %>% 
-  select(ends_with(".final"), 
-         starts_with("town."),
-         starts_with("num."),
-         starts_with("prop."),
-         starts_with("origin."),
-         starts_with("dest"),
-         "buysell.month")
-  
-  
-mrkts_master_v4 <- mrkts_master_v3 %>%
-  left_join(mrktc_actvty_forjoin %>% select(-num.srvy),
-            by = c("region.final", "district.final","ward.final","village.final","market.final"))
-
-
-```
-
-
 # Market Characteristics:
 
 Market surveys were filtered to **exclude** markets in Mtwara region
@@ -553,7 +470,7 @@ Markets in Ruvuma and Lindi (1 market each) were also excluded
   - Visited as part of Mtwara surveys
 
 ```{r mrktsmasterNomtwara, include = F}
-mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region.final %in% c("mtwara", "lindi", "ruvuma"))
+mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region %in% c("mtwara", "lindi", "ruvuma"))
 
 ```
 
@@ -591,24 +508,24 @@ mrkts_master_noMtwara %>%
 
 mrkts_master_noMtwara %>%
   summarise(
-    min = min(town.dist, na.rm = TRUE), 
-    q1 = quantile(town.dist, 0.25, na.rm = TRUE), 
-    median = median(town.dist, na.rm = TRUE), 
-    mean = mean(town.dist, na.rm = TRUE), 
-    q3 = quantile(town.dist, 0.75, na.rm = TRUE), 
-    max = max(town.dist, na.rm = TRUE), 
-    NAs = sum(is.na(town.dist))
+    min = min(town.distkm, na.rm = TRUE), 
+    q1 = quantile(town.distkm, 0.25, na.rm = TRUE), 
+    median = median(town.distkm, na.rm = TRUE), 
+    mean = mean(town.distkm, na.rm = TRUE), 
+    q3 = quantile(town.distkm, 0.75, na.rm = TRUE), 
+    max = max(town.distkm, na.rm = TRUE), 
+    NAs = sum(is.na(town.distkm))
   ) %>%
   mutate_if(is.numeric, round, digits = 2) %>%
   kable() 
 
-distp1 <- ggplot(mrkts_master_noMtwara, aes(x=town.dist, group = town.type))+
+distp1 <- ggplot(mrkts_master_noMtwara, aes(x=town.distkm, group = town.type))+
   geom_histogram(aes(fill = town.type), alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Distance (km)",
        y = "Count")+
   theme(legend.position = "none")
 
-distp2 <- ggplot(mrkts_master_noMtwara, aes(x = town.type, y=town.dist, group = town.type))+
+distp2 <- ggplot(mrkts_master_noMtwara, aes(x = town.type, y=town.distkm, group = town.type))+
   geom_boxplot(aes(fill = town.type),alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -630,18 +547,18 @@ ggarrange(distp1, distp2, nrow = 1)
 
 mrkts_master_noMtwara %>%
   summarise(
-    min = min(num.animals.all, na.rm = TRUE), 
-    q1 = quantile(num.animals.all, 0.25, na.rm = TRUE), 
-    median = median(num.animals.all, na.rm = TRUE), 
-    mean = mean(num.animals.all, na.rm = TRUE), 
-    q3 = quantile(num.animals.all, 0.75, na.rm = TRUE), 
-    max = max(num.animals.all, na.rm = TRUE), 
-    NAs = sum(is.na(num.animals.all))
+    min = min(num.anmls, na.rm = TRUE), 
+    q1 = quantile(num.anmls, 0.25, na.rm = TRUE), 
+    median = median(num.anmls, na.rm = TRUE), 
+    mean = mean(num.anmls, na.rm = TRUE), 
+    q3 = quantile(num.anmls, 0.75, na.rm = TRUE), 
+    max = max(num.anmls, na.rm = TRUE), 
+    NAs = sum(is.na(num.anmls))
   ) %>%
   mutate_if(is.numeric, round, digits = 2) %>%
   kable() 
 
-animalsp1 <- ggplot(mrkts_master_noMtwara, aes(x=num.animals.all))+
+animalsp1 <- ggplot(mrkts_master_noMtwara, aes(x=num.anmls))+
   geom_histogram(binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Small ruminants per market",
        y = "Count")
@@ -657,12 +574,12 @@ animalsp1 <- ggplot(mrkts_master_noMtwara, aes(x=num.animals.all))+
 
 mrkts_master_animals <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
-         prop.sheep.0to12,
-         prop.sheep.adult, 
-         prop.goat.0to12,
-         prop.goat.adult) %>%
-  gather(., key = "agegroup", value = "proportion", -c(fid,market.final)) %>% 
+         market, 
+         prop.shpY,
+         prop.shpA, 
+         prop.goatY,
+         prop.goatA) %>%
+  gather(., key = "agegroup", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
   mutate(activity = ordered(agegroup, levels = c(
          "prop.sheep.0to12",
@@ -692,7 +609,7 @@ mrktanimals1 <- ggplot(mrkts_master_animals, aes(x = agegroup, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
-mrktanimals2 <- ggplot(mrkts_master_noMtwara, aes(x=prop.animal.main))+
+mrktanimals2 <- ggplot(mrkts_master_noMtwara, aes(x=main.anml))+
   geom_histogram(stat = "count", alpha = 0.5, col = "black")+
   labs(x = "Primary animal at market", y = "Count")
 
@@ -711,24 +628,24 @@ ggarrange(mrktanimals1, mrktanimals2, ncol = 1)
 
 mrkts_master_noMtwara %>%
   summarise(
-    min = min(all.sales, na.rm = TRUE), 
-    q1 = quantile(all.sales, 0.25, na.rm = TRUE), 
-    median = median(all.sales, na.rm = TRUE), 
-    mean = mean(all.sales, na.rm = TRUE), 
-    q3 = quantile(all.sales, 0.75, na.rm = TRUE), 
-    max = max(all.sales, na.rm = TRUE), 
-    NAs = sum(is.na(all.sales))
+    min = min(num.sales, na.rm = TRUE), 
+    q1 = quantile(num.sales, 0.25, na.rm = TRUE), 
+    median = median(num.sales, na.rm = TRUE), 
+    mean = mean(num.sales, na.rm = TRUE), 
+    q3 = quantile(num.sales, 0.75, na.rm = TRUE), 
+    max = max(num.sales, na.rm = TRUE), 
+    NAs = sum(is.na(num.sales))
   ) %>%
   mutate_if(is.numeric, round, digits = 2) %>%
   kable() 
 
-salesp1 <- ggplot(mrkts_master_noMtwara, aes(x=all.sales))+
+salesp1 <- ggplot(mrkts_master_noMtwara, aes(x=num.sales))+
   geom_histogram(binwidth = 10, alpha = 0.5, col = "black", boundary = 0)+
   scale_x_continuous(breaks = seq(0,650,50), labels = seq(0,650,50))+
   labs(x = "Small ruminant sales per market",
        y = "Count")
 
-salesp2 <- ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=all.sales))+
+salesp2 <- ggplot(mrkts_master_noMtwara, aes(x = "SR sales", y=num.sales))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -751,24 +668,24 @@ ggarrange(salesp1, salesp2, nrow = 1)
 
 mrkts_master_noMtwara %>%
   summarise(
-    min = min(other.markets, na.rm = TRUE), 
-    q1 = quantile(other.markets, 0.25, na.rm = TRUE), 
-    median = median(other.markets, na.rm = TRUE), 
-    mean = mean(other.markets, na.rm = TRUE), 
-    q3 = quantile(other.markets, 0.75, na.rm = TRUE), 
-    max = max(other.markets, na.rm = TRUE), 
-    NAs = sum(is.na(other.markets))
+    min = min(visits.othermrkt, na.rm = TRUE), 
+    q1 = quantile(visits.othermrkt, 0.25, na.rm = TRUE), 
+    median = median(visits.othermrkt, na.rm = TRUE), 
+    mean = mean(visits.othermrkt, na.rm = TRUE), 
+    q3 = quantile(visits.othermrkt, 0.75, na.rm = TRUE), 
+    max = max(visits.othermrkt, na.rm = TRUE), 
+    NAs = sum(is.na(visits.othermrkt))
   ) %>%
   mutate_if(is.numeric, round, digits = 2) %>%
   kable() 
 
-othermrktsp1 <- ggplot(mrkts_master_noMtwara, aes(x=other.markets))+
+othermrktsp1 <- ggplot(mrkts_master_noMtwara, aes(x=visits.othermrkt))+
   geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Other markets visited",
        y = "Count")
 
 
-othermrktsp2 <- ggplot(mrkts_master_noMtwara, aes(x = "other.markets", y=other.markets))+
+othermrktsp2 <- ggplot(mrkts_master_noMtwara, aes(x = "other.markets", y=visits.othermrkt))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -790,24 +707,24 @@ ggarrange(othermrktsp1,othermrktsp2,nrow=1)
 
 mrkts_master_noMtwara %>%
   summarise(
-    min = min(buysell.month, na.rm = TRUE), 
-    q1 = quantile(buysell.month, 0.25, na.rm = TRUE), 
-    median = median(buysell.month, na.rm = TRUE), 
-    mean = mean(buysell.month, na.rm = TRUE), 
-    q3 = quantile(buysell.month, 0.75, na.rm = TRUE), 
-    max = max(buysell.month, na.rm = TRUE), 
-    NAs = sum(is.na(buysell.month))
+    min = min(visits.thismrkt, na.rm = TRUE), 
+    q1 = quantile(visits.thismrkt, 0.25, na.rm = TRUE), 
+    median = median(visits.thismrkt, na.rm = TRUE), 
+    mean = mean(visits.thismrkt, na.rm = TRUE), 
+    q3 = quantile(visits.thismrkt, 0.75, na.rm = TRUE), 
+    max = max(visits.thismrkt, na.rm = TRUE), 
+    NAs = sum(is.na(visits.thismrkt))
   ) %>%
   mutate_if(is.numeric, round, digits = 2) %>%
   kable() 
 
-visits1 <- ggplot(mrkts_master_noMtwara, aes(x=buysell.month))+
+visits1 <- ggplot(mrkts_master_noMtwara, aes(x=visits.thismrkt))+
   geom_histogram(alpha = 0.5, col = "black", boundary = 0)+
   labs(x = "Mean visits (buy/sell) at market per month",
        y = "Count")
 
 
-visits2 <- ggplot(mrkts_master_noMtwara, aes(x = "Visits", y=buysell.month))+
+visits2 <- ggplot(mrkts_master_noMtwara, aes(x = "Visits", y=visits.thismrkt))+
   geom_boxplot(fill = "grey",alpha = 0.5)+
   geom_jitter(shape = 18, size = 2, width = 0.3)+
   # stat_summary(fun.data = give.n, geom = "text", fun.y = max)+
@@ -882,13 +799,13 @@ ggarrange(trader1, trader2, nrow = 1)
 
 mrkts_master_actvty <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
+         market, 
          prop.buy,
          prop.sell,
          prop.trade,
          prop.middleman,
          prop.otheractvty) %>%
-  gather(., key = "activity", value = "proportion", -c(fid,market.final)) %>% 
+  gather(., key = "activity", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
   mutate(activity = ordered(activity, levels = c("prop.buy",
          "prop.sell",
@@ -918,7 +835,7 @@ mrktacvty1 <- ggplot(mrkts_master_actvty, aes(x = activity, y=proportion))+
   # theme(axis.text.x = element_text(angle = 45, hjust = 1),
   #       legend.position = "none")
 
-mrktacvty2 <- ggplot(mrkts_master_noMtwara, aes(x=prop.actvty.main))+
+mrktacvty2 <- ggplot(mrkts_master_noMtwara, aes(x=actvty.main))+
   geom_histogram(stat = "count", alpha = 0.5, col = "black")+
   labs(x = "Main market activity", y = "Count")
 
@@ -950,13 +867,13 @@ ggarrange(mrktacvty1, mrktacvty2, ncol = 1)
 
 mrkts_master_origplace <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
+         market, 
          "origin.village",          
          "origin.town" ,            
          "origin.market" ,          
          "origin.abattoir",
          "origin.otherplace") %>%
-  gather(., key = "placetype", value = "proportion", -c(fid,market.final)) %>% 
+  gather(., key = "placetype", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
   mutate(placetype = gsub("origin.", "", placetype),
          placetype = ordered(placetype, levels = c("village",          
@@ -1021,13 +938,13 @@ ggarrange(orig1, orig2, ncol = 1)
 
 mrkts_master_origtrans <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
+         market, 
          "origin.foot",          
          "origin.vehicle" ,            
          "origin.cart" ,          
          "origin.othertransport",
          "origin.unknowntransport") %>%
-  gather(., key = "transtype", value = "proportion", -c(fid,market.final)) %>% 
+  gather(., key = "transtype", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
   mutate(
          transtype = ordered(transtype, levels = c("origin.foot",         
@@ -1085,13 +1002,13 @@ ggarrange(origtrans1, origtrans2, ncol = 1)
 
 mrkts_master_distplace <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
+         market, 
          "dest.village",          
          "dest.town" ,            
          "dest.market" ,          
          "dest.abattoir",
          "dest.otherplace") %>%
-  gather(., key = "placetype", value = "proportion", -c(fid,market.final)) %>% 
+  gather(., key = "placetype", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
    mutate(placetype = gsub("dest.", "", placetype),
          placetype = ordered(placetype, levels = c("village",          
@@ -1140,7 +1057,7 @@ ggarrange(dest1, dest2, ncol = 1)
 placetype_cor <- left_join(
   mrkts_master_origplace,
   mrkts_master_distplace %>% rename(dest.proportion = proportion),
-  by = c("fid", "market.final", "placetype")
+  by = c("fid", "market", "placetype")
 )
 
 ggplot(placetype_cor, aes(x=proportion, y = dest.proportion))+
@@ -1174,13 +1091,13 @@ ggplot(placetype_cor, aes(x=proportion, y = dest.proportion))+
 
 mrkts_master_desttrans <- mrkts_master_noMtwara %>%
   select(fid, 
-         market.final, 
+         market, 
          "dest.foot",          
          "dest.vehicle" ,            
          "dest.cart" ,          
          "dest.othertransport",
          "dest.unknowntransport") %>%
-  gather(., key = "transtype", value = "proportion", -c(fid,market.final)) %>% 
+  gather(., key = "transtype", value = "proportion", -c(fid,market)) %>% 
   ungroup() %>%
   mutate(
          transtype = ordered(transtype, levels = c("dest.foot",          
