@@ -472,6 +472,8 @@ Markets in Ruvuma and Lindi (1 market each) were also excluded
 ```{r mrktsmasterNomtwara, include = F}
 mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region %in% c("mtwara", "lindi", "ruvuma"))
 
+# write.csv(mrkts_master_noMtwara, file = here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv"))
+
 ```
 
 ## (1) Number of surveys per market:
