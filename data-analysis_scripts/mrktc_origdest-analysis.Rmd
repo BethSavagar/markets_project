@@ -53,6 +53,7 @@ mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_fina
 # Load Tanzania Shapefile:
 sf_use_s2(FALSE)
 twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
+tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
 
 ```
 
@@ -117,8 +118,11 @@ ggplot() +
 
 
 ggplot() +
-  geom_sf(data = twards_shp, fill = NA)+
-  geom_sf(data = twards_shp %>% filter(Region20_N %in% mrkta_gps$region), aes(fill = Region20_N), alpha = 0.5)+
+  geom_sf(data = tregs_shp, fill = NA)+
+  geom_sf(data = tregs_shp %>% filter(Region_N %in% mrkta_gps$region), aes(fill = Region_N), alpha = 0.5)+
+  geom_sf_text(data = tregs_shp %>% filter(Region_N %in% mrkta_gps$region), aes(label = Region_N), size = 2)+
+  # geom_sf(data = twards_shp, fill = NA)+
+  # geom_sf(data = twards_shp %>% filter(Region20_N %in% mrkta_gps$region), aes(fill = Region20_N), alpha = 0.5)+
   # geom_sf(data = mrktc_origins_sf, fill = "blue", alpha = 0.5)+
   geom_sf(data = mrktc_originspt_sf, col = "red", alpha = 0.5)+
   #geom_sf(data = st_point_on_surface(mrktc_origins_shp$geometry), col = "red", alpha = 0.5)+
