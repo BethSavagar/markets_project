@@ -1,10 +1,70 @@
+---
+title: "mrktc_origdest_catchment"
+output: html_document
+date: "2024-02-27"
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+
+#MFA
 library(FactoMineR)
 library("factoextra")
 
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+```{r load-data, include = F}
+
+# Market survey A data:
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
+  select(-`...1`)
+
+# Market Survey C data
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
+  select(-`...1`)
+mrktc_coords <- mrktc_gps %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+mrktc_sf <- st_as_sf(mrktc_coords, coords = c("long","lat"),  crs = 4326)
+
+# Market Survey C origins and destinations
+mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv"))
+
+mrkts_master_noMtwara <- read_csv(here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv")) %>%
+  select(-`...1`)
+
+# Load Tanzania Shapefile:
+sf_use_s2(FALSE)
 twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
 tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
 
+```
+Test 1
+
+```{r}
 
 mrkts_master_complete <- mrkts_master_noMtwara %>% drop_na()
 
@@ -374,4 +434,353 @@ ggplot() +
   geom_sf_text(data = tregs_shp, aes(label = Region_N), size = 3, check_overlap = TRUE) +
   geom_sf(data = mrkts_clusters_sf, aes(col = cluster))+
   coord_sf()
+
+```
+
+
+
+# Test 2
+
+
+```{r mfa2}
+
+mrkts_master_complete <- mrkts_master_noMtwara %>% drop_na()
+
+mrkts_PCA <- mrkts_master_complete %>%
+  select(
+    # envirchar_s (s)
+    humpop_density1km,
+    town.distkm,
+    road.distkm,
+    
+    # mrktchar_s (s)
+    num.srvy, 
+    num.anmls, 
+    prop.goat,
+    prop.goatA,
+
+    # origcatchment_s (s)
+    origin.areakm2,
+    
+    # destcatchment_s (s)
+    dest.areakm2,
+    
+    # stkhldrchar_s (s)
+    prop.trader
+  )
   
+  
+colnames(mrkts_PCA) 
+
+
+res.pca <- PCA(mrkts_PCA)
+
+fviz_eig(res.pca)
+fviz_pca_ind(res.pca,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE # Avoid text overlapping
+             )
+
+fviz_pca_var(res.pca,
+             col.var = "contrib", # Color by contribution to the PCA
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE # Avoid text overlapping
+             )
+
+```
+
+
+
+# Test 3
+
+
+```{r mfa2}
+
+mrkts_MFA <- mrkts_master_complete %>%
+  select(
+    # envirchar_s (s)
+    anmlpop_10km, 
+    
+    # mrktchar_s (s)
+    num.sales, 
+    goat.sales, 
+    prop.goat, 
+    prop.goatA,
+
+    # origcatchment_s (s)
+    origin.ndists, 
+    origin.nwards, 
+    origin.maxdistkm, 
+    origin.meddistkm, 
+    # origin.areakm2,
+    
+    # destcatchment_s (s)
+    dest.ndists,
+    dest.nwards, 
+    dest.maxdistkm, 
+    dest.meddistkm, 
+    # dest.areakm2,
+    
+    # stkhldrchar_s (s)
+    prop.trader, 
+    prop.buy,
+    prop.sell,
+    prop.trade,
+    prop.middleman,
+    prop.slaughter,
+    prop.food, 
+    # prop.otheractvty, 
+    visits.othermrkt, 
+    visits.thismrkt,
+    
+    # origchar_s (s)
+    origin.village,
+    origin.town,
+    origin.market,
+    origin.abattoir,
+    # origin.otherplace,
+    
+    # destchar_s (s)
+    dest.village,
+    dest.town,
+    dest.market,
+    dest.abattoir,
+    # dest.otherplace,
+
+  )
+  
+  
+colnames(mrkts_MFA) 
+
+
+res.mfa <- MFA(mrkts_MFA,
+               group = c(1,
+                         4,
+                         4,
+                         4,
+                         9,
+                         4,
+                         4),  
+               # type = rep("s",length(group)),
+               name.group = c("enviro_s",
+                              "mrktchar_s",
+                              "origarea_s",
+                              "destarea_s",
+                              "stkhldrchar_s", 
+                              "origchar_s", # "origchar_n",
+                              "destchar_s" #, "destchar_n"
+                              ),
+               num.group.sup = NULL,
+               graph = FALSE)
+
+
+
+###############
+## RESULTS ##
+###############
+# library(factoextra)
+
+# mfa result:
+print(res.mfa)
+
+## 1) Eigenvalues
+
+# The proportion of variances retained by the different dimensions (axes) 
+# can be extracted using the function get_eigenvalue() [factoextra package] 
+# as follow:
+
+eig.val <- get_eigenvalue(res.mfa)
+head(eig.val)
+
+# eigenvalue variance.percent cumulative.variance.percent
+# Dim.1   3.556720        12.914129                    12.91413
+# Dim.2   2.873688        10.434100                    23.34823
+# Dim.3   2.315033         8.405674                    31.75390
+# Dim.4   2.149185         7.803494                    39.55740
+# Dim.5   1.797458         6.526407                    46.08380
+# Dim.6   1.252474         4.547620                    50.63142
+
+# 12.9% Dim.1, 10.4% Dim.2
+
+
+## 2) Screeplot
+
+# The function fviz_eig() or fviz_screeplot() [factoextra package] 
+# can be used to draw the scree plot:
+
+fviz_screeplot(res.mfa)
+
+
+## 2) Graph of variables: Groups
+# The function get_mfa_var() [in factoextra] is used to extract the 
+# results for groups of variables.
+# This function returns a list containing the coordinates, 
+# the cos2 and the contribution of groups, as well as, the correlation between groups
+
+group <- get_mfa_var(res.mfa, "group")
+group
+
+# Coordinates of groups for each dimension
+head(group$coord)
+
+# Cos2: quality of representation on the factore map
+# how well each group is represented in each dimension
+# High cos2 values: Indicate that the principal component(s) effectively capture 
+# the essence of the grouped data. 
+# These are well-represented in the reduced dimensionality space.
+head(group$cos2)
+
+# Contributions to the  dimensions
+head(group$contrib)
+
+# PLOT #
+
+# Plot contribution of groups of variables to each dimension / the correlation between groups and dimensions:
+fviz_mfa_var(res.mfa, "group")
+
+# stakeholder- buyreason has strong contribution to Dim.1
+# stakeholder sell motivation and stakeholder characteristics have moderate contribution to Dim. 1
+# origin characteristics (where animals come from) have moderate contribution to Dim.1
+
+# stakeholder characteristics, market characteristics and origin catchment, 
+# destination catchement and destination characteristics have highest contribution to Dim.2
+
+# Contribution to the first dimension
+fviz_contrib(res.mfa, "group", axes = 1) # red line is equal contrib.
+# Contribution to the second dimension
+fviz_contrib(res.mfa, "group", axes = 2) # red line is equal contrib.
+
+
+# 3) Quantitative Variables:
+# The function get_mfa_var() [in factoextra] is used to extract the results for quantitative variables. 
+# This function returns a list containing the coordinates, the cos2 and the contribution of variables:
+quanti.var <- get_mfa_var(res.mfa, "quanti.var")
+quanti.var 
+
+# Coordinates
+head(quanti.var$coord)
+# Cos2: quality on the factore map
+head(quanti.var$cos2)
+# Contributions to the dimensions
+head(quanti.var$contrib)
+
+
+# Correlation between quantitative variables and dimensions. 
+# The R code below plots quantitative variables colored by groups. 
+# The argument palette is used to change group colors (see ?ggpubr::ggpar for more information about palette). 
+# Supplementary quantitative variables are in dashed arrow and violet color. 
+# We use repel = TRUE, to avoid text overlapping.
+
+
+fviz_mfa_var(res.mfa, "quanti.var", palette = "jco", 
+             col.var.sup = "violet", repel = TRUE,
+             geom = c("point", "text"), legend = "bottom")
+
+# Briefly, the graph of variables (correlation circle) shows the relationship between variables, 
+# the quality of the representation of variables, as well as, the correlation between variables and the dimensions:
+# 
+# Positive correlated variables are grouped together, whereas negative ones are positioned on opposite sides of the plot origin (opposed quadrants).
+# The distance between variable points and the origin measures the quality of the variable on the factor map. 
+# Variable points that are away from the origin are well represented on the factor map.
+# 
+# For a given dimension, the most correlated variables to the dimension are close to the dimension.
+# most correlated variables to the first dimension are:??? 
+  
+  
+  
+# The contribution of quantitative variables (in %) to the definition of the dimensions can be visualized
+# using the function fviz_contrib() [factoextra package]. Variables are colored by groups. 
+# The R code below shows the top 20 variable categories contributing to the dimensions:
+
+# Contributions to dimension 1
+fviz_contrib(res.mfa, choice = "quanti.var", axes = 1, top = 20,
+             palette = "jco")
+# Contributions to dimension 2
+fviz_contrib(res.mfa, choice = "quanti.var", axes = 2, top = 20,
+             palette = "jco")
+
+# The red dashed line on the graph above indicates the expected average value, 
+# If the contributions were uniform. 
+
+
+
+# The most contributing quantitative variables can be highlighted on the scatter plot using the argument col.var = “contrib”. 
+# This produces a gradient colors, which can be customized using the argument gradient.cols.
+
+fviz_mfa_var(res.mfa, "quanti.var", col.var = "contrib", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             col.var.sup = "violet", repel = TRUE,
+             geom = c("point", "text"))
+
+# Similarly, you can highlight quantitative variables using their cos2 values representing 
+# the quality of representation on the factor map. 
+# If a variable is well represented by two dimensions, 
+# the sum of the cos2 is closed to one. 
+# For some of the row items, more than 2 dimensions might be required to perfectly represent the data.
+
+# Color by cos2 values: quality on the factor map
+fviz_mfa_var(res.mfa, col.var = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             col.var.sup = "violet", repel = TRUE,
+             geom = c("point", "text"))
+
+fviz_cos2(res.mfa, choice = "quanti.var", axes = 1)
+
+
+## INDIVIDUALS ##
+
+ind <- get_mfa_ind(res.mfa)
+ind
+
+# To plot individuals, use the function fviz_mfa_ind() [in factoextra]. 
+# By default, individuals are colored in blue. 
+# However, like variables, it’s also possible to color individuals by their cos2 values:
+  
+fviz_mfa_ind(res.mfa, col.ind = "cos2", 
+               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+               repel = TRUE)
+
+# Individuals (markets) with similar profiles are close to each other on the factor map
+# Markets which are closely aligned (correlated) with dimensions may be explained by the important
+# variables contributing to that dimension?
+
+
+
+fviz_mfa_axes(res.mfa)
+
+
+hcpc_result <- HCPC(res.mfa, axes = 1:5)
+# Plot the dendrogram
+fviz_dend(hcpc_result, cex = 0.5)
+
+# Plot individuals in the factor map colored by their cluster
+fviz_cluster(hcpc_result, geom = "point")
+
+
+
+cluster_assignments <- hcpc_result$data.clust$clust
+
+mrkts_clusters <- mrkts_master_complete %>% mutate(cluster = cluster_assignments) %>% select(cluster, everything())
+mrkts_clusters_coords <- mrkts_clusters %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+mrkts_clusters_sf <- st_as_sf(mrkts_clusters_coords, coords = c("long","lat"),  crs = 4326)
+
+
+ggplot() +
+  # geom_sf(data = twards_shp)+
+  geom_sf(data = tregs_shp)+
+  geom_sf_text(data = tregs_shp, aes(label = Region_N), size = 3, check_overlap = TRUE) +
+  geom_sf(data = mrkts_clusters_sf, aes(col = cluster))+
+  coord_sf()
+
+
+# Dim 1 = origin nad destination catchment area, market characteristics (number sales, prop goats, prop goats A)
+# Dim 2 = stakeholder characteristics (activities at market), origin and destination characteristics (placetypes) 
+
+# Cluster 1 = cor. with Dim 2 (stakehold char, orig dest placetypes)
+# Cluster 2 = correlated with Dim 1 (catchment areas, market characteristics)
+# CLuster 3 = correlated with Dim 1 and 2 more equally
+
+```
