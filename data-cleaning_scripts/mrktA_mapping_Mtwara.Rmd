@@ -1,0 +1,188 @@
+---
+title: "marketA_mapping"
+output: html_document
+date: "2024-01-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+
+library(sf)
+library(here)
+library(tidyverse)
+library(RColorBrewer)
+library(lwgeom)
+library(ggpubr)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "Times New Roman", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+
+# Mapping Market Survey A Locations
+
+- Load in raw market survey A data (following initial string cleaning)
+    - `r `"data/tanzania_data/mrkta_gps_tanzania_CLEAN.csv"`
+- Load Tanzania shapefile with ward boundaries
+    - `r `"data/shapefiles/tza_admbnda_adm3_20181019.shp"`
+    - Source <https://data.humdata.org/dataset/cod-ab-tza?> (ADM L3)
+- Cross-reference market location data from survey A (region-ward-village) and tanzania shapefile (region-district-ward)
+
+```{r data, include = T, warning = F, echo = F, message = F}
+
+# Load Tanzania Shapefile:
+# tanzania_shp <- st_read(here("data/shapefiles/Districts and TC as 2020.shp")) # with district boundaries
+tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp")) # with region boundaries
+mtregs_shp <- tregs_shp %>% filter(Region_N %in% c("mtwara", "lindi", "ruvuma"))
+
+# tdists_shp <- st_read(here("data/shapefiles/tza_admbnda_adm2_20181019.shp")) # with district boundaries
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp")) # with ward boundaries
+mtwards_shp <- twards_shp %>% filter(Region_N %in% c("mtwara", "lindi", "ruvuma"))
+
+# Market A location data:
+mrkta_info <- read_csv(file = here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv")) %>% select(-c(`...1`))
+mrkta_info_mt <- mrkta_info %>% filter(region %in% c("mtwara", "lindi", "ruvuma"))
+mrkta_gps <- read_csv(file = here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>% select(-c(`...1`))
+mrkta_gps_mt <- mrkta_info %>% filter(region %in% c("mtwara", "lindi", "ruvuma"))
+
+rm(mrkta_info, mrkta_gps)
+
+
+# convert mrkta location data to mapping format & map manually cleaned data:
+
+mrkta_mapdata <- mrkta_gps_mt %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# check how many rows were lost when removing obs with  missing gps:
+# nrow(mrkta_gps); nrow(mrkta_mapdata)
+
+# for now ignore rows which have na in lat or long:
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+
+
+# Market C location data:
+mrktc_gps <- read_csv(file = here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>% select(-c(`...1`))
+mrktc_gps_mt <- mrktc_gps %>% filter(region %in% c("mtwara", "lindi", "ruvuma"))
+
+rm(mrktc_gps)
+
+
+# convert mrkta location data to mapping format & map manually cleaned data:
+
+mrktc_mapdata <- mrktc_gps_mt %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# check how many rows were lost when removing obs with  missing gps:
+# nrow(mrkta_gps); nrow(mrkta_mapdata)
+
+# for now ignore rows which have na in lat or long:
+mrktc_sf <- st_as_sf(mrktc_mapdata, coords = c("long","lat"),  crs = 4326)
+```
+
+
+
+# Tanzania Map
+- Tanzania shapefile with ward boundaries sourced from: https://data.humdata.org/dataset/cod-ab-tza? (ADM L3)
+
+```{r tanzaniaMap, include = F}
+
+ggplot() +
+  
+  geom_sf(data = mtwards_shp, aes(fill = Dist20_N)) +
+  scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+  # geom_sf(data = tanzania_shp, aes(fill = Region_N, col = factor(District_C))) +
+  geom_sf(data = mtregs_shp, size = 5, col = "black", fill = NA)+
+  geom_sf_text(data = mtregs_shp, aes(label = Region_N), size = 2)+
+  geom_sf(data = mrkta_sf, aes(col = district20), size = 1.5)+
+  scale_colour_manual(values = rep(market_pal,3))+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+mtwara_map
+
+
+
+
+
+
+ggplot() +
+  
+  geom_sf(data = mtwards_shp %>% filter(Region_N == "mtwara"), aes(fill = Dist20_N)) +
+  scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+  # geom_sf(data = tanzania_shp, aes(fill = Region_N, col = factor(District_C))) +
+  geom_sf(data = mtregs_shp  %>% filter(Region_N == "mtwara"), size = 5, col = "black", fill = NA)+
+  geom_sf_text(data = mtregs_shp %>% filter(Region_N == "mtwara"), aes(label = Region_N), size = 2)+
+  geom_sf(data = mrktc_sf %>% filter(region == "mtwara"), aes(col = district20), size = 2, alpha = 0.5)+
+  geom_sf(data = mrkta_sf %>% filter(region == "mtwara"),  size = 1.5, shape = 18)+
+  geom_sf_text(data = mrkta_sf %>% filter(region == "mtwara"), aes(label = market), size = 2)+
+
+  scale_colour_manual(values = rep(market_pal,3))+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+# masasi tc
+
+ggplot() +
+  
+  geom_sf(data = mtwards_shp %>% filter(Dist20_N == "masasi.tc"), aes(fill = Dist20_N)) +
+  geom_sf_text(data = mtwards_shp %>% filter(Dist20_N == "masasi.tc"), aes(label = Ward_N), size = 2)+
+  scale_fill_manual(values=alpha(tanzania_pal,0.7), guide = "none")+
+  # geom_sf(data = tanzania_shp, aes(fill = Region_N, col = factor(District_C))) +
+  geom_sf(data = mrktc_sf %>% filter(district20 == "masasi.tc"), aes(col = district20), size = 2, alpha = 0.5)+
+  geom_sf(data = mrkta_sf %>% filter(district20 == "masasi.tc"),  size = 1.5, shape = 18)+
+  geom_sf_text(data = mrkta_sf %>% filter(district20 == "masasi.tc"), aes(label = market), size = 2)+
+    geom_sf_text(data = mrktc_sf %>% filter(district20 == "masasi.tc"), aes(label = market), col = "blue", size = 2)+
+  scale_colour_manual(values = rep(market_pal,3))+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+# JIDA
+
+ggplot() +
+  
+  geom_sf(data = mtwards_shp %>% filter(Ward_N == "jida")) +
+  geom_sf(data = mrktc_sf %>% filter(ward == "jida"), aes(col = district20), size = 2, alpha = 0.5)+
+  geom_sf(data = mrkta_sf %>% filter(ward == "jida"),  size = 1.5, shape = 18)+
+  geom_sf_text(data = mrkta_sf %>% filter(ward == "jida"), aes(label = market), size = 2)+
+    geom_sf_text(data = mrktc_sf %>% filter(ward == "jida"), aes(label = market), col = "blue", size = 2)+
+  scale_colour_manual(values = rep(market_pal,3))+
+  coord_sf()+
+  labs(title = "Market survey A: survey locations", 
+       fill = "Tanzania region",
+       col = "Market region")+
+  theme(legend.position = "right", legend.box = "horizontal")
+```
+
+
+# For all markets check market A locations and market C locations by region / district. 
+ID markets in A with no matching C data, and ID markets in 
+
+
+
+## END OF REWRITE
