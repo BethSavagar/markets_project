@@ -275,6 +275,7 @@ for(i in 1:length(Regions_Amanual)){
 maps_list[[1]];maps_list[[2]];maps_list[[3]];maps_list[[4]];maps_list[[5]];maps_list[[6]]
 maps_list[[7]];maps_list[[8]];maps_list[[9]];maps_list[[10]];maps_list[[11]];
 
+### Uncertainties: None or uncertainties
 # "dodoma" = no uncertainties  
 # "simiyu" = none  
 # "mwanza" = none
@@ -288,7 +289,6 @@ maps_list[[7]];maps_list[[8]];maps_list[[9]];maps_list[[10]];maps_list[[11]];
 # "njombe" = no uncertainties
 
 ```
-
 
 # Assumption: The survey A gps coords accurately reflect market locations
 - gps coords may represent where the survey was completed (travelling away from the market location?
@@ -327,7 +327,143 @@ mrkta_info %>% filter(district.region.name == "katavi", ward.name %in% ward_i) %
 
 # 1151696 - usevya.05-23
 # 1167758 - majimoto/usevya.05-22
+# usevya.b NOT reflected in mrkt-C)
+
+mrkta_geomatch_gps <- mrkta_geomatch_gps %>% 
+  mutate(village = if_else(ward.name.geomatch == "usevya" & fid == "1167758", "usevya.b", village),
+        market.name = if_else(ward.name.geomatch == "usevya" & fid == "1167758", "usevya.b", market.name))
 ```
+
+# Morogoro: 
+- uncertainties in "minepa" and "milola"
+
+```{r }
+# "morogoro" = uncertainties in "minepa" and "milola"
+maps_list[[5]]+
+  coord_sf(xlim = c(36.5,37), ylim = c(-8.5,-8))
+# seemingly distinct 
+
+ward_i <- c("minepa", "milola")
+
+ggplot() +
+  # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = twards_shp %>% filter(region.name == "morogoro", ward.name %in% ward_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = mrkta_geomatch_sf %>% filter(district.region.name == "morogoro", ward.name %in% ward_i), size = 1)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name), col = "red", size = 1.5,
+  #              nudge_x = 0, nudge_y = +0.01)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name.geomatch), col = "blue", size = 1.5,
+  #              nudge_x = 0, nudge_y = -0.01)+
+  geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "morogoro", ward.name %in% ward_i),aes(label = fid), col = "blue", size = 1.5,
+               nudge_x = 0, nudge_y = -0.01)+
+  coord_sf()+
+  labs(title = "")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+mrkta_info %>% filter(district.region.name == "morogoro", ward.name %in% ward_i) %>% View()
+
+# 1151673 - milola
+# 1157529 - minepa
+# same respondent, differnet dates, different market names - leave as is
+#  (both reflected in mrkt-C)
+
+```
+
+# Mtwara:
+-  uncertainties in ndomoni and lukuledi // 
+- mwengemtapika,mtandi&silabu //  
+- mtonya nangwala luchingu // 
+- tulindane
+
+```{r mtwara}
+
+maps_list[[6]]+
+  coord_sf(xlim = c(39.2, 39.4), ylim = c(-11, -10.9))
+
+# "mtwara" = uncertainties in ndomoni and lukuledi // mwengemtapika,mtandi&silabu //  mtonya nangwala luchingu tulindane
+
+ward_i <- c("mwengemtapika", "silabu", "mtandi")
+
+ggplot() +
+  # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = twards_shp %>% filter(region.name == "mtwara", ward.name %in% ward_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i), size = 1)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name), col = "red", size = 1.5,
+  #              nudge_x = 0, nudge_y = +0.01)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name.geomatch), col = "blue", size = 1.5,
+  #              nudge_x = 0, nudge_y = -0.01)+
+  geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i),aes(label = fid), col = "blue", size = 1.5,
+               nudge_x = 0, nudge_y = -0.01)+
+  coord_sf()+
+  labs(title = "")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+
+# 1153837, 1155787, 1157393, 1157394
+# different wards and dates, rspondents so seemingly correct - use updated ward names. 
+# represented except mwengemtapika
+
+
+
+ward_i <- c("ndomoni", "lukuledi")
+
+ggplot() +
+  # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = twards_shp %>% filter(region.name == "mtwara", ward.name %in% ward_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i), size = 1)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name), col = "red", size = 1.5,
+  #              nudge_x = 0, nudge_y = +0.01)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name.geomatch), col = "blue", size = 1.5,
+  #              nudge_x = 0, nudge_y = -0.01)+
+  geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i),aes(label = fid), col = "blue", size = 1.5,
+               nudge_x = 0, nudge_y = -0.01)+
+  coord_sf()+
+  labs(title = "")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+# 1159822, 1160890
+# different wards and dates, respondents so seemingly correct - use updated ward names. 
+# all represented in survey C
+
+
+
+
+ward_i <- c("mtonya", "nangwala", "luchingu", "tulindane")
+
+ggplot() +
+  # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = twards_shp %>% filter(region.name == "mtwara", ward.name %in% ward_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i), size = 1)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name), col = "red", size = 1.5,
+  #              nudge_x = 0, nudge_y = +0.01)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name.geomatch), col = "blue", size = 1.5,
+  #              nudge_x = 0, nudge_y = -0.01)+
+  geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i),aes(label = fid), col = "blue", size = 1.5,
+               nudge_x = 0, nudge_y = -0.01)+
+  coord_sf()+
+  labs(title = "")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+# same day and respondent, v small numbers, different answers
+# different wards and dates, respondents so seemingly correct - use updated ward names. 
+# all represented in survey C - tulindane, mtonya, nangwala and luchingu.
+
+# keep only luchingu and mtonya?
+
+# mrkta_geomatch_gps <- ???
+```
+
+
+```
+
+
 
 ```{r svrybyward}
 
