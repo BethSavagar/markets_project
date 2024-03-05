@@ -47,8 +47,8 @@ tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp")) # with
 twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp")) # with ward boundaries
 
 # Market A location data:
-# mrkta_info <- read_csv(file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
-# mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_CLEAN.csv"))
+mrkta_info <- read_csv(file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
+mrkta_gps <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_tanzania_CLEAN.csv"))
 
 ```
 
@@ -64,7 +64,8 @@ tregs_shp <- tregs_shp %>%
 twards_shp <- twards_shp %>%
   rename(
     region.name = Region20_N,    
-    district.name = Dist20_N,
+    district.name = Dist_N,
+    district20.name = Dist20_N,
     ward.name = Ward_N
     )
 
@@ -195,6 +196,7 @@ mrkta_geomatch_gps <- mrkta_gps %>%
         twardID,
         "region.name.geomatch" = "region.name",
         "district.name.geomatch" = "district.name",
+        "district20.name.geomatch" = "district20.name",
         "ward.name.geomatch" = "ward.name" ,
       ),
     by = c("twardID")) %>%
@@ -211,15 +213,6 @@ mrkta_geomatch_gps <- mrkta_gps %>%
 
 # How many market surveys (rows of data) are there?
 nrow(mrkta_geomatch_gps)
-
-
-
-
-mrkta_geomatch_gps %>%
-  filter(district.region.name != region.name.geomatch |
-           ward.name != ward.name.geomatch) %>% 
-  select(contains("name")) %>% select(-"district.name.geomatch") %>% 
-  View()
 
 ```
 
@@ -301,12 +294,13 @@ maps_list[[7]];maps_list[[8]];maps_list[[9]];maps_list[[10]];maps_list[[11]];
 ```{r }
 # "katavi" = uncertainties in "usevya" and "kibaoni" wards
 maps_list[[4]]+
-  coord_sf(xlim = c(31,31.5), ylim = c(-7.5,-7))
+  coord_sf(xlim = c(31,31.5), ylim = c(-7.3,-7.05))
 
 # "morogoro" = uncertainties in "minepa" and "milola"
 # "mtwara" = uncertainties in ndomoni and lukuledi // mwengemtapika,mtandi&silabu //  mtonya nangwala luchingu // tulindane
 
 ward_i <- c("usevya", "kibaoni", "majimoto")
+# usevya and majimoto (2) both within usevya ward.
 
 ggplot() +
   # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
@@ -321,7 +315,6 @@ ggplot() +
   coord_sf()+
   labs(title = "")+
   theme(legend.position = "right", legend.box = "horizontal")
-
 
 mrkta_info %>% filter(district.region.name == "katavi", ward.name %in% ward_i) %>% View()
 
@@ -340,7 +333,7 @@ mrkta_geomatch_gps <- mrkta_geomatch_gps %>%
 ```{r }
 # "morogoro" = uncertainties in "minepa" and "milola"
 maps_list[[5]]+
-  coord_sf(xlim = c(36.5,37), ylim = c(-8.5,-8))
+  coord_sf(xlim = c(36.6,36.8), ylim = c(-8.35,-8.2))
 # seemingly distinct 
 
 ward_i <- c("minepa", "milola")
@@ -364,7 +357,7 @@ mrkta_info %>% filter(district.region.name == "morogoro", ward.name %in% ward_i)
 
 # 1151673 - milola
 # 1157529 - minepa
-# same respondent, differnet dates, different market names - leave as is
+# same respondent, differnet dates, different market names - leave as is. market name as differentiator
 #  (both reflected in mrkt-C)
 
 ```
@@ -378,7 +371,8 @@ mrkta_info %>% filter(district.region.name == "morogoro", ward.name %in% ward_i)
 ```{r mtwara}
 
 maps_list[[6]]+
-  coord_sf(xlim = c(39.2, 39.4), ylim = c(-11, -10.9))
+  coord_sf(xlim = c(38.79, 38.85), ylim = c(-10.75, -10.70))
+# ("mwengemtapika", "silabu", "mtandi") each within a different ward
 
 # "mtwara" = uncertainties in ndomoni and lukuledi // mwengemtapika,mtandi&silabu //  mtonya nangwala luchingu tulindane
 
@@ -403,9 +397,8 @@ mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %
 mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
 
 # 1153837, 1155787, 1157393, 1157394
-# different wards and dates, rspondents so seemingly correct - use updated ward names. 
-# represented except mwengemtapika
-
+# different wards and dates, respondents so seemingly correct - use updated ward names (distinct for each)
+# represented except mwengemtapika in survey C
 
 
 ward_i <- c("ndomoni", "lukuledi")
@@ -427,11 +420,12 @@ ggplot() +
 mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
 mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
 # 1159822, 1160890
-# different wards and dates, respondents so seemingly correct - use updated ward names. 
-# all represented in survey C
+# different wards and dates, respondents so seemingly correct - use updated ward names (ndomoni in lindi district). 
+# both represented in survey C
 
 
-
+maps_list[[6]]+
+  coord_sf(xlim = c(39.2, 39.4), ylim = c(-11, -10.9))
 
 ward_i <- c("mtonya", "nangwala", "luchingu", "tulindane")
 
@@ -455,14 +449,34 @@ mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% w
 # different wards and dates, respondents so seemingly correct - use updated ward names. 
 # all represented in survey C - tulindane, mtonya, nangwala and luchingu.
 
-# keep only luchingu and mtonya?
+# keep all, use market name as identifier
 
-# mrkta_geomatch_gps <- ???
+# mrkta_geomatch_gps <- mrkta_geomatch_gps
+
+
+ward_i <- c("mnavira", "makong.onda")
+
+ggplot() +
+  # geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = twards_shp %>% filter(region.name == "mtwara", ward.name %in% ward_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
+  geom_sf(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i), size = 1)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name), col = "red", size = 1.5,
+  #              nudge_x = 0, nudge_y = +0.01)+
+  # geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "katavi", ward.name %in% ward_i),aes(label = ward.name.geomatch), col = "blue", size = 1.5,
+  #              nudge_x = 0, nudge_y = -0.01)+
+  geom_sf_text(data = mrkta_geomatch_sf %>% filter(district.region.name == "mtwara", ward.name %in% ward_i),aes(label = fid), col = "blue", size = 1.5,
+               nudge_x = 0, nudge_y = -0.01)+
+  coord_sf()+
+  labs(title = "")+
+  theme(legend.position = "right", legend.box = "horizontal")
+
+
+mrkta_info %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% ward_i) %>% View()
+
+# different dates and repsondents so use updated location data with market as identifier. 
+
 ```
-
-
-```
-
 
 
 ```{r svrybyward}
@@ -475,7 +489,7 @@ mrkta_geomatch_gps %>% filter(district.region.name == "mtwara", ward.name %in% w
 
 # Number of market surveys per ward under "Manual" data:
 mrkta_geomatch_gps %>% 
-  group_by(region.district.ward.manual) %>% 
+  group_by(ward.name) %>% 
   filter(n()>1) %>% 
   print() %>% 
   nrow()
@@ -485,7 +499,7 @@ mrkta_geomatch_gps %>%
 
 # Number of market surveys per ward under "Geomatched" data:
 mrkta_geomatch_gps %>% 
-  group_by(region.district.ward.geomatch) %>% 
+  group_by(ward.name.geomatch) %>% 
   filter(n()>1) %>% 
   print() %>% 
   nrow()
@@ -494,189 +508,8 @@ mrkta_geomatch_gps %>%
 # - There are 5 wards which are associated with 2 market surveys (i.e. 10 observations) in the geomatched location data
 ```
 
-
-```{r duplicateWards_manual}
-###################
-# Duplicate Wards #
-###################
-
-# Manual - Where a ward is associated with 2 markets, are the markets truly different? (date, respondent etc)
-fid_manual <- mrkta_geomatch_gps %>% 
-  group_by(region.district.ward.manual) %>% 
-  filter(n()>1) %>% 
-  pull(fid)
-
-mrkta_info %>% 
-  filter(fid %in% fid_manual) %>% 
-  left_join(mrkta_geomatch_gps %>% select(fid, region.district.ward.manual, region.district.ward.geomatch), by = "fid") %>% 
-  arrange(region.district.ward.manual)
-
-# - Using manual location data, 3 wards were associated with two markets (observations/surveys) 
-# - Reviewing the market survey A responses associated with these wards, find that market surveys (& hence markets) associated with the same ward were completed on different days, indicating different markets * EXCEPT * majimoto-ward.
-# - The only exception was the two market (A) surveys associated with "Majimoto"
-    # - These surveys were completed on the same day, with the same key informant 
-    # - However... the survey responses were different and the surveys were mapped to different wards in the geo-matched location data.
-
-#############################################
-# Duplicate Ward, survey locations (Manual) #
-#############################################
-
-mrkta_geomatch_mapdata <- mrkta_geomatch_gps %>% 
-  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
-  filter(!is.na(lat), !is.na(long))
-
-# check how many rows were lost when removing obs with  missing gps:
-# nrow(mrkta_gps); nrow(mrkta_mapdata)
-
-# for now ignore rows which have na in lat or long:
-mrkta_geomatch_sf <- st_as_sf(mrkta_geomatch_mapdata, coords = c("long","lat"),  crs = 4326)
-
-region_i <- mrkta_geomatch_gps %>% filter(fid %in% fid_manual) %>% distinct(region.name.geomatch) %>% pull()
-
-ggplot() +
-  geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), aes(fill = region.name), alpha = 0.5, linewidth = 0.1) +
-  geom_sf(data = twards_shp %>% filter(region.name %in% region_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
-  geom_sf_label(data = tregs_shp %>% filter(region.name %in% region_i), 
-               aes(label = region.name), size = 3, fontface = "bold", nudge_y = 0.5)+
-  geom_sf(data = mrkta_geomatch_sf %>% filter(fid %in% fid_manual), aes(col = region.district.ward.manual), size = 1.5)+
-  scale_fill_manual(values = tanzania_pal)+
-  scale_colour_manual(values = market_pal)+
-  coord_sf()+
-  labs(title = "Market Survey A: locations of markets with the same ward-name data (manually matched)", 
-       fill = "Tanzania region",
-       col = "Region-Ward location")+
-  theme(legend.position = "right", legend.box = "horizontal")
-
-# From the map it is clear that katavi-majimoto and mtwara-mnavira correspond to different markets.
-# For these surveys, the geomatched data seems correct.
-# For mtwara-mtandi, map the market locations to see if this is the same market point surveyed on different dates?
-
-ggplot() +
-  geom_sf(data = twards_shp %>% filter(ward.name %in% (mrkta_geomatch_gps %>% filter(region.district.ward.manual == "mtwara-mtandi") %>% pull(ward.name.geomatch))), 
-          fill = "grey", alpha = 0.5, linewidth = 0.1) +
-  geom_sf(data = mrkta_geomatch_sf %>% filter(region.district.ward.manual == "mtwara-mtandi"),  size = 1.5)+
-  coord_sf()+
-  labs(title = "Market Survey A: locations of markets with the same ward-name data (manually matched)", 
-       fill = "Tanzania region",
-       col = "Region-Ward location")+
-  theme(legend.position = "right", legend.box = "horizontal")
-
-
 ## CONCLUSION ##
 # - For manually cleaned market survey A location data, markets listed as within the same ward are actually distinct markets in different wards. The region-ward name can be updated to the geomatched data.
-
-```
-
-
-
-```{r duplicateWards_geomatch}
-###################
-# Duplicate Wards #
-###################
-
-# Manual - Where a ward is associated with 2 markets, are the markets truly different? (date, respondent etc)
-fid_geomatch <- mrkta_geomatch_gps %>% 
-  group_by(region.district.ward.geomatch) %>% 
-  filter(n()>1) %>% 
-  pull(fid)
-
-mrkta_info %>% 
-  filter(fid %in% fid_geomatch) %>% 
-  left_join(mrkta_geomatch_gps %>% select(fid, region.district.ward.manual, region.district.ward.geomatch), by = "fid") %>% 
-  arrange(region.district.ward.geomatch)
-
-# - Using geomatched location data, 5 wards were associated with two markets (observations/surveys) 
-# - Reviewing the market survey A responses associated with these wards, finds that market surveys (& hence markets) associated with the same ward were completed on different days indicating different markets * EXCEPT * markets in the mtwara region 
-# - The exception was market (A) surveys associated with "Mtwara" region 
-    # - Geomatch: mtwara-masasi-mnavira surveys were completed on different dates with different respondents (implying different markets)
-    # - Geomatch: mtwara-newala-luchindu and mtwara-newala-mtonya were completed on the same day, with the same key informant 
-    # - However... the survey responses were different and the surveys were mapped to different villages & wards in the manual location data.
-
-###############################################
-# Duplicate Ward, survey locations (Geomatch) #
-###############################################
-
-region_list <- mrkta_geomatch_gps %>% filter(fid %in% fid_geomatch) %>% distinct(region.name.geomatch) %>% pull()
-
-map_plots <- list()
-for(i in 1:length(region_list)){
-  region_i <- region_list[i]
-  
-  map_plots[[i]] <- ggplot() +
-    geom_sf(data = tregs_shp %>% filter(region.name %in% region_i), fill = "grey", alpha = 0.5, linewidth = 0.1) +
-    geom_sf(data = twards_shp %>% filter(region.name %in% region_i), fill = NA, alpha = 0.5, linewidth = 0.1) +
-    # geom_sf_label(data = tregs_shp %>% filter(region.name %in% region_i), 
-    #            aes(label = region.name), size = 3, fontface = "bold", nudge_y = 0.5)+
-    geom_sf(data = mrkta_geomatch_sf %>% filter(fid %in% fid_geomatch, region.name.geomatch %in% region_i), 
-            aes(col = region.district.ward.geomatch), size = 1.5)+
-    # scale_fill_manual(values = tanzania_pal, guide = "none")+
-    scale_colour_manual(values = market_pal)+
-    facet_wrap(~region.name)+
-    coord_sf()+
-    labs(title = "Market Survey A: locations of markets with the same ward-name data (Geomatch)", 
-         col = "Region-Ward location")+
-    theme(legend.position = "right", legend.box = "horizontal")
-}
-
-map_plots[[1]]; map_plots[[2]]; map_plots[[3]];
-
-# From the map whilst katavi and morogoro markets do occur in the same place, we know from the survey data that these markets occur on different days, and therefore should be distinguished for market-level analysis
-# For these surveys, the village name from manually cleaned data, or an arbitrary identifier ("A", "B") could be used to distinguish the markets.
-# For mtwara markets: map the market locations to see if this is the same market point surveyed on different dates?
-
-mtwara_duplicates_geomatch <- mrkta_geomatch_gps %>% 
-  filter(fid %in% fid_geomatch, region.name.geomatch == "mtwara") %>% 
-  pull( region.district.ward.geomatch) %>% 
-  unique()
-
-ggplot() +
-  geom_sf(data = twards_shp %>% filter(ward.name %in% (mrkta_geomatch_gps %>% filter(region.district.ward.geomatch %in% mtwara_duplicates_geomatch) %>% pull(ward.name.geomatch))), 
-          fill = "grey", alpha = 0.5, linewidth = 0.1) +
-  geom_sf(data = mrkta_geomatch_sf %>% filter(region.district.ward.geomatch %in% mtwara_duplicates_geomatch ), aes(col =  region.district.ward.geomatch), size = 1.5)+
-  coord_sf(xlim=c(NA,39.4), ylim = c(NA, -10.8))+
-  labs(title = "Market Survey A: locations of markets with the same ward-name data (manually matched)", 
-       fill = "Tanzania region",
-       col = "Region-Ward location")+
-  theme(legend.position = "right", legend.box = "horizontal")
-
-# For mnavira the map confirms the survey data that these are two distinct markets active on different days
-# For newala-luchindu and newala-mtonya the markets appear very close together so it is hard to distinguish whether they are truly distinct or not given that they occured on the same day, with the same respondent but have different survey answers
-# NB In mtwara district it seems that all markets are informal which may explain this data... to be discussed with BAJ?
-
-###########################
-# Distance between points #
-###########################
-mrkta_info %>% 
-  filter(fid %in% fid_geomatch) %>% 
-  left_join(mrkta_geomatch_gps %>% select(fid, region.district.ward.manual, region.district.ward.geomatch), by = "fid") %>% 
-  arrange(region.district.ward.geomatch)
-
-
-luchindu1 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-newala-luchindu") %>% slice(1)
-luchindu2 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-newala-luchindu") %>% slice(2)
-
-print(paste0("The distance between the markets in mtwara-newala-luchindu is: ", round(as.vector(st_distance(luchindu1,luchindu2)), digits = 2), "m  or: ", round(as.vector(st_distance(luchindu1,luchindu2))/1000, digits = 2), "km"))
-            
-
-mtonya1 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-newala-mtonya") %>% slice(1)
-mtonya2 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-newala-mtonya") %>% slice(2)
-
-print(paste0("The distance between the markets in mtwara-newala-mtonya is: ", round(as.vector(st_distance(mtonya1,mtonya2)), digits = 2), "m  or: ", round(as.vector(st_distance(mtonya1,mtonya2))/1000, digits = 2), "km"))
-
-## CONCLUSION ##
-# - For geomatched  market survey A location data, some markets that are listed as within the same ward are actually distinct markets, held on different days, within a given location. For market level analysis these should be considered distinct (using village name from manual data, or arbitrary identifiers). However, for "mtwara-newala-luchindu" and "mtwara-newala-mtonya" markets in mtwara region surveys were conducted on the same day, with the same respondent, and within a 1.5km radius of one another, it is therefore hard to distinguish whether these are indeed separate markets or whether they are accidental duplicate surveys. 
-# - NB - it is very important to note that mtwara is a region where formal markets were rarely recorded and markets were more informal, e.g. animals sold on the side of the road.
-
-
-# Other Mtwara market out of interest:
-
-# mna1 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-masasi-mnavira") %>% slice(1)
-# mna2 <- mrkta_geomatch_sf %>% filter(region.district.ward.geomatch == "mtwara-masasi-mnavira") %>% slice(2)
-# 
-# print(paste0("The distance between the markets in mtwara-masasi-mnavira is: ", round(as.vector(st_distance(mna1,mna2)), digits = 2), "m  or: ", round(as.vector(st_distance(mna1,mna2))/1000, digits = 2), "km"))
-
-```
 
 ```{r finaliseLocations}
 
@@ -685,35 +518,33 @@ print(paste0("The distance between the markets in mtwara-newala-mtonya is: ", ro
 # For region & ward level location data, the market.name from manual data is unique to each market, so appending the market name (manual) data to the region-ward (geomatched data) provides a unique identifier for each market in the dataset.
 
 mrkta_final_gps <- mrkta_geomatch_gps %>% 
-  mutate(region.geomatch.final = region.name.geomatch,
-         district.geomatch.final = district.name.geomatch,
-         ward.geomatch.final = ward.name.geomatch,
-         village.manual.final = village,
-         market.manual.final = market.name.corrected,
-         reg.ward.mrkt.final = paste(region.geomatch.final,
-                                      ward.geomatch.final,
-                                      market.manual.final,
-                                      sep = "-")) %>%
+  rename(region = region.name.geomatch,
+         district = district.name.geomatch,
+         district20 = district20.name.geomatch,
+         ward = ward.name.geomatch,
+         village = village,
+         market = market.name) %>%
   select(fid,
          date,
          country,
-         region.geomatch.final,
-         district.geomatch.final,
-         ward.geomatch.final,
-         village.manual.final,
-         market.manual.final,
-         reg.ward.mrkt.final,
+         region,
+         district,
+         district20,
+         ward,
+         village,
+         market,
          gps.coordinates.of.the.market,
          unique.row.identifier.uuid.)
 
 
-mrkta_final_gps %>% distinct(region.geomatch.final) %>% nrow()
-mrkta_final_gps %>% distinct(district.geomatch.final) %>% nrow()
-mrkta_final_gps %>% distinct(ward.geomatch.final) %>% nrow() # ward not unique unless combined with region/district
-mrkta_final_gps %>% distinct(village.manual.final) %>% nrow()
-mrkta_final_gps %>% distinct(market.manual.final) %>% nrow()
-mrkta_final_gps %>% distinct(reg.ward.mrkt.final) %>% nrow()
-
+mrkta_final_gps %>% distinct(region) %>% nrow()
+mrkta_final_gps %>% distinct(district) %>% nrow()
+mrkta_final_gps %>% distinct(district20) %>% nrow()
+mrkta_final_gps %>% distinct(ward) %>% nrow() # ward not unique unless combined with region/district
+mrkta_final_gps %>% distinct(village) %>% nrow()
+mrkta_final_gps %>% distinct(market) %>% nrow()
+mrkta_final_gps %>% distinct(ward,market) %>% nrow()
+# SAVE GPS DATA:
 # write.csv(mrkta_final_gps, file = here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"), row.names = F)
 ```
 
@@ -726,7 +557,7 @@ mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
          # district.manual =NA,
          ward.manual = ward.name,
          village.manual = village,
-         market.manual = market.name.corrected,
+         market.manual = market.name,
          reg.ward.mrkt.manual = paste(region.manual,
                                       ward.manual,
                                       market.manual,
@@ -736,7 +567,7 @@ mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
          district.geomatch.final = district.name.geomatch,
          ward.geomatch.final = ward.name.geomatch,
          village.manual.final = village,
-         market.manual.final = market.name.corrected,
+         market.manual.final = market.name,
          reg.ward.mrkt.final = paste(region.geomatch.final,
                                       ward.geomatch.final,
                                       market.manual.final,
@@ -749,7 +580,6 @@ mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
          ward.manual,
          village.manual,
          market.manual,
-         reg.ward.mrkt.manual,
         
          # final-geomatched location data:
          region.geomatch.final,
@@ -757,49 +587,51 @@ mrkta_gps_manualgeomatch_lkp <- mrkta_geomatch_gps %>%
          ward.geomatch.final,
          village.manual.final,
          market.manual.final,
-         reg.ward.mrkt.final,
+
          gps.coordinates.of.the.market,
          unique.row.identifier.uuid.)
 
-# Save geomatch dataframe: 
-# write.csv(mrkta_geomatch_gps %>% mutate(reg.ward.mrkt.final = paste(region.name.geomatch, ward.name.geomatch, market.name.corrected, sep = "-")), file = here("data/data-cleaning_data/mrkta_gps_tanzania_manual+geomatch.csv"), row.names = F)
 
 # Save location data with manual and geomatched names and gps location:
 # write.csv(mrkta_gps_manualgeomatch_lkp, file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"), row.names = F)
-# write.csv(mrkta_gps_manualgeomatch_lkp, file = here("data/tanzania_data/mrkta_gps_manualgeomatchlkp.csv"), row.names = F)
 ```
 
 ```{r savemrktaInfo, echo = F}
 
 
-# read in CLEAN tanzania market data 
-
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
-
-# mrkta_generalinfo, need to link to cleaned update market location data
-mrkta_info_CLEAN <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_CLEAN.csv"))
-
 # link mrkta Info to clean gps data and retain only variables of interest
-mrkta_info <- left_join(
-  mrkta_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), village)),
-  mrkta_gps %>% select(-c(country, reg.ward.mrkt.final)),
-  by = c("fid","date", "gps.coordinates.of.the.market", "unique.row.identifier.uuid.")) %>%
-  select(
-    fid, 
-    date, 
-    country,
-    ends_with(".final"),
-    everything()
-  ) %>% 
+mrkta_info_final <- mrkta_info %>% 
+  select(-c(contains(".code"), contains(".name"), village)) %>%
+  left_join(
+    mrkta_final_gps %>% select(-c(country)),
+    by = c("fid","date", "gps.coordinates.of.the.market", "unique.row.identifier.uuid.")) %>%
   rename(
     "1.origins" = "1.location.brought.from",
     "2.destinations" = "2.location.taken.to.",
     "3a.sheep.sales" = "3a.no.sheep.sold.per.day",
     "3b.goat.sales" = "3b.no.goats.sold.per.day"
-  )
+  ) %>%
+  select(fid,
+       date,
+       country,
+       region, 
+       district,
+       district20,
+       ward,
+       village,
+       market,
+       market.type,
+       name.of.respondent,
+       `1.origins`,
+       `2.destinations`,
+       `3a.sheep.sales`,
+       `3b.goat.sales`,
+       `4.seasonal.variation.in.trade`,
+       `4.if.yes.describe`,
+       gps.coordinates.of.the.market,
+       unique.row.identifier.uuid.)
 
-# write.csv(mrkta_info, file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
-# write.csv(mrkta_info, file = here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
+# write.csv(mrkta_info_clean2, file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
 
 ```
 

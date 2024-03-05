@@ -35,6 +35,12 @@ mrkta_lkpward <- read_csv(here("data/ecopprmarketscsvs/mrkta_lkpward.csv"))
 
 ```
 
+# Market A Data Cleaning:
+- read in raw market A survey data
+- clean location data string names
+- save as "_CLEAN"
+
+
 ## Market Survey A Data: First Look
 
 - Market survey A is the key informant interview. 
