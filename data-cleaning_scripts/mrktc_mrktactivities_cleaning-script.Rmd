@@ -33,7 +33,8 @@ Use cleaned market survey C gps data to produce "Market Activities" datasets
 
 filesave <- F
 
-mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+# mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
 
 # mrkta_generalinfo, need to link to cleaned update market location data
 mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
@@ -583,6 +584,7 @@ mrktc_activities_summary <- mrktc_activities_v7 %>%
 ```{r saveActvty}
 if(filesave){
   write_csv(mrktc_activities_summary, file = here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+  write_csv(mrktc_activities_summary, file = here("data/tanzania_data/mrktc_mrktactivities_tanzania_final.csv"))
 }
 
 ```

@@ -1279,10 +1279,13 @@ mrktc_nogps_linkA <- mrktc_nogps %>%
   left_join(
     mrkta_gps_manualgeomatchlkp %>% select(-c(fid, country, unique.row.identifier.uuid.)),
     by = c("date", "ward.manual","village.manual","market.manual")
-  )
+  ) 
  
-  
-
+# mbuyuni market remains unmatched (fid: 1157283) since there is no corresponding market survey C
+# link to another mbuyuni market with gps info, fid:  1157277
+mbuyunigps <- mrktc_gps_check %>%
+  filter(fid == 1157277) %>% 
+  select(ends_with(".check"), gps.coordinates.of.the.market)
 
 mrktc_nogps_check <- mrktc_nogps_linkA %>%
     left_join(mrkta_gps %>% select(date.check = date, region, district, district20, ward, village, market),
@@ -1304,20 +1307,17 @@ mrktc_nogps_check <- mrktc_nogps_linkA %>%
     market.check = market.manual.final,
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.
-    
+  ) %>% 
+  mutate(
+    date.check = if_else(fid == 1157283, as.Date(mbuyunigps$date.check), date.check),
+    region.check = if_else(fid == 1157283, mbuyunigps$region.check, region.check),
+    district.check = if_else(fid == 1157283, mbuyunigps$district.check, district.check),
+    district20.check = if_else(fid == 1157283, mbuyunigps$district20.check, district20.check),
+    ward.check = if_else(fid == 1157283, mbuyunigps$ward.check, ward.check),
+    village.check = if_else(fid == 1157283, mbuyunigps$village.check, village.check),
+    market.check = if_else(fid == 1157283, mbuyunigps$market.check, market.check),
+    gps.coordinates.of.the.market = if_else(fid == 1157283, mbuyunigps$gps.coordinates.of.the.market, gps.coordinates.of.the.market)
   )
-# 
-# # Unmatched mtwara-mbuyuni
-# # MTAWARA-MBUYUN matches to CHIUNGUTWA
-# unmatchedfid <- mrktc_nogps_linkA %>%
-#   filter(is.na(gps.coordinates.of.the.market)) %>%
-#   select(fid) %>%
-#   bind_cols(
-#     mrkta_gps %>% filter(ward.geomatch.final == "chiungutwa") %>%
-#       select(
-#         contains("final"),
-#         gps.coordinates.of.the.market)
-#   )
 
 mrktc_allgps_check <- mrktc_gps_check %>%
   mutate(date.check = as.Date(date.check)) %>% 
@@ -1330,6 +1330,7 @@ mrktc_allgps_check <- mrktc_gps_check %>%
     village.final = village.check,
     market.final = market.check
   )
+
 ```
 
 ## NEXT STEPS:

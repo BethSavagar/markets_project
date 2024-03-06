@@ -80,68 +80,68 @@ ggplot() +
 
 ```
 ```{r mrkta_gps}
-
-mrkta_mapdata <- mrkta_gps %>% 
-  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
-  filter(!is.na(lat), !is.na(long))
-
-mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
-
-mrkta_update <- mrkta_sf %>% 
-  st_join(
-    twards_final
-  ) %>% 
-  st_drop_geometry()
-
-mrkta_update_gps <- mrkta_update %>%
-  select(fid,
-         date,
-         country,
-         region = region.geomatch.final,
-         district = district.geomatch.final,
-         district20 = Dist20_N,
-         ward = ward.geomatch.final,
-         village = village.manual.final,
-         market = market.manual.final,
-         gps.coordinates.of.the.market,
-         unique.row.identifier.uuid.)
-
-# Region and ward combinations are identical, it is only the district that has changed
-mrkta_update %>% 
-   filter(region.geomatch.final != tolower(Region20_N))
-
-mrkta_update %>% 
-  filter(district.geomatch.final != tolower(Dist20_N)) %>%
-  select(starts_with("dist"), starts_with("Dist")) %>%
-  distinct(district.geomatch.final,Dist20_N)
-
-mrkta_update %>% 
-   filter(ward.geomatch.final != tolower(Ward_N))
-
-
-mrkta_info_update <- mrkta_info %>%
-  left_join(mrkta_update_gps %>% select(fid, region, district, district20, ward,village,market),
-            by = "fid") %>%
-  select(fid,
-         date,
-         country,
-         region, 
-         district,
-         district20,
-         ward,
-         village,
-         market,
-         market.type,
-         name.of.respondent,
-         `1.origins`,
-         `2.destinations`,
-         `3a.sheep.sales`,
-         `3b.goat.sales`,
-         `4.seasonal.variation.in.trade`,
-         `4.if.yes.describe`,
-         gps.coordinates.of.the.market,
-         unique.row.identifier.uuid.)
+# 
+# mrkta_mapdata <- mrkta_gps %>% 
+#   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+#          long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+#   filter(!is.na(lat), !is.na(long))
+# 
+# mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+# 
+# mrkta_update <- mrkta_sf %>% 
+#   st_join(
+#     twards_final
+#   ) %>% 
+#   st_drop_geometry()
+# 
+# mrkta_update_gps <- mrkta_update %>%
+#   select(fid,
+#          date,
+#          country,
+#          region = region.geomatch.final,
+#          district = district.geomatch.final,
+#          district20 = Dist20_N,
+#          ward = ward.geomatch.final,
+#          village = village.manual.final,
+#          market = market.manual.final,
+#          gps.coordinates.of.the.market,
+#          unique.row.identifier.uuid.)
+# 
+# # Region and ward combinations are identical, it is only the district that has changed
+# mrkta_update %>% 
+#    filter(region.geomatch.final != tolower(Region20_N))
+# 
+# mrkta_update %>% 
+#   filter(district.geomatch.final != tolower(Dist20_N)) %>%
+#   select(starts_with("dist"), starts_with("Dist")) %>%
+#   distinct(district.geomatch.final,Dist20_N)
+# 
+# mrkta_update %>% 
+#    filter(ward.geomatch.final != tolower(Ward_N))
+# 
+# 
+# mrkta_info_update <- mrkta_info %>%
+#   left_join(mrkta_update_gps %>% select(fid, region, district, district20, ward,village,market),
+#             by = "fid") %>%
+#   select(fid,
+#          date,
+#          country,
+#          region, 
+#          district,
+#          district20,
+#          ward,
+#          village,
+#          market,
+#          market.type,
+#          name.of.respondent,
+#          `1.origins`,
+#          `2.destinations`,
+#          `3a.sheep.sales`,
+#          `3b.goat.sales`,
+#          `4.seasonal.variation.in.trade`,
+#          `4.if.yes.describe`,
+#          gps.coordinates.of.the.market,
+#          unique.row.identifier.uuid.)
 
 # write.csv(mrkta_update_gps, here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
 # write.csv(mrkta_info_update, here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv"))
@@ -150,49 +150,49 @@ mrkta_info_update <- mrkta_info %>%
 
 
 ```{r mrktc}
-
-mrktc_update <- mrktc_gps %>%
-  left_join(
-    mrkta_update_gps %>% select(region, district, district20, ward, village, market), 
-    by = c("region.final" = "region", "district.final" = "district", "ward.final" = "ward", "village.final" = "village", "market.final" = "market")
-  )
-
-mrktc_update_gps <- mrktc_update %>%
-  select(fid,
-         date,
-         country,
-         region = region.final,
-         district = district.final,
-         district20,
-         ward = ward.final,
-         village = village.final,
-         market = market.final,
-         gps.coordinates.of.the.market,
-         unique.row.identifier.uuid.)
-
-mrktc_info_update <- mrktc_info %>%
-  left_join(mrktc_update_gps %>% select(fid, region, district, district20, ward,village,market),
-            by = "fid") %>%
-  select(fid,
-         date,
-         date.end,
-         date.of.interview,
-         date.final,
-         country,
-         region, 
-         district,
-         district20,
-         ward,
-         village,
-         market,
-         market.type,
-         respondent.role,
-         other.market.visited,
-         number.markets.visited,
-         trader,
-         trade.pattern,
-         gps.coordinates.of.the.market.final,
-         unique.row.identifier.uuid.)
+# 
+# mrktc_update <- mrktc_gps %>%
+#   left_join(
+#     mrkta_update_gps %>% select(region, district, district20, ward, village, market), 
+#     by = c("region.final" = "region", "district.final" = "district", "ward.final" = "ward", "village.final" = "village", "market.final" = "market")
+#   )
+# 
+# mrktc_update_gps <- mrktc_update %>%
+#   select(fid,
+#          date,
+#          country,
+#          region = region.final,
+#          district = district.final,
+#          district20,
+#          ward = ward.final,
+#          village = village.final,
+#          market = market.final,
+#          gps.coordinates.of.the.market,
+#          unique.row.identifier.uuid.)
+# 
+# mrktc_info_update <- mrktc_info %>%
+#   left_join(mrktc_update_gps %>% select(fid, region, district, district20, ward,village,market),
+#             by = "fid") %>%
+#   select(fid,
+#          date,
+#          date.end,
+#          date.of.interview,
+#          date.final,
+#          country,
+#          region, 
+#          district,
+#          district20,
+#          ward,
+#          village,
+#          market,
+#          market.type,
+#          respondent.role,
+#          other.market.visited,
+#          number.markets.visited,
+#          trader,
+#          trade.pattern,
+#          gps.coordinates.of.the.market.final,
+#          unique.row.identifier.uuid.)
     
 # write.csv(mrktc_update_gps, file = here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
 # write.csv(mrktc_info_update, file = here("data/tanzania_data/mrktc_generalinfo_tanzania_final.csv"))
