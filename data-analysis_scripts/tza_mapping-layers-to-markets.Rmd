@@ -59,8 +59,8 @@ twards_df <- twards_shp %>%
 ```{r load-mrktdata, include = F}
 # Market survey A data:
 
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-  select(-`...1`)
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
+mrkta_gps <- read_csv(here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
 # Market A Map Data
 mrkta_mapdata <- mrkta_gps %>%
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],

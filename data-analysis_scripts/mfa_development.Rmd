@@ -39,8 +39,7 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```{r load-data, include = F}
 
 # Market survey A data:
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-  select(-`...1`)
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
 
 # Market Survey C data
 mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
@@ -55,6 +54,8 @@ mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_fina
 
 mrkts_master_noMtwara <- read_csv(here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv")) %>%
   select(-`...1`)
+
+# mrkts_master_noMtwara <- read_csv(here("data/data-cleaning_data/mrkts_origdest_v4.csv")) 
 
 # Load Tanzania Shapefile:
 sf_use_s2(FALSE)
@@ -748,7 +749,9 @@ fviz_mfa_ind(res.mfa, col.ind = "cos2",
 
 
 fviz_mfa_axes(res.mfa)
+```
 
+```{r hcpc}
 
 hcpc_result <- HCPC(res.mfa, axes = 1:5)
 # Plot the dendrogram

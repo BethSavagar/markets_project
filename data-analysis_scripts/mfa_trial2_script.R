@@ -5,7 +5,7 @@ library("factoextra")
 twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
 tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
 
-
+mrkts_master_complete <- mrkts_master_complete %>% filter(!region %in% c("mtwara", "lindi", "ruvuma"))
 mrkts_master_complete <- mrkts_master_noMtwara %>% drop_na()
 
 mrkts_MFA <- mrkts_master_complete %>%

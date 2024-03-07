@@ -1329,8 +1329,21 @@ mrktc_allgps_check <- mrktc_gps_check %>%
     ward.final = ward.check,
     village.final = village.check,
     market.final = market.check
+  ) %>%
+  select(
+    fid,
+    date = date.final,
+    country,
+    region = region.final,
+    district = district.final,
+    district20 = district20.check,
+    ward = ward.final, 
+    village = village.final, 
+    market = market.final,
+    gps.coordinates.of.the.market,
+    unique.row.identifier.uuid.
   )
-
+  
 ```
 
 ## NEXT STEPS:
@@ -1342,3 +1355,68 @@ if(filesave){
 }
 ```
 
+
+
+```{r finalmaps}
+
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+mrkta_gps <- read_csv(here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv"))
+
+## MAP
+mrkta_mapdata <- mrkta_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+# arrange(gps.coordinates.of.the.market) %>% 
+# filter(!is.na(lat), !is.na(long))
+
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+
+mrktc_mapdata <- mrktc_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+# arrange(gps.coordinates.of.the.market) %>% 
+# filter(!is.na(lat), !is.na(long))
+
+mrktc_sf <- st_as_sf(mrktc_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+
+map_plots <- list()
+regions <- mrkta_gps %>% distinct(region) %>% pull()
+
+for(i in 1:length(regions)){
+  
+  region_i <- regions[i]
+  
+  map_plots[[i]] <- ggplot() +
+    geom_sf(data = twards_shp %>% filter(Region_N %in% region_i), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region %in% region_i), 
+            aes(col = ward), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktc_sf %>% filter(region %in% region_i), 
+            aes(col = ward),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,3))+
+    facet_wrap(~ward)+
+    coord_sf()+
+    labs(col = "Ward of market"
+         #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+    )+
+    theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+map_plots[[1]]
+map_plots[[2]]
+map_plots[[3]]
+map_plots[[4]]
+map_plots[[5]]
+map_plots[[6]]
+map_plots[[7]]
+map_plots[[8]]
+map_plots[[9]]
+map_plots[[10]]
+map_plots[[11]]
+map_plots[[12]]
+map_plots[[13]]
+
+
+```

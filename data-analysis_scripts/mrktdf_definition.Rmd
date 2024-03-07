@@ -36,10 +36,8 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```{r load-data, include = F}
 
 # Market survey A data:
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-  select(-`...1`)
-mrkta_info <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv")) %>%
-  select(-`...1`)
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv"))
+mrkta_info <-  read_csv(here("data/tanzania_data/mrkta_generalinfo_tanzania_final.csv")) 
 mrkta_spatial <- read_csv(here("data/tanzania_data/mrkta_withfeatures_tanzania_final.csv"))
 
 # Market Survey B data
@@ -473,6 +471,7 @@ Markets in Ruvuma and Lindi (1 market each) were also excluded
 mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region %in% c("mtwara", "lindi", "ruvuma"))
 
 # write.csv(mrkts_master_noMtwara, file = here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv"))
+# write.csv(mrkts_master_v4, file = here("data/data-cleaning_data/mrkts_origdest_v4.csv"))
 
 ```
 
