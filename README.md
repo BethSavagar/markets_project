@@ -94,3 +94,14 @@ Market C Survey Cleaning
 - Clean and update dataframe to reflect acitivites of interest.
 - saved as: 
   - `mrktc_mrktactivities_tanzania_final.csv`
+  
+  
+# Analysis Scripts:
+
+1) Descriptive Analysis
+- mrkta and mrktc_descriptive-analysis provide summary descriptive data anlaysis
+- not yet updated to finalised market data (120324)
+
+2) tza_mapping-layers-to-markets.Rmd
+- map multiple spatial layers to market A location data.
+
