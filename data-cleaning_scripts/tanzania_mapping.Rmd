@@ -295,10 +295,11 @@ twards_final <- twards_distreg20b %>%
 
 
 ```{r saveshp}
-
-st_write(tregs_final, here("data/shapefiles/tzshp_final/tregs_final.shp"))
-st_write(tdists_final, here("data/shapefiles/tzshp_final/tdists_final.shp"))
-st_write(twards_final, here("data/shapefiles/tzshp_final/twards_final.shp"))
+if(filesave){
+  st_write(tregs_final, here("data/shapefiles/tzshp_final/tregs_final.shp"))
+  st_write(tdists_final, here("data/shapefiles/tzshp_final/tdists_final.shp"))
+  st_write(twards_final, here("data/shapefiles/tzshp_final/twards_final.shp"))
+}
 
 ```
 
