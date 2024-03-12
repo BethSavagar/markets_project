@@ -1,0 +1,131 @@
+---
+title: "Tanzania Market Survey C: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+Use cleaned market survey C gps data to produce final "General Info" and "Market Activities" datasets
+
+```{r dataload}
+
+filesave <- F
+
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>% select(-`...1`)
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrktc_info_CLEAN <-  read_csv(here("data/tanzania_data/mrktc_generalinfo_tanzania_CLEAN.csv")) %>% select(-c("...1"))
+
+mrktc_activities_raw <- read_csv(here("data/tanzania_data/mrktc_mrktactivities_tanzania.csv"))
+```
+
+<!-- ```{r actvtylkp} -->
+
+<!-- lkp_mrktactvty <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpmrkt_actvty.csv")) %>% -->
+<!--   mutate( -->
+<!--     Code = as.character(Code), -->
+<!--     `1.mrkt.activity.lkp` = case_match( -->
+<!--       Code, -->
+<!--       "-66" ~ "Other", -->
+<!--       "1" ~ "Selling", -->
+<!--       "2" ~ "Middleman", -->
+<!--       "3" ~ "Trader", -->
+<!--       "4" ~ "Buying" -->
+<!--     ) -->
+<!--   ) -->
+
+<!-- lkp_sellplacetype <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_placetype.csv")) %>% -->
+<!--   mutate( -->
+<!--     Code = as.character(Code), -->
+<!--     `2.sell.placetype.lkp` = case_match( -->
+<!--       Code, -->
+<!--       "-66" ~ "Other", -->
+<!--       "1" ~ "Village", -->
+<!--       "2" ~ "Towncentre", -->
+<!--       "3" ~ "Market", -->
+<!--       "4" ~ "Abattoir" -->
+<!--     ) -->
+<!--   ) -->
+
+<!-- lkp_selltransport <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_trans.csv")) %>% -->
+<!--   mutate( -->
+<!--     Code = as.character(Code), -->
+<!--     `4.sell.transport.lkp` = case_match( -->
+<!--       Code, -->
+<!--       "-77" ~ "Unknown", -->
+<!--       "-66" ~ "Other", -->
+<!--       "1" ~ "Foot", -->
+<!--       "2" ~ "Vehicle", -->
+<!--       "3" ~ "Cart" -->
+<!--     ) -->
+<!--   ) -->
+
+<!-- lkp_buyplacetype <- lkp_sellplacetype -->
+
+<!-- lkp_buytransport <- lkp_selltransport -->
+
+<!-- lkp_sellreason <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpsell_reason.csv")) -->
+
+<!-- lkp_buyreason <- read_csv(here("data/ecopprmarketscsvs/mrktc_lkpbuy_reason.csv")) -->
+
+<!-- ``` -->
+
+```{r infoClean}
+
+# link mrktc Info to clean gps data and retain only variables of interest
+mrktc_info <- left_join(
+  mrktc_info_CLEAN %>% select(-c(contains(".code"), contains(".name"), contains("village"))),
+  mrktc_gps %>% select(-c(country)),
+  by = c("fid","date", "unique.row.identifier.uuid.")) %>% # can't join by "gps.coordinates.of.the.market" as some rows of original data have no location.
+  select(
+    fid,
+    date,
+    country,
+    region,
+    district,
+    district20,
+    ward,
+    village,
+    market,
+    market.type, 
+    respondent.role,
+    other.market.visited,
+    number.markets.visited,
+    trader,
+    trade.pattern,
+    gps.coordinates.of.the.market = gps.coordinates.of.the.market.y,
+    unique.row.identifier.uuid.
+  ) %>%
+  mutate(number.markets.visited = replace_na(number.markets.visited, 0)) %>% # For number.markets.visited replace NA with 0 
+  mutate(trader = replace_na(trader, 0))
+
+```
+
+
+```{r saveInfo}
+if(filesave){
+  write_csv(mrktc_info, file = here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+}
+
+```
+
+

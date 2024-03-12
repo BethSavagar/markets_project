@@ -24,7 +24,7 @@ Market A Survey Cleaning
   - INFO: `data/data-cleaning_data/mrkta_generalinfo_tanzania_CLEAN.csv`
   - GPS: `data/data-cleaning_data/mrkta_gps_tanzania_CLEAN.csv`
 
-2) mrkta_mapping_mar24.Rmd
+3) mrkta_mapping_mar24.Rmd
 - update location data on `mrkta_gps_tanzania_CLEAN.csv` and `mrkta_generalinfo_tanzania_CLEAN.csv`
 - link to tanzania ward data, check distinct rows (ward-village-market names)
 - saved as:
@@ -36,7 +36,7 @@ Market A Survey Cleaning
  
 Market B Survey Cleaning
 1) mrktb_to_tanzania.R
-- subset mrkta_info to tanzania observations: `"data/ecopprmarketscsvs/mrktb_generalinfo.csv"`
+- subset mrktc_info to tanzania observations: `"data/ecopprmarketscsvs/mrktb_generalinfo.csv"`
 - saved as: `"data/tanzania_data/mrktb_generalinfo_tanzania.csv"`
 
 
@@ -50,5 +50,35 @@ Market C Survey Cleaning
 - subset mrktc_mrktactivities to tanzania observations: `ecopprmarketscsvs/mrktc_mrktactivities.csv`
 - saved as: `"data/tanzania_data/mrktc_mrktactivities_tanzania.csv"`
 
-
-
+3) mrktc_cleaning_mar24.Rmd
+- clean `mrktc_generalinfo_tanzania.csv` data based on market A survey location data 
+- crossreference mrktc_tanzania, against final mrkta_gps
+- manually update mrktc location data
+- saved as:
+  - INFO: `"data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN.csv"`
+  - GPS: `data/data-cleaning_data/mrktc_generalinfo_tanzania_CLEAN1.csv`
+  
+4) mrktc_mapping_mar24.Rmd
+- update location data on `mrktc_gps_tanzania_CLEAN1.csv` 
+- link to nearest market using `mrkta_gps_tanzania_final.csv`
+- on region-by-region bases verify whether surveys have been appropriately linked.
+  - use location matched data, and check date of survey (all surveys for given market completed on the same day)
+  - where there are differences between manual/raw location & date data, and the geo-linked location & date data
+  - check names across A-linked data, manually cleaned survey data, and raw survey data. 
+  - Update checked market location data accordingly.
+- saved as:
+  - final GPS: `data/data-cleaning_data/mrktc_gps_tanzania_final.csv`
+  - final GPS ALL: `data/data-cleaning_data/mrktc_allgps_tanzania_final.csv`
+  
+5) mrktc_cleaning-info_mar24.Rmd
+- Update & clean `mrktc_generalinfo_tanzania_CLEAN.csv` [and ]
+- update final location data and cols for inclusion
+- saved as: 
+  - `mrktc_generalinfo_tanzania_final.csv`
+ 
+ 6) mrktc_cleaning-actvty_mar24.Rmd
+- Update & clean ``mrktc_mrktactivities_tanzania.csv`
+- No location data in this dataframe, 
+- Clean and update dataframe to reflect acitivites of interest.
+- saved as: 
+  - `mrktc_mrktactivities_tanzania_final.csv`
