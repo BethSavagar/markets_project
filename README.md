@@ -36,9 +36,16 @@ Market A Survey Cleaning
  
 Market B Survey Cleaning
 1) mrktb_to_tanzania.R
-- subset mrktc_info to tanzania observations: `"data/ecopprmarketscsvs/mrktb_generalinfo.csv"`
+- subset mrktb_info to tanzania observations: `"data/ecopprmarketscsvs/mrktb_generalinfo.csv"`
 - saved as: `"data/tanzania_data/mrktb_generalinfo_tanzania.csv"`
 
+
+2) mrktb_cleaning_mar24.Rmd
+- clean `mrktb_generalinfo_tanzania.csv` data based on market A survey location data 
+- NB for observations with duplicate data (i.e. 2 rows with same ward-village-market names but different survey response): calc. mean SR sales.
+- geo-link mrktb locations to mrkta locations
+- saved as:
+  - INFO: `"data/data-cleaning_data/mrktb_generalinfo_tanzania_final.csv"`
 
 
 Market C Survey Cleaning
