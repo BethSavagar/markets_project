@@ -544,15 +544,15 @@ mrkta_withfeatures <- mrkta_withfeatures %>%
 ##########
 ##########
 
-```{r spagg}
+<!-- ```{r spagg} -->
 
-# Raster file:
-spagg_shp <- st_read(here("data/shapefiles/tz-spatial-agg/tz-spatial-agg.shp"))
-spagg_shp %>% st_drop_geometry() %>% group_by(LC) %>% count()
-ggplot()+geom_sf(data = spagg_shp, aes(fill = LC), col = NA)+coord_sf()
+<!-- # Raster file: -->
+<!-- spagg_shp <- st_read(here("data/shapefiles/tz-spatial-agg/tz-spatial-agg.shp")) -->
+<!-- spagg_shp %>% st_drop_geometry() %>% group_by(LC) %>% count() -->
+<!-- ggplot()+geom_sf(data = spagg_shp, aes(fill = LC), col = NA)+coord_sf() -->
 
 
-pp_shp <- st_read(here("data/shapefiles/hotosm_tza_populated_places_points_shp/hotosm_tza_populated_places_points.shp"))
-ggplot()+geom_sf(data = pp_shp, aes(col = place))+coord_sf()
+<!-- pp_shp <- st_read(here("data/shapefiles/hotosm_tza_populated_places_points_shp/hotosm_tza_populated_places_points.shp")) -->
+<!-- ggplot()+geom_sf(data = pp_shp, aes(col = place))+coord_sf() -->
 
-```
+<!-- ``` -->
