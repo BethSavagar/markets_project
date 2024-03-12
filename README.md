@@ -44,6 +44,11 @@ Market B Survey Cleaning
 - clean `mrktb_generalinfo_tanzania.csv` data based on market A survey location data 
 - NB for observations with duplicate data (i.e. 2 rows with same ward-village-market names but different survey response): calc. mean SR sales.
 - geo-link mrktb locations to mrkta locations
+- on region-by-region bases verify whether surveys have been appropriately linked.
+  - use location matched data, and check date of survey (all surveys for given market completed on the same day)
+  - where there are differences between manual location & date data, and the geo-linked location & date data
+  - check names across A-linked data, manually cleaned survey data.
+  - Update checked market location data accordingly.
 - saved as:
   - INFO: `"data/data-cleaning_data/mrktb_generalinfo_tanzania_final.csv"`
 

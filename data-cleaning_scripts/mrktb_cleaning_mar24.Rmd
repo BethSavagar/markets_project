@@ -1,0 +1,892 @@
+---
+title: "Tanzania Market Survey B: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "Times New Roman", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C", "#FFD700", "#1E90FF")
+```
+
+```{r dataload, include = F}
+
+# load tanzania data for market c general info and activities surveys
+mrktb_general <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania.csv"))
+
+## LOOKUPS ##
+# use market a lookups for ward and region as market c lookups are blank
+
+# Market A location data:
+mrkta_gps <- read_csv(here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv")) 
+
+# Market A locations gps lookup:
+mrkta_gps_manualgeomatchlkp <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"))
+mrkta_lkpward <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpward.csv"))
+mrkta_lkpregion <- read_csv(file = here("data/ecopprmarketscsvs/mrkta_lkpregion.csv"))
+
+
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp")) 
+
+```
+
+
+### 1) Clean market b data: 
+- lowercase, remove spaces, punctuation etc
+
+```{r mrktb_fields, include = F}
+# mrktc
+
+# Select only the fields of interest (location data, SR sale data)
+
+colnames(mrktb_general)
+
+mrktb_clean <- mrktb_general %>%
+  left_join(mrkta_lkpward %>% select("Code", ward.name = "Description"),
+            by = c(`department.ward.see.mrkta.lkpward.` = "Code")) %>%
+  left_join(mrkta_lkpregion %>% select(Code,"district.region.name" = "Description"),
+            by = c(`region.see.mrkta.lkpregion.` = "Code")) %>%
+  # excl. fields such as: respondent age, gender, detail of disease problems
+  # select fields of interest i.e. trade info: respondent role, number of markets visited, pattern of trading
+  separate(end.time, c("date.end", "time.end"), sep = " ") %>%
+  select(
+    fid = `fid.see.mrktb.idtable.`,
+    date,
+    date.end,
+    date.of.interview,
+    country = `country.see.mrkta.lkpcountry.`,
+    district.region.code = `region.see.mrkta.lkpregion.`,
+    district.region.name,
+    ward.code = `department.ward.see.mrkta.lkpward.`,
+    ward.name,
+    village,
+    market.name = `name.of.market`,
+    market.type = `type.of.market.see.mrktb.lkpmrkt.type.`,
+    immature.sheep.less.1.,
+    adult.sheep.more.1.,
+    immature.goats.less.1.,
+    adult.goats.more.1.,
+    `gps.coordinates.of.the.market`,
+    `unique.row.identifier.uuid.`
+    ) %>%
+  
+  ##############
+  ## CLEAN ##
+  ##############
+
+  # clean text variables:
+  mutate(
+    "district.region.name" = tolower(`district.region.name`), # all lower case
+    "district.region.name" = gsub("[[:punct:]]", " ", `district.region.name`), # remove punctuation
+    "district.region.name" = trimws(`district.region.name`), #trim leading and trailing spaces
+    "district.region.name" = gsub("\\s+", ".", `district.region.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "ward.name" = tolower(`ward.name`),
+    "ward.name" = gsub("[[:punct:]]", " ", `ward.name`), # remove punctuation
+    "ward.name" = trimws(`ward.name`), #trim leading and trailing spaces
+    "ward.name" = gsub("\\s+", ".", `ward.name`)# replace 1+ spaces with "."
+  ) %>%
+  mutate(
+    "market.name" = tolower(`market.name`), # lowercase
+    "market.name" = gsub("[[:punct:]]", " ", `market.name`), # remove punctuation
+    "market.name" = trimws(`market.name`), #trim leading and trailing spaces
+    "market.name" = gsub("\\s+", ".", `market.name`)# replace 1+ spaces with "."
+  )  %>% 
+  mutate(
+    "village" = tolower(`village`), # lowercase
+    "village" = gsub("[[:punct:]]", " ", `village`), # remove punctuation
+    "village" = trimws(`village`),
+    "village" = gsub("\\s+", ".", `village`)
+  ) %>% 
+  # filter rows with NAs in animals numbers columns: 
+  filter(!(if_all(c(adult.sheep.more.1., adult.goats.more.1., immature.goats.less.1., immature.sheep.less.1.), is.na)))
+
+colnames(mrktb_clean) %>% kable()
+
+# remove duplicate entries
+
+dupes <- mrktb_clean %>% 
+  group_by(date, district.region.name, ward.name, village, market.name) %>% 
+  mutate(dupe = n()>1) %>% 
+  filter(dupe == T) %>%
+  summarise(immature.sheep.less.1.B = mean(immature.sheep.less.1.),
+            adult.sheep.more.1.B = mean(adult.sheep.more.1.),
+            immature.goats.less.1.B = mean(immature.goats.less.1.),
+            adult.goats.more.1.B = mean(adult.goats.more.1.))
+  
+mrktb_deduped <- mrktb_clean %>%
+  
+  left_join(dupes, 
+            by = c("date", "district.region.name", "ward.name", "village", "market.name")) %>%
+  # coalesce columns:
+  mutate(
+            immature.sheep.less.1.B = if_else(is.na(immature.sheep.less.1.B), immature.sheep.less.1., immature.sheep.less.1.B),
+            adult.sheep.more.1.B = if_else(is.na(adult.sheep.more.1.B), adult.sheep.more.1., adult.sheep.more.1.B),
+            immature.goats.less.1.B = if_else(is.na(immature.goats.less.1.B), immature.goats.less.1., immature.goats.less.1.B),
+            adult.goats.more.1.B = if_else(is.na(adult.goats.more.1.B), adult.goats.more.1., adult.goats.more.1.B)
+  ) %>% 
+  group_by(date, district.region.name, ward.name, village, market.name) %>% 
+  mutate(dupe = n()>1)  %>%
+  distinct(date, district.region.name, ward.name, village, market.name, .keep_all = T) %>%
+  select(-dupe) %>% 
+  ungroup()
+  
+```
+
+# Join market B data to market A data:
+```{r btoA}
+
+
+mrktb_gps <- mrktb_deduped %>% 
+  # complete gps data for  mtwara-nangoo
+  left_join(mrkta_gps %>% select(region, market, gps.A = gps.coordinates.of.the.market), 
+            by = c("district.region.name" = "region", "market.name" = "market")) %>%
+  mutate(gps.coordinates.of.the.market = if_else(is.na(gps.coordinates.of.the.market), gps.A, gps.coordinates.of.the.market)) %>%
+  select(-c(gps.A)) %>%
+  # filter(!is.na(`gps.coordinates.of.the.market`)) %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+
+# A mapdata
+mrkta_mapdata <- mrkta_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2]) %>% 
+  filter(!is.na(lat), !is.na(long))
+
+# for now ignore rows which have na in lat or long:
+mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326)
+
+# B mapdata
+mrktb_mapdata <- mrktb_gps %>% 
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+
+mrktb_sf <- st_as_sf(mrktb_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+
+# Join geomatched location data (from tanzania shapefile) to mrtka location data
+mrktb_linkA_mapdata <- mrktb_mapdata %>%
+  mutate(mrktaID = st_nearest_feature(mrktb_sf, mrkta_sf)) %>% 
+  # join matched location data. by rowid (twardID)
+  left_join(
+    mrkta_mapdata %>%
+      mutate(mrktaID = 1:nrow(.)) %>%
+      select(
+        mrktaID,
+        "date.A" = date,
+        "region.geomatch.final.A" = "region",
+        "district.geomatch.final.A" = "district",
+        "district20.geomatch.final.A" = "district20",
+        "ward.geomatch.final.A" = "ward",
+        "village.manual.final.A" = "village" ,
+        "market.manual.final.A" = "market"
+        # "reg.ward.mrkt.final.A" = "reg.ward.mrkt.final"
+      ),
+    by = c("mrktaID")) %>%
+  select(-mrktaID) 
+
+mrktb_linkA_sf <- st_as_sf(mrktb_linkA_mapdata, coords = c("long","lat"),  crs = 4326) 
+
+mrktb_linkA_gps <- mrktb_linkA_mapdata %>% select(-c(lat,long))
+
+## MAP
+map_plots <- list()
+regions <- mrktb_linkA_gps %>% distinct(region.geomatch.final.A) %>% pull()
+
+for(i in 1:length(regions)){
+  
+  region_i <- regions[i]
+  
+  map_plots[[i]] <- ggplot() +
+   geom_sf(data = twards_shp %>% filter(Region20_N %in% region_i), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region %in% region_i), 
+            aes(col = ward), alpha = 0.5, size = 3)+
+    geom_sf(data = mrktb_linkA_sf %>% filter(region.geomatch.final.A %in% region_i), 
+            aes(col = ward.geomatch.final.A),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region20_N)+
+   coord_sf()+
+   labs(col = "Ward of market"
+        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
+        )+
+  theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+map_plots[[1]]; map_plots[[2]]; map_plots[[3]]; map_plots[[4]]; map_plots[[5]]; map_plots[[6]]; 
+map_plots[[7]]; map_plots[[8]]; map_plots[[9]]; map_plots[[10]]; map_plots[[11]]; map_plots[[12]]; 
+map_plots[[13]]
+```
+
+
+# Check Linkage:
+
+
+## Market Survey B Clean (2): check geo-link A data. {.tabset}
+
+For each region, check consistency between:
+
+  - geolinkA survey locations, date-of-survey and raw location data. 
+  - Each survey in a given location should occur on the same date.
+  - Where there are inconsistencies in geolinkA data and survey dates, check raw & manual data matching to check.
+
+```{r check_linkA, warning = F, echo = F}
+
+mrktb_linkA_check <- mrktb_linkA_gps %>%
+  select(
+    fid, 
+    date, 
+    date.end, 
+    date.of.interview,
+    
+    # manually cleaned B locations
+    region.name.manual = "district.region.name",
+    ward.name.manual = "ward.name",
+    village.manual = "village",
+    market.name.manual = "market.name",
+    
+    # geomatched B to A locations
+    date.A,
+    region.geomatch.final.A,
+    district.geomatch.final.A,
+    district20.geomatch.final.A,
+    ward.geomatch.final.A,
+    village.manual.final.A,
+    market.manual.final.A,
+    
+    gps.coordinates.of.the.market
+  ) %>%
+  mutate(
+    unique.manual = paste(region.name.manual, ward.name.manual, village.manual, market.name.manual, sep = "-"),
+    unique.A = paste(region.geomatch.final.A,district.geomatch.final.A,ward.geomatch.final.A,village.manual.final.A,market.manual.final.A, sep = "-"))
+
+```
+
+
+
+### Dodoma: 
+
+```{r dodoma_clean, eval = F}
+
+region_i <- regions[1]
+
+# Plot
+map_plots[[1]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+
+## SUMMARY ##
+# Accept all dodoma A.matches
+
+```
+
+```{r dodomaUpdate, warning = F, results = "hide"}
+
+mrktb_gps_check <- mrktb_linkA_gps %>%
+  mutate(
+    # correct: 2022-05-28        simiyu-mwasamba-mwasamba-mwasamba 2022-05-19 simiyu-bariadi-dutwa-igaganulwa-dut…
+    date.check = as.character(date.A),
+    region.check = region.geomatch.final.A,
+    district.check = district.geomatch.final.A,
+    district20.check = district20.geomatch.final.A,
+    ward.check = ward.geomatch.final.A,
+    village.check = village.manual.final.A,
+    market.check = market.manual.final.A
+  )
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="dodoma") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+
+### Simiyu: 
+
+```{r simiyu_clean, eval = F}
+
+region_i <- regions[2]
+
+# Plot
+map_plots[[2]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+
+## SUMMARY ##
+# Accept all simiyu A.matches
+
+```
+
+```{r simiyuUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="simiyu") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Mwanza: 
+
+```{r mwanza_clean, eval = F}
+
+region_i <- regions[3]
+
+# Plot
+map_plots[[3]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+
+## SUMMARY ##
+# Accept all mwanza A.matches
+
+```
+
+```{r mwanzaUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="mwanza") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Katavi: 
+
+```{r katavi_clean, eval = F}
+
+region_i <- regions[4]
+
+# Plot
+map_plots[[4]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+# 3 srveys linked to majimoto market - check survey responses:
+mrktb_linkA_gps %>% filter(market.manual.final.A == "majimoto")
+
+
+## SUMMARY ##
+# Accept all mwanza A.matches
+# summarise duplicate data as a mean()
+```
+
+```{r kataviUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="katavi") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Morogoro: 
+
+```{r morogoro_clean, eval = F}
+
+region_i <- regions[5]
+
+# Plot
+map_plots[[5]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all morogoro A.matches
+```
+
+```{r morogoroUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="morogoro") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+### Mbeya: 
+
+```{r mbeya_clean, eval = F}
+
+region_i <- regions[7]
+
+# Plot
+map_plots[[7]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r mbeyaUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="mbeya") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Rukwa: 
+
+```{r rukwa_clean, eval = F}
+
+region_i <- regions[8]
+
+# Plot
+map_plots[[8]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r rukwaUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="rukwa") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Iringa: 
+
+```{r iringa_clean, eval = F}
+
+region_i <- regions[9]
+
+# Plot
+map_plots[[9]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r iringaUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="iringa") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+### Songwe: 
+
+```{r songwe_clean, eval = F}
+
+region_i <- regions[10]
+
+# Plot
+map_plots[[10]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r songweUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="songwe") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+### Njombe: 
+
+```{r njombe_clean, eval = F}
+
+region_i <- regions[11]
+
+# Plot
+map_plots[[11]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r njombeUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="njombe") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+
+### Lindi: 
+
+```{r morogoro_clean, eval = F}
+
+region_i <- regions[12]
+
+# Plot
+map_plots[[12]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all lindi A.matches
+```
+
+```{r lindiUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="lindi") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+### Ruvuma: 
+
+```{r ruvuma_clean, eval = F}
+
+region_i <- regions[13]
+
+# Plot
+map_plots[[13]] 
+# - market locations seem consistent 
+
+# Check location & date consistency:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+    # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+    group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+    count() %>%
+    mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+    arrange(unique.manual, check) %>%
+  filter(check == "unmatch")
+
+## SUMMARY ##
+# Accept all mbeya A.matches
+```
+
+```{r ruvumaUpdate, warning = F, results = "hide"}
+# No updates needed
+# mrktb_gps_check <- mrktb_gps_check
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="ruvuma") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+### Mtwara: 
+
+```{r mtwara_clean, eval = F}
+
+region_i <- regions[6]
+map_plots[[6]]
+# Check location & date:
+
+mrktb_linkA_check %>% 
+  filter(region.geomatch.final.A == region_i) %>%
+  # filter(!(date == date.A | date.end == date.A | date.of.interview == date.A)) %>%
+  group_by(date,date.end,date.of.interview, unique.manual, date.A, unique.A) %>%
+  count() %>%
+  mutate(check = if_else((date == date.A | date.end == date.A | date.of.interview == date.A), "match", "unmatch")) %>%
+  arrange(unique.manual, check) %>%
+  View()
+
+## MAP
+mtwara_plots <- list()
+mwards <- mrktb_linkA_gps %>% filter(district.region.name == "mtwara") %>% distinct(ward.name) %>% arrange(ward.name) %>% pull()
+region_i <- "mtwara"
+
+for(i in 1:length(mwards)){
+  
+  ward_i <- mwards[i]
+
+  mtwara_plots[[i]] <- ggplot() +
+    geom_sf(data = twards_shp %>% filter(Region_N %in% region_i), linewidth = 0.1) +
+    geom_sf(data = mrkta_sf %>% filter(region %in% region_i), col = "red", alpha = 1, size = 2)+
+    geom_sf_text(data = mrkta_sf %>% filter(region %in% region_i), aes(label = paste(ward,village, sep = "-")), col = "red", size = 2)+
+    geom_sf(data = mrktb_linkA_sf %>% filter(district.region.name %in% region_i, ward.name %in% ward_i), 
+            aes(col = ward.name),  shape = 17, size = 1.5)+
+    scale_colour_manual(values = rep(market_pal,2))+
+    facet_wrap(~Region_N)+
+    coord_sf()+
+    labs(col = "Ward of market")+
+    theme(legend.position = "right", legend.box = "horizontal")
+  
+}
+
+```
+
+
+```{r}
+mrktb_linkA_check %>% 
+  filter(region.name.manual == region_i) %>% 
+  filter(village.manual != village.manual.final.A) %>%
+  distinct(unique.manual, unique.A) %>% arrange(unique.manual) %>% print(n=30)
+
+# # A tibble: 4 × 2
+#   unique.manual                              unique.A                                                
+#   <chr>                                      <chr>                                                   
+# 1 mtwara-chanikanguo-chanikanguo-chanikanguo mtwara-masasi.township.authority-jida-mtandi.b-mtandi   
+# 2 mtwara-mbuyuni-mbuyuni-mbuyuni             mtwara-masasi-chiungutwa-chiungutwa-chiungutwa          
+# 3 mtwara-mnavira-muhuwesi-muhuwesi           ruvuma-tunduru-muhuwesi-muhesi-muhesi                   
+# 4 mtwara-mwengemtapika-upanga-upanga         mtwara-masasi.township.authority-migongo-nangaya-nangaya 
+
+# chanikanguo: 
+#   - confirmed market location (consistent dates and names in manual/raw data)
+#   - not represented in the A data
+mtwara_plots[[1]]
+mrktb_linkA_check %>% 
+  filter(region.name.manual == region_i) %>% 
+  filter(ward.name.manual == "chanikanguo") 
+
+# mbuyuni: 
+#   - confirmed market location (consistent dates and names in manual/raw data)
+#   - not represented in the A data
+mtwara_plots[[9]]
+mrktb_linkA_check %>% 
+  filter(region.name.manual == region_i) %>% 
+  filter(ward.name.manual == "mbuyuni") 
+
+
+# mnavira
+#   - should be linked to ruvuma-muhesi market
+mtwara_plots[[12]]
+mrktb_linkA_check %>% 
+  filter(region.name.manual == region_i) %>% 
+  filter(market.name.manual == "muhuwesi") 
+
+
+# mwengemtapika
+#   - represented in the A data
+#   - one survey gps location in mtandi (check date of survey) 
+#   - Accept A data based on GPS coordinates and the "date.end" which indicates 
+#     that all surveys from mtandi and sululu were submitted on the same date
+
+mtwara_plots[[17]]
+mrktb_linkA_check %>% 
+  filter(region.name.manual == region_i) %>% 
+  filter(ward.name.manual == "mwengemtapika") 
+
+```
+
+```{r mtwaraupdate, warning =F, results = "hide"}
+
+mrktb_gps_check <- mrktb_gps_check %>%
+  mutate(
+#   1 mtwara-chanikanguo-chanikanguo-chanikanguo mtwara-masasi.township.authority-jida-mtandi.b-mtandi   
+    region.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "mtwara", region.check),
+    district.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "masasi.township.authority", district.check),
+    district20.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "masasi.tc", district20.check),
+    ward.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "mpindimbi", ward.check),
+    village.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "chanikanguo", village.check),
+    market.check = if_else(district.region.name == "mtwara" & village == "chanikanguo", "chanikanguo", market.check),
+
+# 2 mtwara-mbuyuni-mbuyuni-mbuyuni             mtwara-masasi-chiungutwa-chiungutwa-chiungutwa  
+    date.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "2022-06-02", as.character(date.check)),
+    region.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "mtwara", region.check),
+    district.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "masasi", district.check),
+    district20.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "masasi.dc", district20.check),
+    ward.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "mbuyuni", ward.check),
+    village.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "mbuyuni", village.check),
+    market.check = if_else(district.region.name == "mtwara" & village == "mbuyuni", "mbuyuni", market.check),
+
+# 3 muhuwesi (Ruvuma district)               
+# --> Accept .A matched data
+
+# 4 mtwara-mwengemtapika-upanga-upanga         mtwara-masasi.township.authority-migongo-nangaya-nangaya
+# --> acchept .A matched data
+)
+
+
+mrktb_gps_check %>% filter(region.geomatch.final.A=="mtwara") %>% group_by(date.check, region.check, district.check, district20.check, ward.check,village.check,market.check) %>% count()
+```
+
+```{r dedupe2}
+
+# remove duplicate entries
+
+dupes2 <- mrktb_gps_check %>% 
+  group_by(region.check, district20.check, ward.check,village.check,market.check) %>% 
+  mutate(dupe = n()>1) %>% 
+  filter(dupe == T) %>%
+  summarise(immature.sheep.less.1.C = mean(immature.sheep.less.1.B),
+            adult.sheep.more.1.C = mean(adult.sheep.more.1.B),
+            immature.goats.less.1.C = mean(immature.goats.less.1.B),
+            adult.goats.more.1.C = mean(adult.goats.more.1.B))
+  
+mrktb_gps_deduped2 <- mrktb_gps_check %>%
+  
+  left_join(dupes2) %>%
+  # coalesce columns:
+  mutate(
+            immature.sheep.less.1.B = if_else(is.na(immature.sheep.less.1.C), immature.sheep.less.1.B, immature.sheep.less.1.C),
+            adult.sheep.more.1.B = if_else(is.na(adult.sheep.more.1.C), adult.sheep.more.1.B, adult.sheep.more.1.C),
+            immature.goats.less.1.B = if_else(is.na(immature.goats.less.1.C), immature.goats.less.1.B, immature.goats.less.1.C),
+            adult.goats.more.1.B = if_else(is.na(adult.goats.more.1.C), adult.goats.more.1.B, adult.goats.more.1.C)) %>% 
+  group_by(date.check, region.check, district20.check, ward.check,village.check,market.check) %>% 
+  mutate(dupe = n()>1)  %>%
+  distinct(date.check, region.check, district20.check, ward.check,village.check,market.check, .keep_all = T) %>%
+  select(-dupe) %>% 
+  ungroup()
+
+```
+
+
+```{r bfinalsave}
+
+mrktb_final <- mrktb_gps_deduped2 %>% 
+  select(
+    fid,
+    date,
+    date.final = date.A,
+    country,
+    region = region.check,
+    district = district.check,
+    district20 = district20.check,
+    ward = ward.check,
+    village = village.check,
+    market = market.check,
+    market.type,
+    sheep.0to12 = immature.sheep.less.1.B,
+    sheep.adult = adult.sheep.more.1.B,
+    goat.0to12 = immature.goats.less.1.B,
+    goat.adult = adult.goats.more.1.B,
+    gps.coordinates.of.the.market,
+    unique.row.identifier.uuid.
+  ) %>%
+  # filter(!(is.na(sheep.0to12) & is.na(sheep.adult))) %>%
+  distinct(region, district20, ward, village, market, .keep_all = T)
+
+if(filesave){
+  write.csv(mrktb_final, file = here("data/data-cleaning_data/mrktb_generalinfo_tanzania_final.csv"))
+  write.csv(mrktb_final, file = here("data/tanzania_data/mrktb_generalinfo_tanzania_final.csv"))
+}
+```
