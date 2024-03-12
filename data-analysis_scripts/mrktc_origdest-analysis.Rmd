@@ -38,8 +38,9 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) 
 
 # Market Survey C data
-mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")) %>%
-  select(-`...1`)
+mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+
 mrktc_coords <- mrktc_gps %>%
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
@@ -99,7 +100,7 @@ mrktc_origins_sf <- mrktc_origins %>%
   )
 
 mrktc_origins_sf <- st_as_sf(mrktc_origins_sf)
-
+# this is the shapefile of ward polygons
 
 mrktc_originspt_sf <- mrktc_origins_sf
 mrktc_originspt_sf$geometry <- st_point_on_surface(mrktc_originspt_sf$geometry)
@@ -130,7 +131,7 @@ ggplot() +
 ```
 
 
-```{r orig catchment}
+```{r origcatchment}
 library(geosphere)
 
 mrktc_mrktorig <- mrktc_originspt_gps %>%
@@ -360,6 +361,6 @@ mrkt_origdest_join <- mrkta_gps %>%
     by = c(region = "mrkt.region", district20 = "mrkt.district", ward = "mrkt.ward", village = "mrkt.village", market = "mrkt.name")
   )
 
-write_csv(mrkt_origdest_join, file = here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
+# write_csv(mrkt_origdest_join, file = here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
 
 ```

@@ -50,7 +50,10 @@ mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv")
 mrktc_info <-  read_csv(here("data/tanzania_data/mrktc_generalinfo_tanzania_final.csv")) %>%
   select(-`...1`)
 mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
-# write.csv(mrktc_actvty, file = "data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv")
+# Market Survey C data
+# mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+# mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+# mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
 
 
 mrkt_origdest_join <- read_csv(here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
@@ -469,7 +472,7 @@ Markets in Ruvuma and Lindi (1 market each) were also excluded
 
 ```{r mrktsmasterNomtwara, include = F}
 mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region %in% c("mtwara", "lindi", "ruvuma"))
-
+# 
 # write.csv(mrkts_master_noMtwara, file = here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv"))
 # write.csv(mrkts_master_v4, file = here("data/data-cleaning_data/mrkts_origdest_v4.csv"))
 
