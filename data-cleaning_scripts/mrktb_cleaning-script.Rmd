@@ -42,8 +42,7 @@ mrktb_general <- read_csv(here("data/tanzania_data/mrktb_generalinfo_tanzania.cs
 # use market a lookups for ward and region as market c lookups are blank
 
 # Market A location data:
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) %>%
-  select(-`...1`)
+mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) 
 
 # Market A locations gps lookup:
 mrkta_gps_manualgeomatchlkp <- read_csv(file = here("data/data-cleaning_data/mrkta_gps_manualgeomatchlkp.csv"))
@@ -156,8 +155,9 @@ mrktb_clean2 <- mrktb_clean %>%
   
   left_join(dupes, 
             by = c("date", "district.region.name", "ward.name", "village", "market.name")) %>%
+  # coalesce columns:
   mutate(
-    immature.sheep.less.1.B = if_else(is.na(immature.sheep.less.1.B), immature.sheep.less.1., immature.sheep.less.1.B),
+            immature.sheep.less.1.B = if_else(is.na(immature.sheep.less.1.B), immature.sheep.less.1., immature.sheep.less.1.B),
             adult.sheep.more.1.B = if_else(is.na(adult.sheep.more.1.B), adult.sheep.more.1., adult.sheep.more.1.B),
             immature.goats.less.1.B = if_else(is.na(immature.goats.less.1.B), immature.goats.less.1., immature.goats.less.1.B),
             adult.goats.more.1.B = if_else(is.na(adult.goats.more.1.B), adult.goats.more.1., adult.goats.more.1.B)
@@ -259,7 +259,6 @@ map_plots[[13]]
 
 
 mrktb_final <- mrktb_linkA_gps %>% 
-  filter(!(is.na(sheep.0to12) & is.na(sheep.adult))) %>% View()
   select(
     fid,
     date,
@@ -279,6 +278,7 @@ mrktb_final <- mrktb_linkA_gps %>%
     gps.coordinates.of.the.market,
     unique.row.identifier.uuid.
   ) %>%
+  # filter(!(is.na(sheep.0to12) & is.na(sheep.adult))) %>%
   distinct(region, district20, ward, village, market, .keep_all = T)
 
 if(filesave){
@@ -291,18 +291,12 @@ if(filesave){
 ```{r, quickanalysis}
 
 animalsaleslong <- mrktb_final %>% 
-  select(market.final, starts_with("sheep."), starts_with("goat")) %>%
+  select(market, starts_with("sheep."), starts_with("goat")) %>%
   mutate_if(is.numeric, replace_na, replace = 0) %>%
   rowwise() %>% 
   mutate(count.all = sum(c_across(`sheep.0to12`:`goat.adult`), na.rm = T)) %>%
-  gather(key = "age.group", value = "count", -c(market.final, count.all)) %>%
+  gather(key = "age.group", value = "count", -c(market, count.all)) %>%
   mutate(prop = round(count/count.all, digits = 2))
-
-
-
-ggplot(animalsaleslong, aes(x=count), group = age.group)+
-  geom_histogram(aes(fill = age.group), alpha = 0.5, col = "black")+
-  facet_wrap(~age.group)
 
 ggplot(animalsaleslong, aes(x=count), group = age.group)+
   geom_histogram(aes(fill = age.group), alpha = 0.5, col = "black")+
