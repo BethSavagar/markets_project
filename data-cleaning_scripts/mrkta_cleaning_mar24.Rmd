@@ -7,6 +7,10 @@ output:
   html_document: default
 ---
 
+# Cleaning Script 1 for market A data:
+- takes raw market A info survey, subset to tanzania
+- Basic cleaning of string data
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```

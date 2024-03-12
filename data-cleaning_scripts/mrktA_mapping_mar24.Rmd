@@ -631,7 +631,7 @@ mrkta_info_final <- mrkta_info %>%
        gps.coordinates.of.the.market,
        unique.row.identifier.uuid.)
 
-# write.csv(mrkta_info_clean2, file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
+# write.csv(mrkta_info_final, file = here("data/data-cleaning_data/mrkta_generalinfo_tanzania_final.csv"), row.names = F)
 
 ```
 
