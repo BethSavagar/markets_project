@@ -59,28 +59,14 @@ mrkta_gps %>%
   filter(is.na(df))
 
 
-
 ## MAP
-mrkta_mapdata <- mrkta_gps %>% 
+mrktc_mapdata <- mrktc_gps %>% 
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
 # arrange(gps.coordinates.of.the.market) %>% 
 # filter(!is.na(lat), !is.na(long))
 
-mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326) 
-
-
-
-
-## MAP
-mrkta_mapdata <- mrkta_gps %>% 
-  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
-         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
-# arrange(gps.coordinates.of.the.market) %>% 
-# filter(!is.na(lat), !is.na(long))
-
-mrkta_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326) 
-
+mrktc_sf <- st_as_sf(mrkta_mapdata, coords = c("long","lat"),  crs = 4326) 
 
 
 ggplot() +
@@ -94,9 +80,6 @@ ggplot() +
        #title = "Market Survey A-geomatched (circles) and C-linkA (triangles) data",
   )+
   theme(legend.position = "right", legend.box = "horizontal")
-
-
-
 
 ggplot() +
   geom_sf(data = twards_shp %>% filter(Region_N %in% "mtwara"), linewidth = 0.1) +
