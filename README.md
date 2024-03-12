@@ -105,3 +105,16 @@ Market C Survey Cleaning
 2) tza_mapping-layers-to-markets.Rmd
 - map multiple spatial layers to market A location data.
 
+## Market C: Origin-Destination Data
+
+1) mrktc_origindest-cleaning_mar24
+
+- Clean mrktc selling (origin) and buying (destination) data
+- Matched to tanzania shapefiles
+- cleaned file saved as: 
+  - `data/tanzania_data/mrktc_origdest_tanzania_final.csv`
+  
+2) mrktc_origdest-analysis.Rmd
+- origin and destination data analsyis from market survey C
+- take 3310 row dataframe with all origin/destination data
+- summarise as origin-destination stats for each market
