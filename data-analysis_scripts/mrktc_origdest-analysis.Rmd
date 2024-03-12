@@ -35,18 +35,17 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```{r load-data, include = F}
 
 # Market survey A data:
-mrkta_gps <- read_csv(here("data/tanzania_data/mrkta_gps_tanzania_final.csv")) 
+mrkta_gps <- read_csv(here("data/cleaning_data/mrkta_gps_tanzania_final.csv")) 
 
 # Market Survey C data
-mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
-mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/cleaning_data/mrktc_allgps_tanzania_final.csv"))
 
 mrktc_coords <- mrktc_gps %>%
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
 mrktc_sf <- st_as_sf(mrktc_coords, coords = c("long","lat"),  crs = 4326)
 
-# Market Survey C origins and destinations
+# Market Survey C origins and destinations (from mrktc_origindest-cleaning_mar24)
 mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv")) %>%
   select(-`...1`)
 
@@ -56,6 +55,8 @@ twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
 tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
 
 ```
+
+# Script Producing Summary Origin/Destination data for MFA
 
 # Data Overview:
 
