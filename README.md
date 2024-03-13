@@ -93,8 +93,17 @@ Market C Survey Cleaning
 - No location data in this dataframe, 
 - Clean and update dataframe to reflect acitivites of interest.
 - saved as: 
-  - `mrktc_mrktactivities_tanzania_final.csv`
+  - `mrktc_mrktactivities_tanzania_CLEAN.csv`
   
+  7) mrktc_cleaning-actvty-analysis_mar24.Rmd
+  - Further steps to refine the mrktactivities dataframe
+  - Sense check consistency in responses 
+    e.g.: 
+    - ID as trader, activity = trading, reason = business etc
+
+
+
+
   
 # Analysis Scripts:
 
