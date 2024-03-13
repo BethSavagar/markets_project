@@ -1,0 +1,65 @@
+---
+title: "Tanzania Market Survey C: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## review Other categories for data to tease out 
+# - see excel sheets, recode and reform in mrktdf_definition dataframe
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+Produce market C - Activities dataframe for use in MFA
+
+
+## Load Data:
+
+```{r dataload}
+
+filesave <- F
+
+# mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+
+mrktc_activities_clean <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_CLEAN.csv"))
+
+# potentially read in origdest data at this stage too. 
+```
+
+```{r}
+
+mrktc_all <- mrktc_info %>%
+  left_join(mrktc_activities_clean %>% select(-unique.row.identifier.uuid.), 
+            by = "fid")
+colnames(mrktc_all)
+
+```
+
+
+# Respondent role:
+
+```{r resprole}
+
+
+```
