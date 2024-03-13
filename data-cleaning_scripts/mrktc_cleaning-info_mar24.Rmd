@@ -120,12 +120,49 @@ mrktc_info <- left_join(
 
 ```
 
+```{r resprole}
 
-```{r saveInfo}
-if(filesave){
-  write_csv(mrktc_info, file = here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
-}
+mrktc_info <- mrktc_info %>%
+  mutate(
+    "respondent.role" = tolower(`respondent.role`), # all lower case
+    "respondent.role" = gsub("[[:punct:]]", " ", `respondent.role`), # remove punctuation
+    "respondent.role" = trimws(`respondent.role`) #trim leading and trailing spaces
+    )
+
+# write.csv(mrktc_info %>% distinct(`respondent.role`), file = here("data/data-cleaning_data/respondentrole_mrktc.csv"))
 
 ```
 
 
+```{r resprole2}
+
+resp.role <- read_excel(here("data/data-cleaning_data/respondentrole_mrktc.xlsx"))
+
+mrktc_info_final <- mrktc_info %>%
+  left_join(resp.role %>% select(`respondent.role`,`respondent.role.code` = "translation"),
+            by = c("respondent.role")) %>%
+  mutate(respondent.role.code = tolower(`respondent.role.code`), # all lower case
+    "respondent.role.code" = gsub("[[:punct:]]", " ", `respondent.role.code`), # remove punctuation
+    "respondent.role.code" = trimws(`respondent.role.code`) #trim leading and trailing spaces
+  ) %>%
+  
+  mutate(
+    "respondent.buyer" = if_else(grepl("buy", `respondent.role.code`), 1, 0),
+    "respondent.seller" = if_else(grepl("sell", `respondent.role.code`), 1, 0),
+    "respondent.business" = if_else(grepl("business|entrepreneur", `respondent.role.code`), 1, 0),
+    "respondent.middleman" = if_else(grepl("middleman|broker", `respondent.role.code`), 1, 0),
+    "respondent.farmer" = if_else(grepl("farmer", `respondent.role.code`), 1, 0),
+    "respondent.breeder" = if_else(grepl("breed", `respondent.role.code`), 1, 0),
+    "respondent.butcher" = if_else(grepl("butcher", `respondent.role.code`), 1, 0),
+    "respondent.food" = if_else(grepl("vendor|food", `respondent.role.code`), 1, 0))
+    
+```
+
+```{r saveinfo}
+
+if(filesave){
+  write_csv(mrktc_info_final, file = here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+}
+
+
+```
