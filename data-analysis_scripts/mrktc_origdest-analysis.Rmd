@@ -83,6 +83,7 @@ Market Identifiers:
 
 ```{r origins}
 
+# Subset only origin data (2021 rows with origin data)
 mrktc_origins <- mrktc_origdest %>%
   select(
     fid,
