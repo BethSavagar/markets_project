@@ -76,7 +76,7 @@ mrktb_info <- read_csv(here("data/data-cleaning_data/mrktb_generalinfo_tanzania_
 # Market Survey C data
 mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
 mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
-mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+mrktc_actvty <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_CLEAN.csv"))
 
 mrkt_origdest_join <- read_csv(here("data/tanzania_data/mrktdf_origdestforjoin_final.csv"))
 
@@ -176,7 +176,9 @@ num.anmlsdf <- mrktb_info %>%
     prop.shpY = sheep.0to12/num.anmls,
     prop.shpA = sheep.adult/num.anmls,
     prop.goatY = goat.0to12/num.anmls,
-    prop.goatA = goat.adult/num.anmls) %>%
+    prop.goatA = goat.adult/num.anmls,
+    prop.srA = prop.shpA+prop.goatA,
+    prop.srY = prop.shpY+prop.goatY) %>%
   # mutate_at(c('prop.shp','prop.goat', 'prop.shpY','prop.goatY','prop.shpA','prop.goatA'), ~replace_na(.,0)) %>%
   select(region,
          district,
@@ -277,6 +279,16 @@ mrktc_characteristics <- mrktc_info %>%
     # (i) Stakeholder activity 
     # actvty.main = ###
     prop.trader = sum(trader)/num.srvy,
+    
+    # respondent.role = ###
+    prop.respbuyer = sum(respondent.buyer)/num.srvy,
+    prop.respseller = sum(respondent.seller)/num.srvy,
+    prop.respbusiness = sum(respondent.business)/num.srvy,
+    prop.respmiddleman = sum(respondent.middleman)/num.srvy,
+    prop.respfarmer = sum(respondent.farmer)/num.srvy,
+    prop.respbreeder = sum(respondent.breeder)/num.srvy,
+    prop.respbutcher = sum(respondent.butcher)/num.srvy,
+    prop.respfood = sum(respondent.food)/num.srvy,
 
     # prop of stakeholders undertaking X activity:
     prop.buy = sum(`1.activity.buy`)/num.srvy,
@@ -299,13 +311,15 @@ mrktc_characteristics <- mrktc_info %>%
     ## Sales
     sellreason.business = sum(`3.sell.business`)/num.srvy,
     sellreason.household = sum(`3.sell.household`)/num.srvy,
-    sellreason.medical = sum(`3.sell.medical`)/num.srvy,
-    sellreason.school = sum(`3.sell.school`)/num.srvy,
-    sellreason.livestocktreatment = sum(`3.sell.livestocktreatment`)/num.srvy,
-    sellreason.restock = sum(`3.sell.restock`)/num.srvy,
-    sellreason.religious = sum(`3.sell.religious`)/num.srvy,
+    sellreason.livestock = sum(`3.sell.livestock`)/num.srvy,
+   # sellreason.medical = sum(`3.sell.medical`)/num.srvy,
+    #sellreason.school = sum(`3.sell.school`)/num.srvy,
+    #sellreason.livestocktreatment = sum(`3.sell.livestocktreatment`)/num.srvy,
+    #sellreason.restock = sum(`3.sell.restock`)/num.srvy,
+    #sellreason.religious = sum(`3.sell.religious`)/num.srvy,
     sellreason.slaughter = sum(`3.sell.slaughter`)/num.srvy,
     sellreason.income = sum(`3.sell.income`)/num.srvy,
+    sellreason.informaltrade = sum(`3.sell.informaltrade`)/num.srvy,
     sellreason.agriculture = sum(`3.sell.agriculture`)/num.srvy,
     sellreason.food = sum(`3.sell.food`)/num.srvy,
     sellreason.otherreason = sum(`3.sell.otherreason`)/num.srvy,
@@ -317,14 +331,16 @@ mrktc_characteristics <- mrktc_info %>%
     buyreason.breedstock = sum(`7.buy.breedstock`)/num.srvy,
     buyreason.fattening = sum(`7.buy.fattening`)/num.srvy,
     buyreason.rearing = sum(`7.buy.rearing`)/num.srvy,
-    buyreason.homeconsumption = sum(`7.buy.homeconsumption`)/num.srvy,
-    buyreason.religious = sum(`7.buy.religious`)/num.srvy,
+    buyreason.homereligious = sum(`7.buy.homereligious`)/num.srvy,
+    # buyreason.homeconsumption = sum(`7.buy.homeconsumption`)/num.srvy,
+    # buyreason.religious = sum(`7.buy.religious`)/num.srvy,
     buyreason.slaughter = sum(`7.buy.slaughter`)/num.srvy,
     buyreason.income = sum(`7.buy.income`)/num.srvy,
     buyreason.informaltrade = sum(`7.buy.informaltrade`)/num.srvy,
     buyreason.food = sum(`7.buy.food`)/num.srvy,
     buyreason.otherreason = sum(`7.buy.otherreason`)/num.srvy,
     buyreason.multi = sum(`7.buyreason.multi`)/num.srvy,
+    # buyreason.NAsell = sum(`7.buy.NAsell`)/num.srvy,
     
     # 4) Origin Characteristics 
 
@@ -356,7 +372,7 @@ mrktc_characteristics <- mrktc_info %>%
     dest.foot = sum(`8.buy.foot`)/num.srvy,
     dest.vehicle = sum(`8.buy.vehicle`)/num.srvy,
     dest.cart = sum(`8.buy.cart`)/num.srvy,
-    dest.motorbike = sum(`8.buy.motorbike`)/num.srvy,
+    # dest.motorbike = sum(`8.buy.motorbike`)/num.srvy,
     dest.mrktslaughter = sum(`8.buy.slaughter`)/num.srvy,
     dest.atmrkt = sum(`8.buy.atmarket`)/num.srvy,
     dest.othertransport = sum(`8.buy.othertransport`)/num.srvy,
@@ -370,6 +386,9 @@ mrktc_characteristics <- mrktc_info %>%
 mrktc_forjoin <- mrktc_characteristics %>%
   rowwise() %>%
   mutate(
+    # respondent.main
+    respondent.main = names(mrktc_characteristics %>% select(prop.respbuyer: prop.respfood))[which.max(c_across(c(prop.respbuyer: prop.respfood)))],
+
     # main activity
     actvty.main = names(mrktc_characteristics %>% select(prop.buy:prop.otheractvty))[which.max(c_across(c(prop.buy:prop.otheractvty)))],
     
@@ -405,7 +424,18 @@ mrktc_forjoin <- mrktc_characteristics %>%
     market,
     
     #stakeholder characteristics
+    # (i) respondent role:
     prop.trader,
+    prop.respbuyer,
+    prop.respseller,
+    prop.respbusiness,
+    prop.respmiddleman,
+    prop.respfarmer,
+    prop.respbreeder,
+    prop.respbutcher,
+    prop.respfood,
+    
+    # (ii) main activity
     actvty.main,
     prop.buy,
     prop.sell,
@@ -422,13 +452,15 @@ mrktc_forjoin <- mrktc_characteristics %>%
     sellreason.main,
     sellreason.business,
     sellreason.household,
-    sellreason.medical,
-    sellreason.school,
-    sellreason.livestocktreatment,
-    sellreason.restock,
-    sellreason.religious,
+    sellreason.livestock,
+    # sellreason.medical,
+    # sellreason.school,
+    # sellreason.livestocktreatment,
+    # sellreason.restock,
+    # sellreason.religious,
     sellreason.slaughter,
     sellreason.income,
+    sellreason.informaltrade,
     sellreason.agriculture,
     sellreason.food,
     sellreason.otherreason,
@@ -440,8 +472,9 @@ mrktc_forjoin <- mrktc_characteristics %>%
     buyreason.breedstock,
     buyreason.fattening,
     buyreason.rearing,
-    buyreason.homeconsumption,
-    buyreason.religious,
+    buyreason.homereligious,
+    # buyreason.homeconsumption,
+    # buyreason.religious,
     buyreason.slaughter,
     buyreason.income,
     buyreason.informaltrade,
@@ -476,7 +509,7 @@ mrktc_forjoin <- mrktc_characteristics %>%
     dest.foot,
     dest.vehicle,
     dest.cart,
-    dest.motorbike,
+    # dest.motorbike,
     dest.mrktslaughter,
     dest.atmrkt,
     dest.othertransport,
@@ -505,6 +538,7 @@ mrkts_master_noMtwara <- mrkts_master_v4 %>% filter(!region %in% c("mtwara", "li
 # 
 # write.csv(mrkts_master_noMtwara, file = here("data/data-cleaning_data/mrkts_origdest_noMtwara.csv"))
 # write.csv(mrkts_master_v4, file = here("data/data-cleaning_data/mrkts_origdest_v4.csv"))
+# write.csv(mrkts_master_v4, file = here("data/data-cleaning_data/mrkts_MFA_v4.csv"))
 
 ```
 

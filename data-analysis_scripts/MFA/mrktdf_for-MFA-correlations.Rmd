@@ -1,0 +1,354 @@
+---
+title: 'Tanzania Market Survey C: Descriptive Analysis'
+author: "Beth Savagar"
+date: "2024-01-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+library(reshape2)
+
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+
+# with Mar-24 updated data:
+```{r load-data, include = F}
+
+# Market survey A data:
+mrkts_master <- read_csv(file = here("data/data-cleaning_data/mrkts_MFA_v4.csv")) %>% select(-`...1`)
+
+
+
+```
+
+
+## (1) Environmental Characteristics:
+
+
+```{r envcor}
+env <- mrkts_master %>%
+  select(humpop_density1km:road.type) %>%
+  select_if(is.numeric)
+
+env_cor <- cor(env, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(env_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+```
+
+\newpage
+
+## (X) Animals at market:
+- *Sales and number of animlas at market* (and number surveys)
+
+```{r anmlsmrkt}
+
+anmls <- mrkts_master %>%
+  select(num.srvy:main.anml) %>%
+  select_if(is.numeric) %>%
+  select(!contains(".shp"))
+
+anml_cor <- cor(anmls, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(anml_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+```
+
+
+\newpage
+
+## (X) origin catchment:
+
+```{r origcatchment}
+
+origcatch <- mrkts_master %>%
+  select(origin.nmvmts:origin.areakm2) %>%
+  select_if(is.numeric)
+
+origcatch_cor <- cor(origcatch, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(origcatch_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+\newpage
+
+
+## (X) dest catchment:
+
+```{r destcatchment}
+
+destcatch <- mrkts_master %>%
+  select(dest.nmvmts:dest.areakm2) %>%
+  select_if(is.numeric)
+
+destcatch_cor <- cor(destcatch, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(destcatch_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+\newpage
+
+## (X) Respondents activities:
+
+```{r resp}
+
+resp <- mrkts_master %>%
+  select(prop.trader:prop.otheractvty) %>%
+  select_if(is.numeric)
+
+resp_cor <- cor(resp, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(resp_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+\newpage
+
+## (3) Resp * market visits
+
+- *respondent type market visits*
+
+```{r respmrktvisits}
+
+
+respmrkt <- mrkts_master %>%
+  select(prop.trader:prop.respfood, visits.othermrkt,visits.thismrkt) %>%
+  select_if(is.numeric)
+
+respmrkt_cor <- cor(respmrkt, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(respmrkt_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+
+\newpage
+
+
+## (3) Resp * Sell reason
+
+- *respondent type by reason for selling*
+
+```{r respsell}
+
+respsell <- mrkts_master %>%
+  select(prop.trader:prop.respfood, contains("sellreason")) %>%
+  select_if(is.numeric)
+
+respsell_cor <- cor(respsell, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(respsell_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+
+## (3) Resp * Buy reason
+
+- *respondent type by reason for selling*
+
+```{r respsell}
+
+respbuy <- mrkts_master %>%
+  select(prop.trader:prop.respfood, contains("buyreason")) %>%
+  select_if(is.numeric)
+
+respbuy_cor <- cor(respbuy, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(respbuy_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+## (3) Origins
+
+- *Origin type and transport*
+
+```{r origins}
+
+origresp <- mrkts_master %>%
+  select(prop.trader:prop.respfood, origin.main:origin.otherplace) %>%
+  select_if(is.numeric)
+
+origresp_cor <- cor(origresp, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(origresp_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+## (3) Dests
+
+- *Ddest ination by respondent*
+
+```{r origins}
+
+destresp <- mrkts_master %>%
+  select(prop.trader:prop.respfood, dest.main:dest.otherplace) %>%
+  select_if(is.numeric)
+
+destresp_cor <- cor(destresp, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(destresp_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+## (3) Dests
+
+- *Dest type and transport*
+
+```{r dests}
+
+destchar <- mrkts_master %>%
+  select(dest.main:dest.unknowntransport) %>%
+  select_if(is.numeric)
+
+destchar_cor <- cor(destchar, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(destchar_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```
+
+
+
+## (3) Origins * Resp
+
+- *Origin type by respondent*
+
+```{r origins}
+
+origresp <- mrkts_master %>%
+  select(origin.main:origin.unknowntransport) %>%
+  select_if(is.numeric)
+
+origchar_cor <- cor(origchar, use = "complete.obs")  # 'use' argument handles missing values
+
+melted_cor_matrix <- melt(origchar_cor)
+ggplot(data = melted_cor_matrix, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x='', y='')
+
+
+```

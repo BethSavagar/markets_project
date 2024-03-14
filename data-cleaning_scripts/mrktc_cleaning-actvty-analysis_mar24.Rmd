@@ -57,9 +57,12 @@ colnames(mrktc_all)
 ```
 
 
-# Respondent role:
+# Trader:
 
-```{r resprole}
+```{r trader}
 
+mrktc_all %>% filter(trader ==1) %>% View()
+
+# 1314 self-id as traders
 
 ```

@@ -1,0 +1,177 @@
+---
+title: "mrktc_origdest_catchment"
+output: html_document
+date: "2024-02-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(rmarkdown)
+library(igraph)
+library(ggraph)
+```
+
+```{r theme, include = F}
+custom_theme <- theme_bw() + 
+  theme(text = element_text(family = "serif", size = 10))
+theme_set(custom_theme)
+
+tanzania_pal <- rep(brewer.pal(9,"Pastel1"),times=4)
+market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
+```
+
+## Quick Network Analysis ##
+
+
+```{r load-data, include = F}
+
+# Market survey A data:
+mrkta_gps <- read_csv(here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv")) 
+
+# Market Survey C data
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+
+mrktc_coords <- mrktc_gps %>%
+  mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         long = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2])
+mrktc_sf <- st_as_sf(mrktc_coords, coords = c("long","lat"),  crs = 4326)
+
+# Market Survey C origins and destinations (from mrktc_origindest-cleaning_mar24)
+mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv")) %>%
+  select(-`...1`)
+
+# Load Tanzania Shapefile:
+sf_use_s2(FALSE)
+twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
+tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
+
+```
+
+# Script Producing Summary Origin/Destination data for MFA
+
+# Data Overview:
+
+Market Identifiers:
+- fid
+- date
+- region
+- district
+- district20
+- ward
+- village
+- market
+
+
+## 2) Market Catchment Characteristics:
+
+- total.area
+
+- origin.maxdist
+- origin.area
+- origin.ndstrct
+- origin.nwards
+
+
+```{r origins}
+
+# Subset only origin data (2021 rows with origin data)
+mrktc_origins <- mrktc_origdest %>%
+  select(
+    fid,
+    `2.sell.place.ward.final`,
+    `2.sell.place.district.final`,
+    `2.sell.place.region.final`
+  ) %>%
+  drop_na()
+
+# create shapefile with point data for origins of animals at market:
+
+mrktc_origins_sf <- mrktc_origins %>%
+  # join
+  left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`2.sell.place.ward.final` = "Ward_N", 
+           `2.sell.place.district.final` = "Dist20_N",
+           `2.sell.place.region.final` = "Region20_N")
+  ) %>%
+  st_as_sf() %>%
+  st_point_on_surface()
+
+# this is the shapefile of ward polygons
+
+mrktc_origins_gps <- mrktc_origins_sf %>%
+  st_drop_geometry() %>%
+  mutate(origlong = st_coordinates(mrktc_origins_sf)[,1],
+         origlat = st_coordinates(mrktc_origins_sf)[,2])
+
+
+```
+
+
+```{r origcatchment}
+
+orig_wddstrct <- mrktc_origins_gps %>%
+  mutate(wddstrct = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-")) 
+
+mrktc_mrktorig <- mrktc_origins_gps %>%
+  # join market location:
+  left_join(mrktc_gps %>% rename(
+    mrkt.region = region,
+    mrkt.district = district20,
+    mrkt.ward = ward,
+    mrkt.village = village,
+    mrkt.name = market
+  ) %>%
+    select(-c(district)), 
+  by = "fid") %>%
+  # variables for market lat and long:
+  mutate(mrktlong = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2],
+         mrktlong = as.numeric(mrktlong),
+         mrktlat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
+         mrktlat = as.numeric(mrktlat)
+  )
+
+
+
+# distlist <- twards_shp %>% filter(Region20_N == "dodoma") %>% distinct(Dist20_N) %>% pull(Dist20_N)
+
+mrktc_orignetwork <- mrktc_mrktorig %>%
+  #filter(mrkt.region %in% c("dodoma")) %>%
+    mutate(orig_wddstrct = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-"),
+           mrkt_wddstrct = paste(`mrkt.district`,`mrkt.region`, sep = "-")) %>%
+  select(fid,orig_wddstrct,mrkt_wddstrct) %>%
+  group_by(orig_wddstrct,mrkt_wddstrct) %>%
+  count() %>%
+  filter(!orig_wddstrct == mrkt_wddstrct)
+
+
+###############
+# Assuming you have a dataframe `edges` with columns `from`, `to`, and `weight` (number of movements)
+network <- graph_from_data_frame(d = mrktc_orignetwork)
+# network <- graph_from_data_frame(d = mrktc_orignetwork, directed = TRUE)
+
+
+plot(network)
+plot(network, edge.width = E(network)$n)
+
+ggraph(network, layout = "fr") +  # Using the Fruchterman-Reingold layout
+  geom_edge_link(aes(width = n), color = "gray") + 
+  geom_node_point(color = "blue", size = 5) +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+  theme_graph() + 
+  labs(title = "Network Visualization with ggraph")
+
+```

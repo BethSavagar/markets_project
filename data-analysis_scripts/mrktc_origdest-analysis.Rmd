@@ -35,10 +35,10 @@ market_pal <- c(brewer.pal(8, "Dark2"), "#FFA500", "#6A3D9A", "#33A02C")
 ```{r load-data, include = F}
 
 # Market survey A data:
-mrkta_gps <- read_csv(here("data/cleaning_data/mrkta_gps_tanzania_final.csv")) 
+mrkta_gps <- read_csv(here("data/data-cleaning_data/mrkta_gps_tanzania_final.csv")) 
 
 # Market Survey C data
-mrktc_gps <- read_csv(here("data/cleaning_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
 
 mrktc_coords <- mrktc_gps %>%
   mutate(lat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
