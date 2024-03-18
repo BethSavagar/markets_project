@@ -135,26 +135,57 @@ mrktc_info <- mrktc_info %>%
 
 
 ```{r resprole2}
+# order strings alphabetically
+alphabetical <- function(words) {
+  words <- sort(words)
+  paste(words, collapse = " ")
+}
 
-resp.role <- read_excel(here("data/data-cleaning_data/respondentrole_mrktc.xlsx"))
+# remove repeated words
+repeats <- function(words) {
+  paste(unique(words), collapse = " ")
+}
+
+
+resp.role <- read_excel(here("data/data-cleaning_data/respondentrole_mrktc.xlsx")) %>%
+  select(`respondent.role`,`respondent.role.code` = "translation")
+
+
+resp.role <- resp.role %>%
+  mutate(respondent.role.code = tolower(`respondent.role.code`), # all lower case
+         respondent.role.code = gsub("[[:punct:]]", " ", `respondent.role.code`), # remove punctuation
+         # animals
+         respondent.role.code = gsub("goat\\S*|sheep|livestock|bees|chickens|rabbits|animals", "", respondent.role.code),
+         respondent.role.code = gsub("and|of|also|for", "", respondent.role.code),
+         respondent.role.code = gsub("i have come to|in the market|i m|right here|various places|shop|meat|grilling|market", "", respondent.role.code),
+         respondent.role.code = gsub("\\bbuy\\S*|purchase", "buyer", respondent.role.code),
+         respondent.role.code = gsub("\\bsell\\S*", "seller", respondent.role.code),
+         respondent.role.code = gsub("\\bbreed\\S*", "breeder", respondent.role.code),
+         respondent.role.code = gsub("\\bbusiness\\S*", "businessman", respondent.role.code),
+         respondent.role.code = gsub("\\bentrepreneur\\S*", "businessman", respondent.role.code),
+         respondent.role.code = gsub("\\bslaughter\\S*", "slaughter", respondent.role.code),
+         respondent.role.code = gsub("\\bsmuggle\\S*", "other", respondent.role.code),
+         respondent.role.code = gsub("witch doctor", "other", respondent.role.code),
+         respondent.role.code = gsub("soup seller", "other", respondent.role.code),
+         respondent.role.code = gsub("\\brestaurant\\S*", "other", respondent.role.code),
+         respondent.role.code = gsub("\\bmgalagajaa|\\bjalagaja|\\bunion|\\btrtt|\\bnyamikoma|\\bswindler|\\bstudent|\\bmufindi|\\bmfanty|\\bmf|\\bisunta|\\bisale|gulunga jilala", "other", respondent.role.code)) %>% 
+  mutate(respondent.role.code = sapply(str_split(respondent.role.code, "\\s+"), alphabetical),
+         respondent.role.code = sapply(str_split(respondent.role.code, "\\s+"), repeats),
+         respondent.role.code = gsub("\\s+", " ", trimws(respondent.role.code)))
 
 mrktc_info_final <- mrktc_info %>%
-  left_join(resp.role %>% select(`respondent.role`,`respondent.role.code` = "translation"),
+  left_join(resp.role,
             by = c("respondent.role")) %>%
-  mutate(respondent.role.code = tolower(`respondent.role.code`), # all lower case
-    "respondent.role.code" = gsub("[[:punct:]]", " ", `respondent.role.code`), # remove punctuation
-    "respondent.role.code" = trimws(`respondent.role.code`) #trim leading and trailing spaces
-  ) %>%
-  
   mutate(
-    "respondent.buyer" = if_else(grepl("buy", `respondent.role.code`), 1, 0),
-    "respondent.seller" = if_else(grepl("sell", `respondent.role.code`), 1, 0),
-    "respondent.business" = if_else(grepl("business|entrepreneur", `respondent.role.code`), 1, 0),
+    "respondent.buyer" = if_else(grepl("buyer", `respondent.role.code`), 1, 0),
+    "respondent.seller" = if_else(grepl("seller", `respondent.role.code`), 1, 0),
+    "respondent.business" = if_else(grepl("businessman", `respondent.role.code`), 1, 0),
     "respondent.middleman" = if_else(grepl("middleman|broker", `respondent.role.code`), 1, 0),
     "respondent.farmer" = if_else(grepl("farmer", `respondent.role.code`), 1, 0),
-    "respondent.breeder" = if_else(grepl("breed", `respondent.role.code`), 1, 0),
+    "respondent.breeder" = if_else(grepl("breeder", `respondent.role.code`), 1, 0),
     "respondent.butcher" = if_else(grepl("butcher", `respondent.role.code`), 1, 0),
-    "respondent.food" = if_else(grepl("vendor|food", `respondent.role.code`), 1, 0))
+    "respondent.other" = if_else(grepl("vendor|food", `respondent.role.code`), 1, 0)) %>% 
+  mutate("respondent.buyandsell" = if_else(respondent.buyer == 1 & respondent.seller == 1, 1, 0))
     
 ```
 

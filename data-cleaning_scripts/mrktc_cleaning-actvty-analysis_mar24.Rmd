@@ -54,6 +54,8 @@ mrktc_all <- mrktc_info %>%
             by = "fid")
 colnames(mrktc_all)
 
+# write.csv(mrktc_all, file = here("data/data-cleaning_data/mrktc_infoactvty_tanzania.csv"))
+
 ```
 
 
@@ -61,8 +63,46 @@ colnames(mrktc_all)
 
 ```{r trader}
 
-mrktc_all %>% filter(trader ==1) %>% View()
+mrktc_all %>% filter(trader ==1) %>% nrow()
 
-# 1314 self-id as traders
+# 1314 id as traders
+
+mrktc_all %>% filter(trader == 1) %>% 
+ 
+  group_by(respondent.role.code) %>% 
+  count() %>% 
+  View()
+
+
+mrktc_all %>% 
+  # of all traders
+  filter(trader ==1) %>%
+  mutate(`2.sell.thismrkt` = if_else(`4.sell.frommrkt` ==1, 1, 0),
+         `6.buy.thismrkt` = if_else(`8.buy.atmarket`==1,1,0),
+         `2.sell.market` = if_else(`2.sell.thismrkt`==1,0,`2.sell.market`),
+         `6.buy.market` = if_else(`6.buy.thismrkt`==1,0,`6.buy.market`)) %>%
+  # how many brought animals from a market (not this market)
+  # and how many take animals to a market (not this market) 
+  group_by(`2.sell.market`, `2.sell.thismrkt`,
+           `6.buy.market`, `6.buy.thismrkt`) %>%
+  count() %>% 
+  View()
+
+
+
+mrktc_all %>% 
+  # of all traders
+  filter(trader ==1) %>%
+  mutate(`2.sell.thismrkt` = if_else(`4.sell.frommrkt` ==1, 1, 0),
+         `6.buy.thismrkt` = if_else(`8.buy.atmarket`==1,1,0),
+         `2.sell.market` = if_else(`2.sell.thismrkt`==1,0,`2.sell.market`),
+         `6.buy.market` = if_else(`6.buy.thismrkt`==1,0,`6.buy.market`)) %>%
+  # how many brought animals from a market (not this market)
+  # and how many take animals to a market (not this market) 
+  # filter(`2.sell.market` == 1 | `6.buy.market` == 1) %>%
+  filter(`6.buy.market` == 1) %>%
+  filter(`1.activity.trade`==1|`1.activity.buy`==1) %>% #,`1.activity.middleman`
+  # count() %>% 
+  View()
 
 ```
