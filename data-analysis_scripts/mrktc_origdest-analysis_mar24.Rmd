@@ -50,7 +50,7 @@ mrktc_coords <- mrktc_gps %>%
 mrktc_sf <- st_as_sf(mrktc_coords, coords = c("long","lat"),  crs = 4326)
 
 # Market Survey C origins and destinations (from mrktc_origindest-cleaning_mar24)
-mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_final.csv")) %>%
+mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_finalv2.csv")) %>%
   select(-`...1`)
 
 # Load Tanzania Shapefile:
@@ -99,8 +99,8 @@ mrktc_origins <- mrktc_origdest %>%
 
 # create shapefile with point data for origins of animals at market:
 
-mrktc_origins_sf <- mrktc_origins %>%
-  # join
+mrktc_originspt_sf <- mrktc_origins %>%
+  # join tanzania ward polygons to origins data:
   left_join(
     twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
     by = c(`2.sell.place.ward.final` = "Ward_N", 
@@ -108,70 +108,85 @@ mrktc_origins_sf <- mrktc_origins %>%
            `2.sell.place.region.final` = "Region20_N")
   ) %>%
   st_as_sf() %>%
+  # transform to point data (centroid/central point within ward)
   st_point_on_surface()
 
 # this is the shapefile of ward polygons
 
-mrktc_origins_gps <- mrktc_origins_sf %>%
+mrktc_originspt_gps <- mrktc_originspt_sf %>%
   st_drop_geometry() %>%
-  mutate(origlong = st_coordinates(mrktc_origins_sf)[,1],
-         origlat = st_coordinates(mrktc_origins_sf)[,2])
+  mutate(origlong = st_coordinates(mrktc_originspt_sf)[,1],
+         origlat = st_coordinates(mrktc_originspt_sf)[,2])
 
 
 ```
 
 
-```{r origcatchment}
+```{r origmrktOD_data}
 
-orig_wddstrct <- mrktc_origins_gps %>%
-  mutate(wddstrct = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-")) 
+# Join origins data to markets data to create OD dataframe:
 
-mrktc_mrktorig <- mrktc_origins_gps %>%
-  # join market location:
-  left_join(mrktc_gps %>% rename(
+mrktorig_df <- mrktc_gps %>%
+  # tidy market location data
+  select(-district) %>%
+  rename(
     mrkt.region = region,
     mrkt.district = district20,
     mrkt.ward = ward,
     mrkt.village = village,
     mrkt.name = market
   ) %>%
-    select(-c(district)), 
-  by = "fid") %>%
   # variables for market lat and long:
   mutate(mrktlong = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 2],
          mrktlong = as.numeric(mrktlong),
          mrktlat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          mrktlat = as.numeric(mrktlat)
-  )
+  ) %>%
+  
+  # Join origin gps data:
+  left_join(mrktc_originspt_gps, by = "fid") %>%
+  
+  # exclude if no GPS data:
+  filter(! (is.na(mrktlong)|is.na(mrktlat)|is.na(origlong)|is.na(origlat)))
+
+```
 
 
+```{r dstrctnetwork}
+# Origin Destination data between distinct districts:
 
-# distlist <- twards_shp %>% filter(Region20_N == "dodoma") %>% distinct(Dist20_N) %>% pull(Dist20_N)
-
-mrktc_orignetwork <- mrktc_mrktorig %>%
-  #filter(mrkt.region %in% c("dodoma")) %>%
-    mutate(orig_wddstrct = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-"),
-           mrkt_wddstrct = paste(`mrkt.district`,`mrkt.region`, sep = "-")) %>%
-  select(fid,orig_wddstrct,mrkt_wddstrct) %>%
-  group_by(orig_wddstrct,mrkt_wddstrct) %>%
+mrktorig_OD <- mrktorig_df %>%
+    mutate(orig_distreg = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-"),
+           mrkt_distreg = paste(`mrkt.district`,`mrkt.region`, sep = "-")) %>%
+  select(fid,orig_distreg,mrkt_distreg) %>%
+  group_by(orig_distreg,mrkt_distreg) %>%
   count() %>%
-  filter(!orig_wddstrct == mrkt_wddstrct)
+  # remove self-self loops:
+  filter(!orig_distreg == mrkt_distreg)
 
 
 ###############
-# Assuming you have a dataframe `edges` with columns `from`, `to`, and `weight` (number of movements)
-network <- graph_from_data_frame(d = mrktc_orignetwork)
+mrktorig_net <- graph_from_data_frame(d = mrktorig_OD)
 # network <- graph_from_data_frame(d = mrktc_orignetwork, directed = TRUE)
 
 
-plot(network)
-plot(network, edge.width = E(network)$n)
+plot(mrktorig_net)
+plot(mrktorig_net, edge.width = E(mrktorig_net)$n)
 
-ggraph(network, layout = "fr") +  # Using the Fruchterman-Reingold layout
+ggraph(mrktorig_net, layout = "fr") +  # Using the Fruchterman-Reingold layout
   geom_edge_link(aes(width = n), color = "gray") + 
   geom_node_point(color = "blue", size = 5) +
   geom_node_text(aes(label = name), repel = TRUE, size = 3) +
   theme_graph() + 
   labs(title = "Network Visualization with ggraph")
+
+```
+
+
+```{r wardmvmtmap} 
+# Assuming 'movements' has columns: origin_lon, origin_lat, destination_lon, destination_lat, and num_movements
+
+# AA: We used R [35], a language and environment for statistical computing, as well as add-on
+# packages (ggplot,flows,network) [36, 37] to perform data analysis and plotting
 
 ```
