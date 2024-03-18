@@ -28,6 +28,8 @@ library(stringdist)
 library(fuzzyjoin)
 ```
 
+# Clean the Market-C Activities Origin and Destination data:
+
 ```{r load-data, include = F}
 
 # Market Survey C data
@@ -48,16 +50,18 @@ twards_df <- twards_shp %>%
 thfacilities <- st_read(here("data/shapefiles/health_facilities/health_facilities.shp"))
 ```
 
-# mjini = urban, vijini = rural
+
+# Transform origin-destination data to longform
+# Add "orig", "dest" identifier variables:
 
 ```{r subsetdata}
-# 1.ii. Origin and destination data:
+# 1 (i) Select only origin and destination data from df:
 origdest_df <- mrktc_actvty %>%
   select(fid,
          starts_with("2.sell.place"),
          starts_with("6.buy.place"))
-origdest_df %>% distinct(fid) %>% nrow()
 
+# 1 (ii) Subset Origins, and Destinations and join as "long" dataframe, with fid and "orig-dest" identifier. 
 origdest_long <- origdest_df %>%
   
   # Select Origins: 
@@ -69,7 +73,7 @@ origdest_long <- origdest_df %>%
   mutate(origdest = "orig") %>%
   
   # Bind Destinations:
-  bind_rows(mrktc_actvty %>%
+  bind_rows(origdest_df %>%
               select(
                 fid,
                  place0 = `6.buy.place.name`,
@@ -78,7 +82,7 @@ origdest_long <- origdest_df %>%
               mutate(origdest = "dest")
   ) %>%
   
-  # Remove rows with no location data:
+  # Remove rows with NO location data:
   
   ##  Replace "na" with NA & remove rows with all NAs
   mutate(place0 = if_else(place0 == "na", NA, place0),
@@ -86,12 +90,17 @@ origdest_long <- origdest_df %>%
          district0 = if_else(district0 == "na", NA, district0)) %>%
   filter(! (is.na(place0) & is.na(ward0) & is.na(district0))) # remove NAs
 
-# 3913 movements in total
+# 3913 movements in total. 
+origdest_long %>% group_by(origdest) %>% count()
 ```
 
+# Complete origin-destination data with available information:
+- i.e. fill in blank place/ward/district data with available information
 
 ```{r lkp}
-# If location data is NA for place/ward/disrirct, complete with available information:
+
+# 2. Complete missing data
+# If location data is NA for place/ward/district, complete with available information:
 
 origdest_lkp <- origdest_long %>% # remove NAs
   
@@ -111,9 +120,10 @@ origdest_lkp <- origdest_long %>% # remove NAs
 ```
 
 # Clean common location suffixes on raw data and reference data.
+# mjini = urban, vijini = rural
 
 ```{r matchdist}
-# 2. Clean common location suffixes
+# 3. Clean common location suffixes
 
 # mjini = urban, vijini = rural
 # suffix for urban: .tc, .mc, .cc
@@ -135,7 +145,7 @@ origdest_lkp %>%
   arrange(suffix) %>% 
   View()
 
-## 2.ii. Replace common suffixes in data:
+## 3.ii. Replace common suffixes in data:
 origdest_lkp <- origdest_lkp %>%
   mutate(dist_suffix = gsub("\\.mji[a-z]*$", ".cc.mc.tc", district), #.mji, .mjini
          dist_suffix = gsub("\\.ji[a-z]*$", ".cc.mc.tc", dist_suffix), # .jini
@@ -176,7 +186,7 @@ twards_match <- twards_df %>%
 
 ```{r distclean1}
 
-# # Dataframe of district-regions in regerence data:
+# # Dataframe of district-regions in reference data:
 
 tdists_match <- twards_match %>%
   distinct(Dist20_N, Dist20_nosuffix, Region20_N)
@@ -202,7 +212,9 @@ dist_lkp <- dist_lkp %>%
 
 # Load post-manual check:
 dist_lkp <- read_excel(here("data/data-cleaning_data/origdest_distlkp.xlsx"))
-# accept_D2 by manual checking, also "kenya", "manyoni", "tanganyika"
+# accept_D0: dist_suffix matched
+# accept_D1: dist_nosuffix matched
+# accept_D2: manual check, also "kenya", "manyoni", "tanganyika"
 
 
 dist_lkp <- dist_lkp %>%
@@ -233,22 +245,24 @@ origdest_lkp <- origdest_lkp %>%
 
 ```
 
+# Define distinct origin/destination locations from long df
 
 ```{r origdestmatch}
 
+# 4. Unique origin-destinations
 # List unique entries of place,ward,district and region for matching and cleaning:
-# Join to origdest_lkp by:
-# c("place", "ward" = "ward.A", "district.clean" = "dist.A", "region.clean" = "reg.A")
+# When joining back to original dataframe use:  place, ward, district.clean, region.clean. 
 
 origdest_lkpunique <- origdest_lkp %>%
   distinct(place, ward, district.clean, region.clean) %>%
-  # place-ward-district: 
-  mutate(pwd.A = paste(place, ward, district.clean, sep = "-"), 
-         wd.A = paste(ward, district.clean, sep = "-"),
-         wdr.A = paste(ward,district.clean,region.clean, sep = "-")) %>% 
+  # place-ward-district identifiers: 
+  mutate(pwd.A = paste(place, ward, district.clean, sep = "-"), # place-ward-district
+         wd.A = paste(ward, district.clean, sep = "-"), # ward-district
+         wdr.A = paste(ward,district.clean,region.clean, sep = "-") # ward-district-region
+         ) %>% 
   rename("ward.A" = ward, "dist.A" = district.clean, "reg.A" = region.clean)
 
-
+# update tanzania wards dataframe for matching
 twards_match <- twards_match %>%
   mutate(
     wd.B = paste(Ward_N, Dist20_N, sep = "-"),
@@ -257,37 +271,20 @@ twards_match <- twards_match %>%
     ward.B = Ward_N,
     dist.B = Dist20_N,
     reg.B = Region20_N,
-    wd.B,
-    wdr.B
+    wd.B, # ward-district
+    wdr.B # ward-district-region
   )
 
 ```
 
-
-# For entries with a confirmed district
+# Find exact ward-district-region matches.
 
 ```{r dcleanmatch}
 
-## For confirmed districts:
-# Append the region, find the closest place-ward-district match in the data
-# 
-# wdr_match <- origdest_match %>%
-#    stringdist_join(.,twards_match, 
-#                    by=c("pwd.A" = "wdr.B",
-#                         "wdr.A" = "wdr.B",
-#                         "reg.A" = "reg.B"),
-#                 mode='left', #use left join
-#                 method = "jw", #use jw distance metric
-#                 max_dist=99, 
-#                 distance_col='dist')  %>%
-#   rowwise() %>%
-#   mutate(dist_sum = sum(ward.A.dist, dist.A.dist, reg.A.dist)) %>%
-#   ungroup() %>%
-#   group_by(pwd.A) %>%
-#   slice_min(order_by=dist_sum, n=1) %>%
-#   ungroup()
+# 5. Exact ward-district-region matching:
 
 origdest_match <- origdest_lkpunique %>%
+  # join on W-D-R
    stringdist_join(.,twards_match, 
                    by=c("ward.A" = "ward.B",
                         "dist.A" = "dist.B",
@@ -297,34 +294,46 @@ origdest_match <- origdest_lkpunique %>%
                 max_dist=99, 
                 distance_col='dist')  %>%
   rowwise() %>%
+  # total distance for W-D-R
   mutate(dist_sum = sum(ward.A.dist, dist.A.dist, reg.A.dist)) %>%
   ungroup() %>%
   group_by(pwd.A) %>%
+  # keep only the closest match:
   slice_min(order_by=dist_sum, n=1) %>%
   ungroup()
 
+# Identify exact matches in dataframe:
 WDR_matched <- origdest_match %>%
   mutate(acceptWDR = if_else(dist_sum == 0, "acceptWDR0", NA))
 
-# Check that matches are unique: 
-WDR_matched %>% filter(acceptWDR == "acceptWDR0") %>% group_by(place,ward.A,dist.A,reg.A, ward.B,dist.B,reg.B) %>% mutate(dupe = n()>1) %>% View()
+# Matches are unique with no duplicates:
+WDR_matched %>% 
+  filter(acceptWDR == "acceptWDR0") %>% 
+  group_by(place,ward.A,dist.A,reg.A, ward.B,dist.B,reg.B) %>% 
+  mutate(dupe = n()>1) %>% 
+  View()
 ```
 
 
-For non exact matches
+## Non-Exact Matches # 
 (1) Check locations where ward and region match exactly but the district is incorrect
 
 ```{r matchdist}
-# Identify entries where the ward and region match but the district is incorrect:
 
+# 6.1: District Error:
+
+# Identify entries where the ward and region match but the district does not.
+# Manually check and accept:
 dist_unmatch <- WDR_matched %>%
-  # filter results which matched district and region but don't match by ward:
+  # match on Ward and Region, not District
   filter(ward.A.dist == 0, 
          dist.A.dist > 0,
          reg.A.dist == 0) %>%
+  # check matches manually:
   select(dist.A, dist.B, dist.A.dist, wdr.A, wdr.B) %>%
   distinct()
-# manually checked all examples, matches are either:
+
+# District errors are either:
   # bordering districts/mistakes 
   # the incorrect suffix: t e.g. bariadi.dc = bariadi.tc)
 
@@ -332,17 +341,22 @@ WDR_matched <- WDR_matched %>%
   # if only district is incorrect then accept correction (based on manual checking above)
   mutate(acceptWDR = if_else((ward.A.dist == 0 & dist.A.dist > 0 & reg.A.dist == 0),
                              "acceptWDR1", 
-                             acceptWDR)
-  )
+                             acceptWDR))
+# accept WDR1: ward-region matched, district manually checked.
 
+# check for duplicates:
 # wdr_match %>% filter(!is.na(acceptWDR)) %>% group_by(place,ward.A,dist.A,reg.A, ward.B,dist.B,reg.B,acceptWDR) %>% mutate(dupe = n()>1) %>% View()
 ```
 
 
+(1) Check locations where district and region match exactly but the ward is incorrect
+
 ```{r matchwd}
 
-# Identify entries where the district and region match but the ward is incorrect:
-# Check these manually in excel
+# 6.2: Ward Error:
+
+# Identify entries where the district and region match but the ward does not.
+# Manually check in excel:
 ward_unmatch <- WDR_matched %>%
   # filter results which matched district and region but don't match by ward:
   filter(ward.A.dist>0, 
@@ -351,52 +365,80 @@ ward_unmatch <- WDR_matched %>%
   select(place, ward.A, ward.B, ward.A.dist, wdr.A, wdr.B) %>%
   distinct()
 
+# save and manually check in excel:
 # write.csv(ward_unmatch, file = here("data/data-cleaning_data/unmatchwd_lkp.csv"), row.names = F)
-ward_unmatchlkp <- read_excel(here("data/data-cleaning_data/unmatchwd_lkpxl.xlsx")) %>%
-  # rename(acceptWDR2 = AcceptW1) %>%
-  mutate(acceptWDR2 = if_else(AcceptW1 == 1, "acceptWDR2", NA))
 
+# load excel checked lookup:
+ward_unmatchlkp <- read_excel(here("data/data-cleaning_data/unmatchwd_lkpxl.xlsx")) %>%
+  mutate(acceptWDR2 = if_else(AcceptW1 == 1, "acceptWDR2", NA)) # recode accept column
+# accept WDR2: district-region match, ward manually checked.
+
+
+## Update WDR_matched dataframe:
 WDR_matched <- WDR_matched %>% 
+  # join ward_unmatch to update acceptance variable.
   left_join(ward_unmatchlkp %>% 
               filter(acceptWDR2 == "acceptWDR2") %>%
               distinct(place, ward.A, wdr.A, wdr.B, acceptWDR2)) %>%
   mutate(acceptWDR = if_else(is.na(acceptWDR),acceptWDR2,acceptWDR)) %>%
   select(-acceptWDR2)
 
+
+# Total matches from exact matching of (i) all, (ii) ward-region, (iii) dist-region
 WDR_matched %>% group_by(acceptWDR) %>% count()
 
+# Store matched ward-district-region data for joining to origdest_lkp:
 wdr_join <- WDR_matched %>%
+  # exclude unmatched data:
   filter(!is.na(acceptWDR)) %>%
+  # select columns for joining:
   select(place,ward.A,dist.A,reg.A,ward.B,dist.B,reg.B, acceptWDR)
 
-# write.csv(wdr_match, file = "data/data-cleaning_data/origdest_wdr_jmatch.csv")
-# 
+# Save the matched W-D-R data:
+# write.csv(wdr_match, file = "data/data-cleaning_data/origdest_wdr_match.csv")
+
+# Check that matched data are unique (no duplicates)
 # wdr_join %>%
 #   group_by(place,ward.A,dist.A,reg.A,ward.B,dist.B,reg.B) %>%
-#   mutate(dupe = n()>1) %>% View()
-# 
-# #origdest_unique <-
-# origdest_unique %>%
-#   left_join(
-#     wdr_join,
-#     by = c("place", "ward.A", "dist.A", "reg.A")
-#   ) %>%
-#   group_by(acceptWDR) %>%
-#   count()
+#   mutate(dupe = n()>1) %>%
+#   View()
 
+# origdest_lkpunique <-
+  # origdest_lkpunique %>%
+  # left_join(
+  #   wdr_join,
+  #   by = c("place", "ward.A", "dist.A", "reg.A")
+  # ) %>%
+  # group_by(acceptWDR) %>%
+  # count()
+
+# when joined to origdest_lkpunique dataframe (all movements):
 # 935 match ward & district, 59 match reg-dist and stringward. 178 match reg-ward and stringdist.
 # 653 remain unmatched
 
-
 ```
 
-Ward-Region match:
-- Match exactly on ward and region only
+# Incomplete Matches #
+- String match on ward and region only, no matching on district:
 
 ```{r unmatchedWardRegion}
-unmatched <- WDR_matched %>% 
+
+# Identify unmatched locations from WDR_matched dataframe:
+unmatched <- WDR_matched %>%
   filter(is.na(acceptWDR)) %>% 
   distinct(place, ward.A, dist.A, reg.A, wdr.A)
+
+# unmatched <-
+  # origdest_lkpunique %>%
+  # left_join(
+  #   wdr_join,
+  #   by = c("place", "ward.A", "dist.A", "reg.A")
+  # ) %>%
+  # filter(is.na(acceptWDR)) %>%
+  # distinct(place, ward.A, dist.A, reg.A, wdr.A)
+
+
+# Match data on Ward and Region only, ignoring District:
 
 unmatched_match <- unmatched %>%
    stringdist_join(.,twards_match, 
@@ -408,34 +450,37 @@ unmatched_match <- unmatched %>%
                 max_dist=99, 
                 distance_col='dist')  %>%
   rowwise() %>%
+  # sum stringdist for Ward and Region
   mutate(dist_sum = sum(ward.A.dist, reg.A.dist)) %>%
   ungroup() %>%
   group_by(place,ward.A,dist.A) %>%
+  # keep closest match:
   slice_min(order_by=dist_sum, n=1) %>%
   ungroup()
 
+# Dataframe for manual checking: 
 unmatched_lkp <- unmatched_match %>% 
+  # select variables to check consistency between districts and stringdist between wards, regions.
   select(place, wdr.A, wdr.B, dist.A, dist.B, ends_with(".dist"), dist_sum) %>% 
   distinct()
 
-# unmatched %>% mutate(wdr.A = paste(ward.A,dist.A, reg.A, sep = "-")) %>% select(place, wdr.A, wdr.B, dist.A, dist.B, ends_with(".dist"), dist_sum) %>% filter(dist_sum==0) %>% View()
-# 
-# unmatched %>% mutate(wdr.A = paste(ward.A,dist.A, reg.A, sep = "-")) %>% select(place, wdr.A, wdr.B, dist.A, dist.B, ends_with(".dist"), dist_sum) %>% filter(dist_sum==0) %>% distinct(dist.A,dist.B) %>% View()
-
-
 # Save csv for manual check 
-# Check perfect Ward and Region match (Accept WR0)
-# Check perfect Ward match (Accept WR1)
+# Perfect match on Ward & Region (acceptWR0) - manually check district.
+# Perfect match on Ward (acceptW0) - manually check district/region.
 # write.csv(unmatched_lkp, file = "data/data-cleaning_data/unmatched2_lkp.csv")
 unmatched_lkp <- read_excel(here("data/data-cleaning_data/unmatched2_lkp.xlsx"))
+
+# Identify manually checked matches on ward and region
 unmatched_lkp <- unmatched_lkp %>%
-  # mutate(acceptWR0 = if_else(acceptWR0 != "acceptWR0", acceptW0, acceptWR0)) %>%
+  # keep only matches:
   filter(acceptWR0 %in% c("acceptWR0", "acceptW0")) %>%
+  # update with place-ward-district-region data:
   left_join(unmatched_match %>% select(place,wdr.A,ward.B,dist.B,reg.B, wdr.B),
                             by = c("place", "wdr.A", "wdr.B", "dist.B"))
 
 # unmatched_lkp %>% group_by(place,wdr.A, wdr.B, dist.A, dist.B) %>% mutate(dupe = n()>1) %>% View()
 
+# Create dataframe for joining to origdest_lkpunique"
 unmatched_join <- unmatched %>%
   select(place, 
          ward.A,
@@ -443,19 +488,28 @@ unmatched_join <- unmatched %>%
          reg.A,
          wdr.A) %>%
   left_join(unmatched_lkp %>% 
+              # keep only matched data:
               filter(!is.na(acceptWR0)) %>%
-              select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                     "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
             by = c("place", "wdr.A")) %>%
   distinct(place, ward.A, dist.A, reg.A, wdr.A,
            ward.C, dist.C, reg.C, acceptWR0) 
+
+# Check for duplicates:
 # unmatched_join %>%
 #   group_by(place,ward.A,dist.A,reg.A,ward.C, dist.C, reg.C) %>%
 #   mutate(dupe = n()>1) %>% View()
 
-# 
-# #origdest_unique <-
-# origdest_unique %>%
+# Join to origdest_lkpunique
+# origdest_lkpunique <-
+# origdest_lkpunique %>%
 #   left_join(
 #     wdr_join,
 #     by = c("place", "ward.A", "dist.A", "reg.A")
@@ -467,64 +521,73 @@ unmatched_join <- unmatched %>%
 
 ```
 
+# Update remaining unmatched data:
 
-
-# Filter by region and find closest ward match:
-
-```{r joinall}
+```{r unmatched2}
 
 unmatched2 <- unmatched_join %>% 
+  # filter to remaining unmatched:
   filter(is.na(acceptWR0)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
 ```
 
-WARD TO PLACE EXACT
 
+## HEALTH FACILITIES DATA #
+# Match to health facilities data:
+# Find exact matches between origdest data and health facilities data on:
+# (i) Ward.A = Facility_N (HF), District, Region 
+# (ii) Ward.A = Village_St (HF), District, Region
+# Check matches are found in tanzania reference data
 
-```{r}
+```{r HF1}
+
+# clean health facilities dataframe: 
 hfacilities_df <- thfacilities %>%
   st_drop_geometry() %>%
   select(Facility_N,
          Village_St,
-         ward.X = Ward,
-         dist.X = Council, 
-         reg.X = Region) %>% 
+         ward.HF = Ward,
+         dist.HF = Council, 
+         reg.HF = Region) %>% 
   mutate(
-    place.X = tolower(Facility_N),
-    place.X = gsub("[[:punct:]]", " ",place.X),
-    place.X = trimws(place.X),
-    place.X = gsub("\\s+", ".",place.X),
+    place.HF = tolower(Facility_N),
+    place.HF = gsub("[[:punct:]]", " ",place.HF),
+    place.HF = trimws(place.HF),
+    place.HF = gsub("\\s+", ".",place.HF),
     
-    village.X = tolower(Village_St),
-    village.X = gsub("[[:punct:]]", " ",village.X),
-    village.X = trimws(village.X),
-    village.X = gsub("\\s+", ".",village.X),
+    village.HF = tolower(Village_St),
+    village.HF = gsub("[[:punct:]]", " ",village.HF),
+    village.HF = trimws(village.HF),
+    village.HF = gsub("\\s+", ".",village.HF),
     
-    ward.X = tolower(ward.X),
-    ward.X = gsub("[[:punct:]]", " ",ward.X),
-    ward.X = trimws(ward.X),
-    ward.X = gsub("\\s+", ".",ward.X),
+    ward.HF = tolower(ward.HF),
+    ward.HF = gsub("[[:punct:]]", " ",ward.HF),
+    ward.HF = trimws(ward.HF),
+    ward.HF = gsub("\\s+", ".",ward.HF),
     
-    dist.X = tolower(dist.X),
-    dist.X = gsub("[[:punct:]]", " ",dist.X),
-    dist.X = trimws(dist.X),
-    dist.X = gsub("\\s+", ".",dist.X),
+    dist.HF = tolower(dist.HF),
+    dist.HF = gsub("[[:punct:]]", " ",dist.HF),
+    dist.HF = trimws(dist.HF),
+    dist.HF = gsub("\\s+", ".",dist.HF),
     
-    reg.X = tolower(reg.X),
-    reg.X = gsub("[[:punct:]]", " ",reg.X),
-    reg.X = trimws(reg.X),
-    reg.X = gsub("\\s+", ".",reg.X))
+    reg.HF = tolower(reg.HF),
+    reg.HF = gsub("[[:punct:]]", " ",reg.HF),
+    reg.HF = trimws(reg.HF),
+    reg.HF = gsub("\\s+", ".",reg.HF))
 
+
+# Match origin-destination data to health facilities data:
+# place = ward, district, region
 unmatched2_match <- unmatched2 %>%
    stringdist_join(.,hfacilities_df, 
-                   by=c("ward.A" = "place.X",
-                        "dist.A" = "dist.X",
-                        "reg.A" = "reg.X"
+                   by=c("ward.A" = "place.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
                         ),
                 mode='left', #use left join
                 method = "jw", #use jw distance metric
-                max_dist=0, 
+                max_dist=0, # keep only exact matches
                 distance_col='dist')  %>%
   # rowwise() %>%
   # mutate(dist_sum = sum(place.dist)) %>%
@@ -533,53 +596,73 @@ unmatched2_match <- unmatched2 %>%
   slice_min(order_by=ward.A.dist, n=1) %>%
   ungroup()
 
+# Check health facilities matches exist in tanzania data
 unmatched2_lkp <- unmatched2_match %>% 
+  # join tanzania data by WDR match to health facilities data
   left_join(twards_match,
-              by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
+            by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-         wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-  select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, ward.A.dist, dist.A.dist, reg.A.dist) %>% 
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  # select variables for checking matching HF to T-data and HF to orig-dest data:
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, ward.A.dist, dist.A.dist, reg.A.dist) %>% 
+  # keep only exact matches between HF and orig-dest data
   filter(ward.A.dist ==0, dist.A.dist==0, reg.A.dist ==0) %>% 
+  # REMOVE rows which have no match in the tanzania data:
   filter(!is.na(wdr.B)) %>% 
   mutate(acceptHF = "acceptHF0") # accept by matching to health facilities placenames
 
 
+# Create dataframe for joining to origdest_lkpunique"
 unmatched_join <- unmatched %>%
-    select(place, 
-           ward.A,
-           dist.A,
-           reg.A,
-           wdr.A) %>%
-    left_join(unmatched_lkp %>% 
-                  filter(!is.na(acceptWR0)) %>%
-                  select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                         "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-              by = c("place", "wdr.A")) %>%
-    left_join(unmatched2_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
     distinct(place, ward.A, dist.A, reg.A, wdr.A,
-             ward.C, dist.C, reg.C, ward.X, dist.X, reg.X, acceptWR0, acceptHF) %>% 
+             ward.C, dist.C, reg.C, 
+             ward.HF, dist.HF, reg.HF, acceptWR0, acceptHF) %>% 
   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0))
 
 # write.csv(unmatched2_match, file = here("data/data-cleaning_data/unmatched2c_lkp.csv"))
 
 ```
 
+# Find exact matches between origdest data and health facilities data on:
+# (ii) Ward.A = Village_St (HF), District, Region
 
-WARD TO VILLAGE EXACT
+```{r unmatched3}
 
-```{r}
-
+# review unmatched data:
 unmatched3 <- unmatched_join %>% 
   filter(is.na(acceptAll)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
+# Match between orig-dest data and HF data on village = ward match:
 unmatched3_match <- unmatched3 %>%
    stringdist_join(.,hfacilities_df, 
-                   by=c("ward.A" = "village.X",
-                        "dist.A" = "dist.X",
-                        "reg.A" = "reg.X"
+                   by=c("ward.A" = "village.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
                         ),
                 mode='left', #use left join
                 method = "jw", #use jw distance metric
@@ -592,65 +675,87 @@ unmatched3_match <- unmatched3 %>%
   slice_min(order_by=ward.A.dist, n=1) %>%
   ungroup()
 
+
+# Check matches exist in tanzania reference data, keep only exact matches:
+
 unmatched3_lkp <- unmatched3_match %>% 
+  # Join tanzania data:
   left_join(twards_match,
-              by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
+            by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-         wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-  select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, ward.A.dist, dist.A.dist, reg.A.dist) %>% 
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  # select vars to check between HF- tanzania data - origdest data
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, ward.A.dist, dist.A.dist, reg.A.dist) %>% 
+  # keep exact matches only:
   filter(ward.A.dist ==0, dist.A.dist==0, reg.A.dist ==0) %>% 
+  # exclude if not found in tanzania data:
   filter(!is.na(wdr.B)) %>% 
   mutate(acceptHF = "acceptHF1") # accept by matching to health facilities villagenames
 
 
 unmatched_join <- unmatched %>%
-    select(place, 
-           ward.A,
-           dist.A,
-           reg.A,
-           wdr.A) %>%
-    left_join(unmatched_lkp %>% 
-                  filter(!is.na(acceptWR0)) %>%
-                  select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                         "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-              by = c("place", "wdr.A")) %>%
-    left_join(unmatched2_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
   left_join(unmatched3_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Z = wdr.X, ward.Z = ward.X, dist.Z = dist.X, reg.Z = reg.X, acceptHFZ = acceptHF)) %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
     distinct(place, ward.A, dist.A, reg.A, wdr.A,
              ward.C, dist.C, reg.C, 
-             ward.X, dist.X, reg.X, 
-             ward.Z, dist.Z, reg.Z,
-             acceptWR0, acceptHF, acceptHFZ) %>% 
+             ward.HF, dist.HF, reg.HF, 
+             ward.HF1, dist.HF1, reg.HF1,
+             acceptWR0, acceptHF, acceptHF1) %>% 
   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
-         acceptAll = if_else(is.na(acceptAll), acceptHFZ, acceptAll))
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll))
 
 
 # write.csv(unmatched2_match, file = here("data/data-cleaning_data/unmatched2c_lkp.csv"))
 
 ```
 
-## WARD TO PLACE FUZZY
+# Find FUZZY matches between origdest data and health facilities data on:
+# (ii) Ward.A = Facility_N (HF), District, Region
 
-```{r}
+```{r unmatched4}
 
-
+# Review unmatched data:
 unmatched4 <- unmatched_join %>% 
   filter(is.na(acceptAll)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
 unmatched4_match <- unmatched4 %>%
    stringdist_join(.,hfacilities_df, 
-                   by=c("ward.A" = "place.X",
-                        "dist.A" = "dist.X",
-                        "reg.A" = "reg.X"
+                   by=c("ward.A" = "place.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
                         ),
                 mode='left', #use left join
                 method = "jw", #use jw distance metric
-                max_dist=0.5, 
+                max_dist=0.5, # allow fuzzy matches
                 distance_col='dist')  %>%
   # rowwise() %>%
   # mutate(dist_sum = sum(place.dist)) %>%
@@ -660,62 +765,85 @@ unmatched4_match <- unmatched4 %>%
   ungroup()
 
 unmatched4_lkp <- unmatched4_match %>% 
+  # exact district, region match, check fuzzy matching ward to facility_N
   filter(dist.A.dist == 0, reg.A.dist ==0 ) %>%
+  # join twards reference data
   left_join(twards_match,
-              by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
+              by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-         wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-  select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, ward.A.dist, dist.A.dist, reg.A.dist) %>%
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  # manually review place, wdr.A against placeHF
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, ward.A.dist, dist.A.dist, reg.A.dist) %>%
+  # exclude if no match in twards data
   filter(!is.na(wdr.B)) %>% 
   mutate(acceptHF = "acceptHF2") 
 
 unmatched_join <- unmatched %>%
-    select(place, 
-           ward.A,
-           dist.A,
-           reg.A,
-           wdr.A) %>%
-    left_join(unmatched_lkp %>% 
-                  filter(!is.na(acceptWR0)) %>%
-                  select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                         "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-              by = c("place", "wdr.A")) %>%
-    left_join(unmatched2_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
   left_join(unmatched3_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Z = wdr.X, ward.Z = ward.X, dist.Z = dist.X, reg.Z = reg.X, acceptHFZ = acceptHF)) %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
+  
+  # Join HF matched data (2):
   left_join(unmatched4_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Y = wdr.X, ward.Y = ward.X, dist.Y = dist.X, reg.Y = reg.X, acceptHFY = acceptHF)) %>%
-    distinct(place, ward.A, dist.A, reg.A, wdr.A,
-             ward.C, dist.C, reg.C, 
-             ward.X, dist.X, reg.X, 
-             ward.Z, dist.Z, reg.Z,
-             ward.Y, dist.Y, reg.Y,
-             acceptWR0, acceptHF, acceptHFZ, acceptHFY) %>% 
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF2 = wdr.HF, ward.HF2 = ward.HF, dist.HF2 = dist.HF, reg.HF2 = reg.HF, acceptHF2 = acceptHF)) %>%
+  distinct(place, ward.A, dist.A, reg.A, wdr.A,
+           ward.C, dist.C, reg.C,
+           ward.HF, dist.HF, reg.HF, 
+           ward.HF1, dist.HF1, reg.HF1,
+           ward.HF2, dist.HF2, reg.HF2,
+             acceptWR0, acceptHF, acceptHF1, acceptHF2) %>% 
   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
-         acceptAll = if_else(is.na(acceptAll), acceptHFZ, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHFY, acceptAll)
-         )
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF2, acceptAll))
+
 
 ```
 
-
-## WARD TO VILLAGE FUZZY
+# Find FUZZY matches between origdest data and health facilities data on:
+# (i) Ward.A = Village_St (HF), District, Region
 
 ```{r}
 
+# update unmatched data:
 unmatched5 <- unmatched_join %>% 
   filter(is.na(acceptAll)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
 unmatched5_match <- unmatched5 %>%
+  # ward.A to village.HF fuzzy
    stringdist_join(.,hfacilities_df, 
-                   by=c("ward.A" = "village.X",
-                        "dist.A" = "dist.X",
-                        "reg.A" = "reg.X"
+                   by=c("ward.A" = "village.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
                         ),
                 mode='left', #use left join
                 method = "jw", #use jw distance metric
@@ -729,69 +857,91 @@ unmatched5_match <- unmatched5 %>%
   ungroup()
 
 unmatched5_lkp <- unmatched5_match %>% 
+  # only exact matching district and regions:
   filter(dist.A.dist == 0, reg.A.dist ==0 ) %>%
+  # match to twards data
   left_join(twards_match,
-              by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
+            by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-         wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-  select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, ward.A.dist, dist.A.dist, reg.A.dist) %>%
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  # manually check matches:
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, ward.A.dist, dist.A.dist, reg.A.dist) %>%
+  # only keep if found in twards reference
   filter(!is.na(wdr.B)) %>% 
   mutate(acceptHF = "acceptHF3") %>%
   distinct()
 
 unmatched_join <- unmatched %>%
-    select(place, 
-           ward.A,
-           dist.A,
-           reg.A,
-           wdr.A) %>%
-    left_join(unmatched_lkp %>% 
-                  filter(!is.na(acceptWR0)) %>%
-                  select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                         "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-              by = c("place", "wdr.A")) %>%
-    left_join(unmatched2_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
   left_join(unmatched3_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Z = wdr.X, ward.Z = ward.X, dist.Z = dist.X, reg.Z = reg.X, acceptHFZ = acceptHF)) %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
+  
+  # Join HF matched data (2):
   left_join(unmatched4_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Y = wdr.X, ward.Y = ward.X, dist.Y = dist.X, reg.Y = reg.X, acceptHFY = acceptHF))  %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF2 = wdr.HF, ward.HF2 = ward.HF, dist.HF2 = dist.HF, reg.HF2 = reg.HF, acceptHF2 = acceptHF)) %>%
+  
+  # Join HF matched data (3):
   left_join(unmatched5_lkp %>%
                   filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.W = wdr.X, ward.W = ward.X, dist.W = dist.X, reg.W = reg.X, acceptHFW = acceptHF)) %>%
-    distinct(place, ward.A, dist.A, reg.A, wdr.A,
-             ward.C, dist.C, reg.C, 
-             ward.X, dist.X, reg.X, 
-             ward.Z, dist.Z, reg.Z,
-             ward.Y, dist.Y, reg.Y,
-             ward.W, dist.W, reg.W,
-             acceptWR0, acceptHF, acceptHFZ, acceptHFY, acceptHFW) %>% 
+                  select(place, wdr.A, wdr.HF3 = wdr.HF, ward.HF3 = ward.HF, dist.HF3 = dist.HF, reg.HF3 = reg.HF, acceptHF3 = acceptHF)) %>%
+  distinct(place, ward.A, dist.A, reg.A, wdr.A,
+           ward.C, dist.C, reg.C,
+           ward.HF, dist.HF, reg.HF, 
+           ward.HF1, dist.HF1, reg.HF1,
+           ward.HF2, dist.HF2, reg.HF2,
+           ward.HF3, dist.HF3, reg.HF3,
+           acceptWR0, acceptHF, acceptHF1, acceptHF2, acceptHF3) %>% 
   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
-         acceptAll = if_else(is.na(acceptAll), acceptHFZ, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHFY, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHFW, acceptAll),
-         )
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF2, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF3, acceptAll))
 
 ```
 
-
-## PLACE (A) TO PLACE FUZZY
+# Find FUZZY matches between origdest data and health facilities data on:
+# (iii) Place.A = Facility_N (HF), District, Region
 
 ```{r}
-
-
+# update unmatched : 
 unmatched6 <- unmatched_join %>% 
   filter(is.na(acceptAll)) %>% 
   distinct(place,ward.A,dist.A, reg.A)
 
+# fuzzy match place name origdest data with Facility_N in health data:
 unmatched6_match <- unmatched6 %>%
    stringdist_join(.,hfacilities_df, 
-                   by=c("place" = "place.X",
-                        "dist.A" = "dist.X",
-                        "reg.A" = "reg.X"
+                   by=c("place" = "place.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
                         ),
                 mode='left', #use left join
                 method = "jw", #use jw distance metric
@@ -805,124 +955,188 @@ unmatched6_match <- unmatched6 %>%
   ungroup()
 
 unmatched6_lkp <- unmatched6_match %>% 
+  # keep only if district and region match exactly
   filter(dist.A.dist == 0, reg.A.dist ==0 ) %>%
+  # join reference tanzania data for checking
   left_join(twards_match,
-              by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
+              by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-         wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-  select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, place.dist, dist.A.dist, reg.A.dist) %>%
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, place.dist, dist.A.dist, reg.A.dist) %>%
   filter(!is.na(wdr.B)) %>% 
-  mutate(acceptHF = "acceptHF6") 
+  mutate(acceptHF = "acceptHF4") 
 
 unmatched_join <- unmatched %>%
-    select(place, 
-           ward.A,
-           dist.A,
-           reg.A,
-           wdr.A) %>%
-    left_join(unmatched_lkp %>% 
-                  filter(!is.na(acceptWR0)) %>%
-                  select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-                         "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-              by = c("place", "wdr.A")) %>%
-    left_join(unmatched2_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
   left_join(unmatched3_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Z = wdr.X, ward.Z = ward.X, dist.Z = dist.X, reg.Z = reg.X, acceptHFZ = acceptHF)) %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
+  
+  # Join HF matched data (2):
   left_join(unmatched4_lkp %>%
-                  filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.Y = wdr.X, ward.Y = ward.X, dist.Y = dist.X, reg.Y = reg.X, acceptHFY = acceptHF))  %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF2 = wdr.HF, ward.HF2 = ward.HF, dist.HF2 = dist.HF, reg.HF2 = reg.HF, acceptHF2 = acceptHF)) %>%
+  
+  # Join HF matched data (3):
   left_join(unmatched5_lkp %>%
                   filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.W = wdr.X, ward.W = ward.X, dist.W = dist.X, reg.W = reg.X, acceptHFW = acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF3 = wdr.HF, ward.HF3 = ward.HF, dist.HF3 = dist.HF, reg.HF3 = reg.HF, acceptHF3 = acceptHF)) %>%
+  
+  # Join HF matched data (4): 
   left_join(unmatched6_lkp %>%
                   filter(!is.na(acceptHF)) %>%
-                  select(place, wdr.A, wdr.6 = wdr.X, ward.6 = ward.X, dist.6 = dist.X, reg.6 = reg.X, acceptHF6 = acceptHF)) %>%
-    distinct(place, ward.A, dist.A, reg.A, wdr.A,
-             ward.C, dist.C, reg.C, 
-             ward.X, dist.X, reg.X, 
-             ward.Z, dist.Z, reg.Z,
-             ward.Y, dist.Y, reg.Y,
-             ward.W, dist.W, reg.W,
-             ward.6, dist.6, reg.6,
-             acceptWR0, acceptHF, acceptHFZ, acceptHFY, acceptHFW, acceptHF6) %>% 
+                  select(place, wdr.A, wdr.HF4 = wdr.HF, ward.HF4 = ward.HF, dist.HF4 = dist.HF, reg.HF4 = reg.HF, acceptHF4 = acceptHF)) %>%
+  
+  distinct(place, ward.A, dist.A, reg.A, wdr.A,
+           ward.C, dist.C, reg.C,
+           ward.HF, dist.HF, reg.HF, 
+           ward.HF1, dist.HF1, reg.HF1,
+           ward.HF2, dist.HF2, reg.HF2,
+           ward.HF3, dist.HF3, reg.HF3,
+           ward.HF4, dist.HF4, reg.HF4,
+           acceptWR0, acceptHF, acceptHF1, acceptHF2, acceptHF3, acceptHF4) %>% 
   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
-         acceptAll = if_else(is.na(acceptAll), acceptHFZ, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHFY, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHFW, acceptAll),
-         acceptAll = if_else(is.na(acceptAll), acceptHF6, acceptAll)
-         )
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF2, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF3, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF4, acceptAll))
 ```
 
 
-## PLACE (A) TO VILLAGE FUZZY
+# Find FUZZY matches between origdest data and health facilities data on:
+# (iii) Place.A = Village_St (HF), District, Region
 
 ```{r}
 # 
 # 
-# unmatched7 <- unmatched_join %>% 
-#   filter(is.na(acceptAll)) %>% 
-#   distinct(place,ward.A,dist.A, reg.A)
+unmatched7 <- unmatched_join %>%
+  filter(is.na(acceptAll)) %>%
+  distinct(place,ward.A,dist.A, reg.A)
 # 
-# unmatched6_match <- unmatched6 %>%
-#    stringdist_join(.,hfacilities_df, 
-#                    by=c("place" = "village.X",
-#                         "dist.A" = "dist.X",
-#                         "reg.A" = "reg.X"
-#                         ),
-#                 mode='left', #use left join
-#                 method = "jw", #use jw distance metric
-#                 max_dist=0.5, 
-#                 distance_col='dist')  %>%
-#   # rowwise() %>%
-#   # mutate(dist_sum = sum(place.dist)) %>%
-#   # ungroup() %>%
-#   group_by(place,ward.A,dist.A) %>%
-#   slice_min(order_by=place.dist, n=1) %>%
-#   ungroup()
-# 
-# unmatched6_lkp <- unmatched6_match %>% 
-#   filter(dist.A.dist == 0, reg.A.dist ==0 ) %>%
-#   left_join(twards_match,
-#               by = c("ward.X" = "ward.B", "dist.X" = "dist.B", "reg.X" = "reg.B")) %>%
-#   mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
-#          wdr.X = paste(ward.X, dist.X, reg.X, sep = "-")) %>%
-#   select(place, wdr.A, place.X, village.X, wdr.X, wdr.B, ward.X, dist.X, reg.X, place.dist, dist.A.dist, reg.A.dist) %>%
-#   filter(!is.na(wdr.B)) %>% 
-#   mutate(acceptHF = "acceptHF2") 
-# 
-# unmatched_join <- unmatched %>%
-#     select(place, 
-#            ward.A,
-#            dist.A,
-#            reg.A,
-#            wdr.A) %>%
-#     left_join(unmatched_lkp %>% 
-#                   filter(!is.na(acceptWR0)) %>%
-#                   select(place, wdr.A, "wdr.C" = wdr.B, "ward.C" = ward.B, 
-#                          "dist.C" = dist.B, "reg.C" = reg.B, acceptWR0),
-#               by = c("place", "wdr.A")) %>%
-#     left_join(unmatched2_lkp %>%
-#                   filter(!is.na(acceptHF)) %>%
-#                   select(place, wdr.A, wdr.X, ward.X, dist.X, reg.X, acceptHF)) %>%
-#   left_join(unmatched3_lkp %>%
-#                   filter(!is.na(acceptHF)) %>%
-#                   select(place, wdr.A, wdr.Z = wdr.X, ward.Z = ward.X, dist.Z = dist.X, reg.Z = reg.X, acceptHFZ = acceptHF)) %>%
-#   left_join(unmatched4_lkp %>%
-#                   filter(!is.na(acceptHF)) %>%
-#                   select(place, wdr.A, wdr.Y = wdr.X, ward.Y = ward.X, dist.Y = dist.X, reg.Y = reg.X, acceptHFY = acceptHF)) %>%
-#     distinct(place, ward.A, dist.A, reg.A, wdr.A,
-#              ward.C, dist.C, reg.C, 
-#              ward.X, dist.X, reg.X, 
-#              ward.Z, dist.Z, reg.Z,
-#              ward.Y, dist.Y, reg.Y,
-#              acceptWR0, acceptHF, acceptHFZ, acceptHFY) %>% 
-#   mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
-#          acceptAll = if_else(is.na(acceptAll), acceptHFZ, acceptAll),
-#          acceptAll = if_else(is.na(acceptAll), acceptHFY, acceptAll)
-#          )
+unmatched7_match <- unmatched7 %>%
+   stringdist_join(.,hfacilities_df,
+                   by=c("place" = "village.HF",
+                        "dist.A" = "dist.HF",
+                        "reg.A" = "reg.HF"
+                        ),
+                mode='left', #use left join
+                method = "jw", #use jw distance metric
+                max_dist=0.5,
+                distance_col='dist')  %>%
+  # rowwise() %>%
+  # mutate(dist_sum = sum(place.dist)) %>%
+  # ungroup() %>%
+  group_by(place,ward.A,dist.A) %>%
+  slice_min(order_by=place.dist, n=1) %>%
+  ungroup()
+
+
+unmatched7_lkp <- unmatched7_match %>% 
+  # keep only if district and region match exactly
+  filter(dist.A.dist == 0, reg.A.dist ==0 ) %>%
+  # join reference tanzania data for checking
+  left_join(twards_match, by = c("ward.HF" = "ward.B", "dist.HF" = "dist.B", "reg.HF" = "reg.B")) %>%
+  mutate(wdr.A = paste(ward.A, dist.A, reg.A, sep = "-"),
+         wdr.HF = paste(ward.HF, dist.HF, reg.HF, sep = "-")) %>%
+  select(place, wdr.A, place.HF, village.HF, wdr.HF, wdr.B, ward.HF, dist.HF, reg.HF, place.dist, dist.A.dist, reg.A.dist) %>%
+  filter(!is.na(wdr.B)) %>% 
+  mutate(acceptHF = "acceptHF5") 
+
+
+unmatched_join <- unmatched %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
+  left_join(unmatched3_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
+  
+  # Join HF matched data (2):
+  left_join(unmatched4_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF2 = wdr.HF, ward.HF2 = ward.HF, dist.HF2 = dist.HF, reg.HF2 = reg.HF, acceptHF2 = acceptHF)) %>%
+  
+  # Join HF matched data (3):
+  left_join(unmatched5_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF3 = wdr.HF, ward.HF3 = ward.HF, dist.HF3 = dist.HF, reg.HF3 = reg.HF, acceptHF3 = acceptHF)) %>%
+  
+  # Join HF matched data (4): 
+  left_join(unmatched6_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF4 = wdr.HF, ward.HF4 = ward.HF, dist.HF4 = dist.HF, reg.HF4 = reg.HF, acceptHF4 = acceptHF)) %>%
+  
+   # Join HF matched data (5): 
+  left_join(unmatched7_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF5 = wdr.HF, ward.HF5 = ward.HF, dist.HF5 = dist.HF, reg.HF5 = reg.HF, acceptHF5 = acceptHF)) %>%
+  distinct(place, ward.A, dist.A, reg.A, wdr.A,
+           ward.C, dist.C, reg.C,
+           ward.HF, dist.HF, reg.HF, 
+           ward.HF1, dist.HF1, reg.HF1,
+           ward.HF2, dist.HF2, reg.HF2,
+           ward.HF3, dist.HF3, reg.HF3,
+           ward.HF4, dist.HF4, reg.HF4,
+           ward.HF5, dist.HF5, reg.HF5,
+           acceptWR0, acceptHF, acceptHF1, acceptHF2, acceptHF3, acceptHF4, acceptHF5) %>% 
+  mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF2, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF3, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF4, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF5, acceptAll))
 
 ```
 
@@ -936,31 +1150,118 @@ unmatched_final <- unmatched_join %>%
 
 ```
 
+```{r unmatchedmanual}
+
+unmatchedfinal_lkp <- read_excel(here("data/data-cleaning_data/unmatchedfinal_lkp.xlsx")) %>%
+  rename("acceptManual" = code)
+
+
+unmatched_join <- unmatched %>%
+  select(place, 
+         ward.A,
+         dist.A,
+         reg.A,
+         wdr.A) %>%
+  left_join(unmatched_lkp %>% 
+              # keep only matched data:
+              filter(!is.na(acceptWR0)) %>%
+              # update names suffix ".C" to distinguish:
+              select(place, 
+                     wdr.A, 
+                     "wdr.C" = wdr.B, 
+                     "ward.C" = ward.B, 
+                     "dist.C" = dist.B, 
+                     "reg.C" = reg.B, 
+                     acceptWR0),
+            by = c("place", "wdr.A")) %>%
+  
+  # Join HF matched data:
+  left_join(unmatched2_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              # update names suffix ".HF" to distinguish:
+              select(place, wdr.A, wdr.HF, ward.HF, dist.HF, reg.HF, acceptHF)) %>%
+  
+    # Join HF matched data (1): 
+  left_join(unmatched3_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF1 = wdr.HF, ward.HF1 = ward.HF, dist.HF1 = dist.HF, reg.HF1 = reg.HF, acceptHF1 = acceptHF)) %>%
+  
+  # Join HF matched data (2):
+  left_join(unmatched4_lkp %>%
+              # keep only matched data:
+              filter(!is.na(acceptHF)) %>%
+              select(place, wdr.A, wdr.HF2 = wdr.HF, ward.HF2 = ward.HF, dist.HF2 = dist.HF, reg.HF2 = reg.HF, acceptHF2 = acceptHF)) %>%
+  
+  # Join HF matched data (3):
+  left_join(unmatched5_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF3 = wdr.HF, ward.HF3 = ward.HF, dist.HF3 = dist.HF, reg.HF3 = reg.HF, acceptHF3 = acceptHF)) %>%
+  
+  # Join HF matched data (4): 
+  left_join(unmatched6_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF4 = wdr.HF, ward.HF4 = ward.HF, dist.HF4 = dist.HF, reg.HF4 = reg.HF, acceptHF4 = acceptHF)) %>%
+  
+   # Join HF matched data (5): 
+  left_join(unmatched7_lkp %>%
+                  filter(!is.na(acceptHF)) %>%
+                  select(place, wdr.A, wdr.HF5 = wdr.HF, ward.HF5 = ward.HF, dist.HF5 = dist.HF, reg.HF5 = reg.HF, acceptHF5 = acceptHF)) %>%
+  
+  # Manual match:
+  left_join(unmatchedfinal_lkp %>%
+              filter(acceptManual == "manual")) %>%
+  
+  distinct(place, ward.A, dist.A, reg.A, wdr.A,
+           ward.C, dist.C, reg.C,
+           ward.HF, dist.HF, reg.HF, 
+           ward.HF1, dist.HF1, reg.HF1,
+           ward.HF2, dist.HF2, reg.HF2,
+           ward.HF3, dist.HF3, reg.HF3,
+           ward.HF4, dist.HF4, reg.HF4,
+           ward.HF5, dist.HF5, reg.HF5,
+           ward.manual, dist.manual, reg.manual,
+           acceptWR0, acceptHF, acceptHF1, acceptHF2, acceptHF3, acceptHF4, acceptHF5, acceptManual) %>% 
+  mutate(acceptAll = if_else(is.na(acceptWR0), acceptHF, acceptWR0),
+         acceptAll = if_else(is.na(acceptAll), acceptHF1, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF2, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF3, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF4, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptHF5, acceptAll),
+         acceptAll = if_else(is.na(acceptAll), acceptManual, acceptAll))
+
+```
+
+*********
+*********
+
+# Clean Corrected location data:
 
 ```{r}
+# 
 
 origdest_join <- origdest_lkpunique %>%
+  # join matched data to original orig-dest unique list:
   left_join(
-    wdr_join,
-    by = c("place", "ward.A", "dist.A", "reg.A")
-  ) %>% left_join(
-    unmatched_join %>% select(-c(wdr.A, acceptWR0, acceptHF, acceptHFZ, acceptHFY, acceptHFW, acceptHF6)),
+    wdr_join, by = c("place", "ward.A", "dist.A", "reg.A")
+  ) %>% 
+  left_join(
+    unmatched_join %>% select(-c(wdr.A, acceptWR0, acceptHF, acceptHF1, acceptHF2, acceptHF3, acceptHF4,  acceptHF5, acceptManual)),
     by = c("place", "ward.A", "dist.A", "reg.A")
   ) %>%
+  # update acceptAll.final to reflect acceptance code
+  # ".Bclean" to reflect matched location data
   mutate(acceptAll.final = if_else(is.na(acceptWDR), acceptAll, acceptWDR),
-         "ward.Bclean" = coalesce(ward.B, ward.C, ward.W, ward.X, ward.Y, ward.Z, ward.6),
-         "dist.Bclean" = coalesce(dist.B, dist.C, dist.W, dist.X, dist.Y, dist.Z, dist.6),
-         "region.Bclean" = coalesce(reg.B, reg.C, reg.W, reg.X, reg.Y, reg.Z, reg.6)
+         "ward.Bclean" = coalesce(ward.B, ward.C, ward.HF, ward.HF1, ward.HF2, ward.HF3, ward.HF4, ward.HF5, ward.manual),
+         "dist.Bclean" = coalesce(dist.B, dist.C, dist.HF, dist.HF1, dist.HF2, dist.HF3, dist.HF4, dist.HF5, dist.manual),
+         "region.Bclean" = coalesce(reg.B, reg.C, reg.HF, reg.HF1, reg.HF2, reg.HF3, reg.HF4, reg.HF5, reg.manual)
          ) # %>%
   # group_by(acceptAll.final) %>% count() %>%
   # filter(is.na(acceptAll.final))
 
-origdest_lkp %>%
-  left_join(
-    origdest_join %>% select(place,ward.A,dist.A,reg.A, ward.Bclean, dist.Bclean, region.Bclean, acceptAll.final),
-    by = c("place", "ward" = "ward.A", "district.clean" = "dist.A", "region.clean" = "reg.A")
-  )
-  
+
+# Link matched data (origdest_join) to fids for joining to actvty dataframe:
 fidorigdest <- origdest_lkp %>%
   left_join(
     origdest_join %>% select(place,ward.A,dist.A,reg.A, ward.Bclean, dist.Bclean, region.Bclean, acceptAll.final),
@@ -975,13 +1276,6 @@ fidorigdest <- origdest_lkp %>%
     acceptAll.final
   )
 
-fidNA <- fidorigdest %>% 
-  select(
-    fid,
-    origdest,
-    acceptAll.final
-  )
-
 ```
 
 
@@ -989,7 +1283,14 @@ fidNA <- fidorigdest %>%
 
 ```{r lastjoin}
 
-fidorigdest_complete <- fidorigdest %>% filter(!is.na(acceptAll.final))
+# origdest data with cleaned locations"
+fidorigdest_complete <- fidorigdest %>% 
+  filter(!is.na(acceptAll.final))
+
+# unmatched origdest fids:
+fidorigdest_NA <- fidorigdest %>% 
+  select(fid,origdest,acceptAll.final) %>% 
+  filter(is.na(acceptAll.final))
 
 mrktc_origdest_df <- mrktc_actvty %>%
   select(
@@ -1001,25 +1302,25 @@ mrktc_origdest_df <- mrktc_actvty %>%
     `6.buy.place.ward`,
     `6.buy.place.district`
     ) %>%
-  # correct origin place data:
+  
+  # Join MATCHED ORIGIN DATA:
   left_join(
-    fidorigdest_complete %>% 
-      filter(origdest == "orig") %>%
-      select(-c(origdest)),
+    fidorigdest_complete %>% filter(origdest == "orig") %>% select(-c(origdest)),
     by = "fid"
   ) %>%
+  # update final names:
   rename(
     `2.sell.place.ward.final` = ward.Bclean,
     `2.sell.place.district.final` = dist.Bclean,
     `2.sell.place.region.final` = region.Bclean,
   ) %>%
-  # correct destination place data:
+  
+  # Join MATCHED DESTINATION DATA:
   left_join(
-    fidorigdest_complete %>% 
-      filter(origdest == "dest")%>%
-      select(-c(origdest)),
+    fidorigdest_complete %>% filter(origdest == "dest") %>% select(-c(origdest)),
     by = "fid"
   ) %>%
+  # update final names:
   rename(
     `6.buy.place.ward.final` = ward.Bclean,
     `6.buy.place.district.final` = dist.Bclean,
@@ -1028,30 +1329,9 @@ mrktc_origdest_df <- mrktc_actvty %>%
 
 if(filesave){
   write.csv(mrktc_origdest_df, file = here("data/tanzania_data/mrktc_origdest_tanzania_final.csv"))
+  # with manual data:
+  write.csv(mrktc_origdest_df, file = here("data/tanzania_data/mrktc_origdest_tanzania_finalv2.csv"))
 }
 
 ```
 
-```{r }
-# 
-# unmatched_finallkp <- unmatched_final %>% 
-#   mutate(
-#     pdr = paste(place,ward.A,dist.A,reg.A, sep = "-"),
-#     wdr = paste(place,ward.A,dist.A,reg.A, sep = "-")) %>%
-#   stringdist_join(.,twards_match,
-#                    by=c("wdr" = "wdr.B",
-#                         "pdr"="wdr.B"),
-#                 mode='left', #use left join
-#                 method = "jw", #use jw distance metric
-#                 max_dist=1,
-#                 distance_col='dist')  %>%
-#   # rowwise() %>%
-#   # mutate(dist_sum = sum(place.dist)) %>%
-#   # ungroup() %>%
-#   group_by(place,ward.A,dist.A,reg.A) %>%
-#   slice_min(order_by=wdr.dist, n=1) %>%
-#   ungroup()
-# 
-
-
-```
