@@ -69,6 +69,9 @@ Epi Cluster Analysis:
 
 ```{r mfa2}
 
+mrkts_master_complete <- mrkts_master %>%
+  drop_na()
+
 mrkts_MFA <- mrkts_master_complete %>%
   select(
     # envirchar_s (s)
@@ -145,7 +148,6 @@ res.mfa <- MFA(mrkts_MFA,
                               ),
                num.group.sup = NULL,
                graph = FALSE)
-
 
 
 ###############
