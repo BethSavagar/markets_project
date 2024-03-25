@@ -56,6 +56,7 @@ mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_fina
 # Load Tanzania Shapefile:
 sf_use_s2(FALSE)
 twards_shp <- st_read(here("data/shapefiles/tzshp_final/twards_final.shp"))
+tdists_shp <- st_read(here("data/shapefiles/tzshp_final/tdists_final.shp"))
 tregs_shp <- st_read(here("data/shapefiles/tzshp_final/tregs_final.shp"))
 
 ```
@@ -75,58 +76,21 @@ Market Identifiers:
 - market
 
 
-## 2) Market Catchment Characteristics:
 
-- total.area
+## Update mrktc market locations data
+- match to market locations in mrkt survey A (consistent between surveys)
 
-- origin.maxdist
-- origin.area
-- origin.ndstrct
-- origin.nwards
+```{r mrktclocations}
 
-
-```{r origins}
-
-# Subset only origin data (2021 rows with origin data)
-mrktc_origins <- mrktc_origdest %>%
-  select(
-    fid,
-    `2.sell.place.ward.final`,
-    `2.sell.place.district.final`,
-    `2.sell.place.region.final`
-  ) %>%
-  drop_na()
-
-# create shapefile with point data for origins of animals at market:
-
-mrktc_originspt_sf <- mrktc_origins %>%
-  # join tanzania ward polygons to origins data:
+mrktc_gps_update <- mrktc_gps %>% 
+  # remove and add coordinates from market survey A:
+  select(-`gps.coordinates.of.the.market`) %>%
+  # join market survey A location data:
   left_join(
-    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
-    by = c(`2.sell.place.ward.final` = "Ward_N", 
-           `2.sell.place.district.final` = "Dist20_N",
-           `2.sell.place.region.final` = "Region20_N")
-  ) %>%
-  st_as_sf() %>%
-  # transform to point data (centroid/central point within ward)
-  st_point_on_surface()
+    mrkta_gps %>% select(-c(fid,date,unique.row.identifier.uuid.))
+  )
 
-# this is the shapefile of ward polygons
-
-mrktc_originspt_gps <- mrktc_originspt_sf %>%
-  st_drop_geometry() %>%
-  mutate(origlong = st_coordinates(mrktc_originspt_sf)[,1],
-         origlat = st_coordinates(mrktc_originspt_sf)[,2])
-
-
-```
-
-
-```{r origmrktOD_data}
-
-# Join origins data to markets data to create OD dataframe:
-
-mrktorig_df <- mrktc_gps %>%
+mrktc_pts_gps <- mrktc_gps_update %>%
   # tidy market location data
   select(-district) %>%
   rename(
@@ -141,52 +105,447 @@ mrktorig_df <- mrktc_gps %>%
          mrktlong = as.numeric(mrktlong),
          mrktlat = str_split(`gps.coordinates.of.the.market`, "\\s", simplify = TRUE)[, 1],
          mrktlat = as.numeric(mrktlat)
+  )
+
+mrktc_unique_gps <- mrktc_pts_gps %>%
+  distinct(
+    mrkt.region, mrkt.district, mrkt.ward, mrkt.village, mrkt.name, mrktlong, mrktlat
   ) %>%
+  mutate(mrktid = paste0("M", row_number()))
+
+# use ward level gps???
+
+mrktc_ward_gps <- mrktc_unique_gps %>%
+  select(-c(mrktlong, mrktlat, mrkt.village, mrkt.name)) %>%
+   left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`mrkt.ward` = "Ward_N", 
+           `mrkt.district` = "Dist20_N",
+           `mrkt.region` = "Region20_N")
+  ) %>%
+  st_as_sf() %>%
+  # transform to point data (centroid/central point within ward)
+  st_point_on_surface()
   
+mrktc_ward_gps <- mrktc_ward_gps %>%
+  st_drop_geometry() %>%
+  mutate(mrktlong = st_coordinates(mrktc_ward_gps)[,1],
+         mrktlat = st_coordinates(mrktc_ward_gps)[,2]) %>%
+  distinct(mrkt.region, mrkt.district, mrkt.ward, mrktlong, mrktlat)
+```
+
+## Subset Origins and add point locations (district/ward centroid) ##
+
+```{r origins}
+
+# Subset only origin data (2021 rows with origin data)
+mrktc_origins <- mrktc_origdest %>%
+  select(
+    fid,
+    origin.ward = `2.sell.place.ward.final`,
+    origin.district = `2.sell.place.district.final`,
+    origin.region = `2.sell.place.region.final`
+  ) %>%
+  drop_na() %>%
+  mutate(
+    origin.place = origin.ward
+  )
+
+
+# ORIGIN GPS DATA
+# - Add ward centroid gps coords for each market:
+
+mrktc_originspt_sf <- mrktc_origins %>%
+  # join tanzania ward polygons to origins data:
+  left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`origin.ward` = "Ward_N", 
+           `origin.district` = "Dist20_N",
+           `origin.region` = "Region20_N")
+  ) %>%
+  st_as_sf() %>%
+  # transform to point data (centroid/central point within ward)
+  st_point_on_surface()
+
+## CREATE REF (LONG-LAT) DF
+# - update locations of markets which are surveyed using mtka_gps data:
+
+mrktc_originspt_gps <- mrktc_originspt_sf %>%
+  st_drop_geometry() %>%
+  mutate(origlong = st_coordinates(mrktc_originspt_sf)[,1],
+         origlat = st_coordinates(mrktc_originspt_sf)[,2]) # %>%
+  # join mrktc market location data if appearing as origins
+  # left_join(
+  #   mrktc_pts_gps %>% distinct(mrkt.ward,mrkt.district,mrkt.region,mrktlong,mrktlat),
+  #   by = c("2.sell.place.ward.final" = "mrkt.ward",
+  #          "2.sell.place.district.final" = "mrkt.district",
+  #          "2.sell.place.region.final" = "mrkt.region")
+  # ) %>%
+  # # update origin lon/lat with market locations
+  # mutate(origlong = if_else(is.na(mrktlong), origlong, mrktlong),
+  #        origlat = if_else(is.na(mrktlat), origlat, mrktlat))
+
+origins_unique_gps <- mrktc_originspt_gps %>%
+  select(-c(fid, origin.place)) %>%
+  distinct()
+  
+```
+
+
+```{r nodes}
+
+nodes <- mrktc_ward_gps %>%
+  #distinct(mrkt.ward,mrkt.district,mrkt.region, mrktlong,mrktlat) %>%
+  select(
+    # place = mrkt.name,
+    ward = mrkt.ward, 
+     district = mrkt.district, 
+     region = mrkt.region, 
+     long = mrktlong, 
+     lat = mrktlat) %>%
+  mutate(nodetype = "mrktsrvy") %>%
+  bind_rows(
+    origins_unique_gps %>%
+      select(
+        # place = origin.place,
+        ward = origin.ward,
+             district = origin.district,
+             region = origin.region,
+             long = origlong,
+             lat = origlat)
+  ) %>%
+  mutate(nodetype = "orig") %>%
+  distinct() %>%
+  mutate(id = paste0("M", row_number())) %>%
+  select(id, long, lat, nodetype, ward, district, region)
+
+
+```
+
+# Origin - Destination data:
+
+```{r origmrktOD_data}
+
+# Join origins data to markets data to create OD dataframe:
+
+mrktOD_df <- mrktc_pts_gps %>%
+  select(-c(gps.coordinates.of.the.market, unique.row.identifier.uuid.)) %>%
   # Join origin gps data:
   left_join(mrktc_originspt_gps, by = "fid") %>%
-  
   # exclude if no GPS data:
-  filter(! (is.na(mrktlong)|is.na(mrktlat)|is.na(origlong)|is.na(origlat)))
+  filter(! (is.na(mrktlong)|is.na(mrktlat)|is.na(origlong)|is.na(origlat))) %>%
+  # join market ID
+  left_join(nodes %>% select(region,district,ward,"mrktid" = id),
+            by = c("mrkt.region" = "region", "mrkt.district" = "district", "mrkt.ward" = "ward")) %>%
+  # join origin ID
+  left_join(nodes %>% select(region,district,ward,"origid" = id),
+            by = c("origin.ward" = "ward","origin.district" = "district","origin.region" = "region"))
 
-```
-
-
-```{r dstrctnetwork}
-# Origin Destination data between distinct districts:
-
-mrktorig_OD <- mrktorig_df %>%
-    mutate(orig_distreg = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-"),
-           mrkt_distreg = paste(`mrkt.district`,`mrkt.region`, sep = "-")) %>%
-  select(fid,orig_distreg,mrkt_distreg) %>%
-  group_by(orig_distreg,mrkt_distreg) %>%
+edges <- mrktOD_df %>%
+  # exclude within-ward /same market movements
+  filter(!(mrktid == origid)) %>%
+  # select IDs
+  group_by(origid, mrktid) %>%
   count() %>%
-  # remove self-self loops:
-  filter(!orig_distreg == mrkt_distreg)
+  select(from = origid, to = mrktid, weight = n)
 
-
-###############
-mrktorig_net <- graph_from_data_frame(d = mrktorig_OD)
-# network <- graph_from_data_frame(d = mrktc_orignetwork, directed = TRUE)
-
-
-plot(mrktorig_net)
-plot(mrktorig_net, edge.width = E(mrktorig_net)$n)
-
-ggraph(mrktorig_net, layout = "fr") +  # Using the Fruchterman-Reingold layout
-  geom_edge_link(aes(width = n), color = "gray") + 
-  geom_node_point(color = "blue", size = 5) +
-  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
-  theme_graph() + 
-  labs(title = "Network Visualization with ggraph")
 
 ```
 
 
-```{r wardmvmtmap} 
-# Assuming 'movements' has columns: origin_lon, origin_lat, destination_lon, destination_lat, and num_movements
+```{r net1}
 
-# AA: We used R [35], a language and environment for statistical computing, as well as add-on
-# packages (ggplot,flows,network) [36, 37] to perform data analysis and plotting
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+
+
+edges_for_plot <- edges %>%
+  inner_join(nodes %>% select(id, long, lat), by = c('from' = 'id')) %>%
+  rename(x = long, y = lat) %>%
+  inner_join(nodes %>% select(id, long, lat), by = c('to' = 'id')) %>%
+  rename(xend = long, yend = lat)
+
+assert_that(nrow(edges_for_plot) == nrow(edges))
+
+nodes$weight = degree(g)
+
+
+origin_moves <- ggplot(nodes) + 
+  geom_sf(data = tregs_shp) +
+  geom_curve(aes(x = x, 
+                 y = y, 
+                 xend = xend, 
+                 yend = yend,     # draw edges as arcs
+                 size = weight),
+             data = edges_for_plot, curvature = 0.33,
+             alpha = 0.5) +
+  # scale_size_continuous(guide = FALSE, range = c(0.25, 2)) + # scale for edge widths
+  geom_point(aes(x = long, y = lat, col = nodetype)) # +
+  # scale_size_continuous(guide = FALSE, range = c(1, 6)) # +    # scale for node size
+  # geom_text(aes(x = long, y = lat, label = ward),             # draw text labels
+  #           hjust = 0, nudge_x = 1, nudge_y = 4,
+  #           size = 3, color = "white", fontface = "bold")
+
+
+```
+
+```{r distorigchloro}
+
+dist_exchange_df <- mrktOD_df %>% 
+  mutate(distexchange = if_else(origin.district == mrkt.district, "within", "other")) %>%
+  group_by(mrkt.district, distexchange) %>%
+  count() %>%
+  ungroup()
+
+dist_within_shp <- tdists_shp %>%
+  left_join(dist_exchange_df %>% filter(distexchange == "within") %>% select(-distexchange), 
+            by = c("Dist20_N" = "mrkt.district"))
+
+dist_outside_shp <- tdists_shp %>%
+  left_join(dist_exchange_df %>% filter(distexchange == "other") %>% select(-distexchange), 
+            by = c("Dist20_N" = "mrkt.district"))
+
+dist_within <- ggplot() +
+  geom_sf(data = dist_within_shp, aes(fill = n))+
+  labs(title = "Within-District")
+
+dist_outside <- ggplot() +
+  geom_sf(data = dist_outside_shp, aes(fill = n))+
+  labs(title = "Outside-District")
+
+origin_districts <- ggarrange(dist_within, dist_outside, ncol = 1)
+```
+
+
+
+
+<!-- ```{r dstrctnetwork} -->
+<!-- # Origin Destination data between distinct districts: -->
+
+<!-- mrktorig_OD <- mrktorig_df %>% -->
+<!--     mutate(orig_distreg = paste(`2.sell.place.district.final`, `2.sell.place.region.final`, sep = "-"), -->
+<!--            mrkt_distreg = paste(`mrkt.district`,`mrkt.region`, sep = "-")) %>% -->
+<!--   select(fid,orig_distreg,mrkt_distreg) %>% -->
+<!--   group_by(orig_distreg,mrkt_distreg) %>% -->
+<!--   count() %>% -->
+<!--   # remove self-self loops: -->
+<!--   filter(!orig_distreg == mrkt_distreg) -->
+
+
+<!-- ############### -->
+<!-- mrktorig_net <- graph_from_data_frame(d = mrktorig_OD) -->
+<!-- # network <- graph_from_data_frame(d = mrktc_orignetwork, directed = TRUE) -->
+
+
+<!-- plot(mrktorig_net) -->
+<!-- plot(mrktorig_net, edge.width = E(mrktorig_net)$n) -->
+
+<!-- ggraph(mrktorig_net, layout = "fr") +  # Using the Fruchterman-Reingold layout -->
+<!--   geom_edge_link(aes(width = n), color = "gray") +  -->
+<!--   geom_node_point(color = "blue", size = 5) + -->
+<!--   geom_node_text(aes(label = name), repel = TRUE, size = 3) + -->
+<!--   theme_graph() +  -->
+<!--   labs(title = "Network Visualization with ggraph") -->
+
+<!-- ``` -->
+
+
+<!-- ```{r wardmvmtmap}  -->
+<!-- # Assuming 'movements' has columns: origin_lon, origin_lat, destination_lon, destination_lat, and num_movements -->
+
+<!-- # AA: We used R [35], a language and environment for statistical computing, as well as add-on -->
+<!-- # packages (ggplot,flows,network) [36, 37] to perform data analysis and plotting -->
+
+<!-- ``` -->
+
+
+
+
+```{r dests}
+
+# Subset only origin data (2021 rows with origin data)
+mrktc_dests <- mrktc_origdest %>%
+  select(
+    fid,
+    dest.ward = `6.buy.place.ward.final`,
+    dest.district = `6.buy.place.district.final`,
+    dest.region = `6.buy.place.region.final`
+  ) %>%
+  drop_na() %>%
+  mutate(
+    dest.place = dest.ward
+  )
+
+
+# ORIGIN GPS DATA
+# - Add ward centroid gps coords for each market:
+
+mrktc_destspt_sf <- mrktc_dests %>%
+  # join tanzania ward polygons to origins data:
+  left_join(
+    twards_shp %>% select(Region20_N, Dist20_N, Ward_N, geometry),
+    by = c(`dest.ward` = "Ward_N", 
+           `dest.district` = "Dist20_N",
+           `dest.region` = "Region20_N")
+  ) %>%
+  st_as_sf() %>%
+  # transform to point data (centroid/central point within ward)
+  st_point_on_surface()
+
+## CREATE REF (LONG-LAT) DF
+# - update locations of markets which are surveyed using mtka_gps data:
+
+mrktc_destspt_gps <- mrktc_destspt_sf %>%
+  st_drop_geometry() %>%
+  mutate(destlong = st_coordinates(mrktc_destspt_sf)[,1],
+         destlat = st_coordinates(mrktc_destspt_sf)[,2]) # %>%
+  # join mrktc market location data if appearing as origins
+  # left_join(
+  #   mrktc_pts_gps %>% distinct(mrkt.ward,mrkt.district,mrkt.region,mrktlong,mrktlat),
+  #   by = c("2.sell.place.ward.final" = "mrkt.ward",
+  #          "2.sell.place.district.final" = "mrkt.district",
+  #          "2.sell.place.region.final" = "mrkt.region")
+  # ) %>%
+  # # update origin lon/lat with market locations
+  # mutate(origlong = if_else(is.na(mrktlong), origlong, mrktlong),
+  #        origlat = if_else(is.na(mrktlat), origlat, mrktlat))
+
+dests_unique_gps <- mrktc_destspt_gps %>%
+  select(-c(fid, dest.place)) %>%
+  distinct()
+  
+```
+
+
+```{r nodes}
+
+nodes <- mrktc_ward_gps %>%
+  #distinct(mrkt.ward,mrkt.district,mrkt.region, mrktlong,mrktlat) %>%
+  select(
+    # place = mrkt.name,
+    ward = mrkt.ward, 
+     district = mrkt.district, 
+     region = mrkt.region, 
+     long = mrktlong, 
+     lat = mrktlat) %>%
+  mutate(nodetype = "mrktsrvy") %>%
+  bind_rows(
+    dests_unique_gps %>%
+      select(
+        # place = origin.place,
+        ward = dest.ward,
+             district = dest.district,
+             region = dest.region,
+             long = destlong,
+             lat = destlat)
+  ) %>%
+  mutate(nodetype = "dest") %>%
+  distinct() %>%
+  mutate(id = paste0("M", row_number())) %>%
+  select(id, long, lat, nodetype, ward, district, region)
+
+
+```
+
+# Origin - Destination data:
+
+```{r }
+
+# Join origins data to markets data to create OD dataframe:
+
+mrktOD_df <- mrktc_pts_gps %>%
+  select(-c(gps.coordinates.of.the.market, unique.row.identifier.uuid.)) %>%
+  # Join origin gps data:
+  left_join(mrktc_destspt_gps, by = "fid") %>%
+  # exclude if no GPS data:
+  filter(! (is.na(mrktlong)|is.na(mrktlat)|is.na(destlong)|is.na(destlat))) %>%
+  # join market ID
+  left_join(nodes %>% select(region,district,ward,"mrktid" = id),
+            by = c("mrkt.region" = "region", "mrkt.district" = "district", "mrkt.ward" = "ward")) %>%
+  # join origin ID
+  left_join(nodes %>% select(region,district,ward,"destid" = id),
+            by = c("dest.ward" = "ward","dest.district" = "district","dest.region" = "region"))
+
+edges <- mrktOD_df %>%
+  # exclude within-ward /same market movements
+  filter(!(mrktid == destid)) %>%
+  # select IDs
+  group_by(destid, mrktid) %>%
+  count() %>%
+  select(from = destid, to = mrktid, weight = n)
+
+
+```
+
+
+```{r net1}
+
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+
+
+edges_for_plot <- edges %>%
+  inner_join(nodes %>% select(id, long, lat), by = c('from' = 'id')) %>%
+  rename(x = long, y = lat) %>%
+  inner_join(nodes %>% select(id, long, lat), by = c('to' = 'id')) %>%
+  rename(xend = long, yend = lat)
+
+assert_that(nrow(edges_for_plot) == nrow(edges))
+
+nodes$weight = degree(g)
+
+
+destination_moves <- ggplot(nodes) + 
+  geom_sf(data = tregs_shp) +
+  geom_curve(aes(x = x, 
+                 y = y, 
+                 xend = xend, 
+                 yend = yend,     # draw edges as arcs
+                 size = weight),
+             data = edges_for_plot, 
+             curvature = 0.33,
+             alpha = 0.5) +
+  # scale_size_continuous(guide = FALSE, range = c(0.25, 2)) + # scale for edge widths
+  geom_point(aes(x = long, y = lat, col = nodetype)) # +
+  # scale_size_continuous(guide = FALSE, range = c(1, 6)) # +    # scale for node size
+  # geom_text(aes(x = long, y = lat, label = ward),             # draw text labels
+  #           hjust = 0, nudge_x = 1, nudge_y = 4,
+  #           size = 3, color = "white", fontface = "bold")
+
+
+```
+
+
+```{r distdestchloro}
+
+dist_exchange_df <- mrktOD_df %>% 
+  mutate(distexchange = if_else(dest.district == mrkt.district, "within", "other")) %>%
+  group_by(mrkt.district, distexchange) %>%
+  count() %>%
+  ungroup()
+
+dist_within_shp <- tdists_shp %>%
+  left_join(dist_exchange_df %>% filter(distexchange == "within") %>% select(-distexchange), 
+            by = c("Dist20_N" = "mrkt.district"))
+
+dist_outside_shp <- tdists_shp %>%
+  left_join(dist_exchange_df %>% filter(distexchange == "other") %>% select(-distexchange), 
+            by = c("Dist20_N" = "mrkt.district"))
+
+dist_within <- ggplot() +
+  geom_sf(data = dist_within_shp, aes(fill = n))+
+  labs(title = "Within-District")
+
+dist_outside <- ggplot() +
+  geom_sf(data = dist_outside_shp, aes(fill = n))+
+  labs(title = "Outside-District")
+
+destination_districts <- ggarrange(dist_within, dist_outside, ncol = 1)
+```
+
+
+```{r }
+
+ggarrange(origin_moves, destination_moves, labels = c("tomrkt", "frommrkt"))
+
+ggarrange(origin_districts, destination_districts, labels = c("tomrkt", "frommrkt"))
 
 ```
