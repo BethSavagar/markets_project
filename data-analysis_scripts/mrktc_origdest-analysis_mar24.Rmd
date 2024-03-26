@@ -216,7 +216,12 @@ nodes <- mrktc_ward_gps %>%
   ) %>%
   mutate(nodetype = "orig") %>%
   distinct() %>%
-  mutate(id = paste0("M", row_number())) %>%
+  mutate(id = paste0("M", row_number()),
+         nodetype = if_else(ward==mrktc_ward_gps$mrkt.ward & 
+                              district == mrktc_ward_gps$mrkt.district & 
+                              region == mrktc_ward_gps$mrkt.region,
+                            "mrktsrvy",
+                            "orig")) %>%
   select(id, long, lat, nodetype, ward, district, region)
 
 
@@ -271,19 +276,18 @@ nodes$weight = degree(g)
 
 origin_moves <- ggplot(nodes) + 
   geom_sf(data = tregs_shp) +
-  geom_curve(aes(x = x, 
-                 y = y, 
-                 xend = xend, 
-                 yend = yend,     # draw edges as arcs
-                 size = weight),
-             data = edges_for_plot, curvature = 0.33,
-             alpha = 0.5) +
-  # scale_size_continuous(guide = FALSE, range = c(0.25, 2)) + # scale for edge widths
-  geom_point(aes(x = long, y = lat, col = nodetype)) # +
-  # scale_size_continuous(guide = FALSE, range = c(1, 6)) # +    # scale for node size
-  # geom_text(aes(x = long, y = lat, label = ward),             # draw text labels
-  #           hjust = 0, nudge_x = 1, nudge_y = 4,
-  #           size = 3, color = "white", fontface = "bold")
+  geom_curve(
+    data = edges_for_plot,
+    aes(x = x, 
+        y = y, 
+        xend = xend, 
+        yend = yend,     # draw edges as arcs
+        color = weight),
+    arrow = arrow(length=unit(0.2,"cm")),
+    size = 1)+
+  geom_point(data = nodes, aes(x = long, y = lat), col = "white")+
+  geom_point(data = nodes %>% filter(nodetype == "mrktsrvy"),
+             aes(x = long, y = lat), col = "red")
 
 
 ```
@@ -427,7 +431,6 @@ nodes <- mrktc_ward_gps %>%
      region = mrkt.region, 
      long = mrktlong, 
      lat = mrktlat) %>%
-  mutate(nodetype = "mrktsrvy") %>%
   bind_rows(
     dests_unique_gps %>%
       select(
@@ -438,9 +441,13 @@ nodes <- mrktc_ward_gps %>%
              long = destlong,
              lat = destlat)
   ) %>%
-  mutate(nodetype = "dest") %>%
   distinct() %>%
-  mutate(id = paste0("M", row_number())) %>%
+  mutate(id = paste0("M", row_number()),
+         nodetype = if_else(ward==mrktc_ward_gps$mrkt.ward & 
+                              district == mrktc_ward_gps$mrkt.district & 
+                              region == mrktc_ward_gps$mrkt.region,
+                            "mrktsrvy",
+                            "dest")) %>%
   select(id, long, lat, nodetype, ward, district, region)
 
 
@@ -471,7 +478,7 @@ edges <- mrktOD_df %>%
   # select IDs
   group_by(destid, mrktid) %>%
   count() %>%
-  select(from = destid, to = mrktid, weight = n)
+  select(from = mrktid, to = destid, weight = n)
 
 
 ```
@@ -495,20 +502,18 @@ nodes$weight = degree(g)
 
 destination_moves <- ggplot(nodes) + 
   geom_sf(data = tregs_shp) +
-  geom_curve(aes(x = x, 
-                 y = y, 
-                 xend = xend, 
-                 yend = yend,     # draw edges as arcs
-                 size = weight),
-             data = edges_for_plot, 
-             curvature = 0.33,
-             alpha = 0.5) +
-  # scale_size_continuous(guide = FALSE, range = c(0.25, 2)) + # scale for edge widths
-  geom_point(aes(x = long, y = lat, col = nodetype)) # +
-  # scale_size_continuous(guide = FALSE, range = c(1, 6)) # +    # scale for node size
-  # geom_text(aes(x = long, y = lat, label = ward),             # draw text labels
-  #           hjust = 0, nudge_x = 1, nudge_y = 4,
-  #           size = 3, color = "white", fontface = "bold")
+  geom_curve(
+    data = edges_for_plot,
+    aes(x = x, 
+        y = y, 
+        xend = xend, 
+        yend = yend,     # draw edges as arcs
+        color = weight),
+    arrow = arrow(length=unit(0.2,"cm")),
+    size = 1)+
+  geom_point(data = nodes, aes(x = long, y = lat), col = "white")+
+  geom_point(data = nodes %>% filter(nodetype == "mrktsrvy"),
+             aes(x = long, y = lat), col = "red")
 
 
 ```
