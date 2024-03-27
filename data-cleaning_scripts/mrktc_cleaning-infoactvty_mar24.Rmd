@@ -1,0 +1,403 @@
+---
+title: "Tanzania Market Survey C: Data Cleaning"
+author: "Beth Savagar"
+date: "2023-02-07"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## review Other categories for data to tease out 
+# - see excel sheets, recode and reform in mrktdf_definition dataframe
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = F}
+library(readr)
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(here)
+library(knitr)
+library(ggpubr)
+library(RColorBrewer)
+library(readxl)
+
+```
+
+Produce market C - Activities dataframe for use in MFA
+
+
+## Load Data:
+
+```{r dataload}
+
+filesave <- F
+
+# mrktc_gps <- read_csv(here("data/tanzania_data/mrktc_allgps_tanzania_final.csv"))
+mrktc_gps <- read_csv(here("data/data-cleaning_data/mrktc_allgps_tanzania_final.csv"))
+
+# mrkta_generalinfo, need to link to cleaned update market location data
+mrktc_info <-  read_csv(here("data/data-cleaning_data/mrktc_generalinfo_tanzania_final.csv"))
+
+# mrktc_activities_clean <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_CLEAN.csv"))
+mrktc_activities_clean <- read_csv(here("data/data-cleaning_data/mrktc_mrktactivities_tanzania_final.csv"))
+
+# potentially read in origdest data at this stage too. 
+# Market Survey C origins and destinations (from mrktc_origindest-cleaning_mar24)
+mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_finalv2.csv")) %>%
+  select(-`...1`)
+```
+
+```{r}
+
+# include market location info, market activity info and cleaned market origdest data
+mrktc_all <- mrktc_info %>%
+  left_join(mrktc_activities_clean %>% select(-unique.row.identifier.uuid.), 
+            by = "fid") %>%
+  left_join(mrktc_origdest %>% select(fid, ends_with(".final"))) %>% 
+  select(-c(`2.sell.place.ward`, `2.sell.place.district`, `2.sell.place.name`, 
+            `6.buy.place.ward`, `6.buy.place.district`, `6.buy.place.name`))
+
+data.frame(fields = colnames(mrktc_all)) 
+
+# write.csv(mrktc_all, file = here("data/data-cleaning_data/mrktc_infoactvty_tanzania.csv"))
+
+mrktc_allv1 <- mrktc_all %>%
+  select(
+    fid,				
+    date,				
+    country,				
+    region,				
+    district,				
+    district20,				
+    ward,				
+    village,			
+    market,				
+    # market.type, -- uninformative
+    # respondent.role, -- swahili				
+    # other.market.visited,	-- YN answer		
+    visits.othermrkt = number.markets.visited,	# update NAs to 0		
+    trader, # replace with mrkttrader variable
+    # trade.pattern, -- swahili			
+    gps.coordinates.of.the.market,				
+    # unique.row.identifier.uuid.,				
+    respondent.role.code, # contextual information		
+    # remove respondent roles as not required:
+    # respondent.buyer,				
+    # respondent.seller,				
+    # respondent.business,				
+    # respondent.middleman,				
+    # respondent.farmer,				
+    # respondent.breeder,				
+    # respondent.butcher,				
+    # respondent.other,				
+    # respondent.buyandsell,
+    `1.mrkt.activity`,				
+    `1.mrkt.activity.other`,				
+    `1.mrkt.activity.other.code`, # replace with `1.mrkt.activity.code`
+    `1.activity.sell`,			
+    `1.activity.middleman`,				
+    `1.activity.trade`,				
+    `1.activity.buy`,				
+    `1.activity.slaughter`,				
+    `1.activity.food`,	# update to "other"		
+    `1.activity.other`,				
+    # `1.activity.multi` -- unnecessary
+    
+    # Origin: 
+    `2.origin.ward` = `2.sell.place.ward.final`,			
+    `2.origin.district` = `2.sell.place.district.final`,			
+    `2.origin.region` = `2.sell.place.region.final`,			
+    
+    `2.origin.placetype.code` = `2.sell.placetype.code`,				
+    `2.origin.placetype.other` = `2.sell.placetype.other`,
+    `2.origin.placetype.other.code` = `2.sell.placetype.other.code`, # replace with `2.sell.placetype.code`		
+    `2.origin.village` = `2.sell.village`,	# replace with holding
+    `2.origin.town` = `2.sell.town`, # replace with holding			
+    `2.origin.market` = `2.sell.market`,	# keep 		
+    `2.origin.abattoir` = `2.sell.abattoir`, # keep 				
+    `2.origin.otherplace` = `2.sell.otherplace`, # unnecessary?
+    # Sell reason:
+    # `3.sell.reason`,				
+    # `3.sell.reason.other`,				
+    # `3.sell.reason.other.code`, # replace with sellreason code?				
+    # `3.sell.business`,
+    # `3.sell.household`,				
+    # `3.sell.livestock`,				
+    # `3.sell.agriculture`,				
+    # `3.sell.slaughter`,				
+    # `3.sell.food`,				
+    # `3.sell.informaltrade`,				
+    # `3.sell.income`,				
+    # `3.sell.otherreason`,				
+    # # `3.sell.NAbuy`,				
+    # # `3.sellreason.multi`
+    
+    # sell transport:
+    `4.origin.transport.type` = `4.sell.transport.type`,				
+    `4.origin.transport.other` = `4.sell.transport.other`,	
+    `4.origin.transport.other.code` = `4.sell.transport.other.code`,	# replace with origin.transport.code		
+    `4.origin.foot` = `4.sell.foot`,				
+    `4.origin.vehicle` = `4.sell.vehicle`,				
+    `4.origin.cart`	= `4.sell.cart`,			
+    `4.origin.frommrkt` = `4.sell.frommrkt`,	# use to define origin placetype, location			
+    `4.origin.othertransport` = `4.sell.othertransport`,			
+    # `4.origin.unknowntransport`	= `4.sell.unknowntransport`,
+    
+    
+    # destination place:
+    `6.dest.ward` = `6.buy.place.ward.final`,			
+    `6.dest.district` = `6.buy.place.district.final`,			
+    `6.dest.region` = `6.buy.place.region.final`,
+    
+    # destination placetype
+    `6.dest.placetype.code` = `6.buy.placetype.code`,
+    `6.dest.placetype.other` = `6.buy.placetype.other`,			
+    `6.dest.placetype.other.code` = `6.buy.placetype.other.code`,	# replace with `6.dest.placetype.code`		
+    `6.dest.village` = `6.buy.village`,	# replace with holding
+    `6.dest.town` = `6.buy.town`,	# replace with holding
+    `6.dest.market` = `6.buy.market`,			
+    `6.dest.abattoir` = `6.buy.abattoir`,			
+    `6.dest.otherplace` = `6.buy.otherplace`,
+    
+    # `7.buy.reason`,			
+    # `7.buy.reason.other`,			
+    # `7.buy.reason.other.code`,
+    # `7.buy.business`,			
+    # `7.buy.restock`,			
+    # `7.buy.breedstock`,			
+    # `7.buy.fattening`,			
+    # `7.buy.rearing`,			
+    # `7.buy.homereligious`,			
+    # `7.buy.slaughter`,			
+    # `7.buy.food`,			
+    # `7.buy.informaltrade`,			
+    # `7.buy.income`,
+    # `7.buy.otherreason`,			
+    # `7.buy.NAsell`,			
+    # `7.buyreason.multi`,
+    
+    `8.dest.transport.type` = `8.buy.transport.type`,			
+    `8.dest.transport.other` = `8.buy.transport.other`,			
+    `8.dest.transport.other.code` = `8.buy.transport.other.code`,	# replace with dest.transport.code		
+    `8.dest.foot` = `8.buy.foot`,			
+    `8.dest.vehicle` = `8.buy.vehicle`,			
+    `8.dest.cart` = `8.buy.cart`,			
+    `8.dest.slaughter` = `8.buy.slaughter`,
+    `8.dest.atmrkt` = `8.buy.atmarket`, # use to define destination placetype, location	
+    `8.dest.othertransport` = `8.buy.othertransport`,			
+    # `8.buy.unknowntransport` = `8.buy.unknowntransport`
+  )
+
+
+colnames(mrktc_allv1)
+
+```
+
+
+```{r mrktactvty}
+
+# market activity options: buy, trade, middlemen, sell, slaughter, food, other
+
+mrktc_allv2 <- mrktc_allv1 %>%
+  
+  ###################
+  ## OTHER MARKETS ##
+  ################### 
+  mutate(visits.othermrkt = replace_na(visits.othermrkt,0)) %>%
+  
+  ## TOWN/VLLAGE ##
+  mutate(`2.origin.holding` = if_else(`2.origin.village` == 1 | `2.origin.town` ==1, 1, 0),
+         `6.dest.holding` = if_else(`6.dest.village` == 1 | `6.dest.town` ==1, 1, 0)) %>%
+  
+  ###############
+  ## SLAUGHTER ##
+  ############### 
+ # slaughter: if destination is slaughter then update activity to slaughter and destination to thismarket.
+  mutate(`1.activity.slaughter` = if_else(`8.dest.slaughter`==1, 1,`1.activity.slaughter`),
+         `8.dest.atmrkt` = if_else(`8.dest.slaughter` ==1, 1,`8.dest.atmrkt`)) %>% 
+  
+  # activity: if buy & slaughter then update origin to thismrkt and activity to slaughter
+  mutate(`4.origin.frommrkt` = if_else(`1.activity.buy` == 1 & `1.activity.slaughter` == 1, 1, `4.origin.frommrkt`),
+         # `1.activity.buy` = if_else(`1.activity.buy` == 1 & `1.activity.slaughter` == 1, 0, `1.activity.buy`),
+         # if activity is slaughter and food then keep only slaughter
+         # if activity is food only then list under other
+         `1.activity.other` = if_else(`1.activity.food` == 1 & `1.activity.slaughter` == 0, 1, `1.activity.other`)
+         ) %>%
+  
+  ############
+  ## ORIGIN ##
+  ############ 
+  # if origin is this market, update origin locations:
+  mutate(`2.origin.ward` = if_else(`4.origin.frommrkt` == 1, ward, `2.origin.ward`),
+         `2.origin.district` = if_else(`4.origin.frommrkt` == 1, district20, `2.origin.district`),
+         `2.origin.region` = if_else(`4.origin.frommrkt` == 1, region, `2.origin.region`),
+         
+         # add origin variable accounting for thismrkt:
+         `2.origin.thismrkt` = if_else(`2.origin.market`==1 & ward == `2.origin.ward`, 1, `4.origin.frommrkt`),
+         `2.origin.thismrkt` = replace_na(`2.origin.thismrkt`, 0),
+         `2.origin.market` = if_else(`2.origin.market` == 1 & `2.origin.thismrkt` == 1, 0, `2.origin.market`)) %>%
+  
+  #################
+  ## DESTINATION ##
+  #################
+  
+  # if bought with dest of this market, update dest data
+  mutate(`6.dest.ward` = if_else(`8.dest.atmrkt` == 1, ward, `6.dest.ward`),
+         `6.dest.district` = if_else(`8.dest.atmrkt` == 1, district20, `6.dest.district`),
+         `6.dest.region` = if_else(`8.dest.atmrkt` == 1, region, `6.dest.region`),
+
+          # add dest variable accounting for thismrkt:
+         `6.dest.thismrkt` = if_else(`6.dest.market`==1 & ward == `6.dest.ward`, 1, `8.dest.atmrkt`),
+         `6.dest.thismrkt` = replace_na(`6.dest.thismrkt`, 0),
+         `6.dest.market` = if_else(`6.dest.market` == 1 & `6.dest.thismrkt` == 1, 0, `6.dest.market`)) %>%
+
+
+  #################
+  ## MRKT TRADER ##
+  #################
+
+  # bring animals from another market to sell (or trader) animals at this market
+  mutate(
+    mrkttrader = if_else((`1.activity.sell` == 1 |`1.activity.trade` == 1) & (`2.origin.market` == 1) , 1, 0),
+    # buy/trade animals at this market and take to another market
+    mrkttrader = if_else((`1.activity.buy` == 1 |`1.activity.trade` == 1) & (`6.dest.market` == 1) , 1, mrkttrader)
+  ) %>%
+  select(
+    -c(`8.dest.atmrkt`, `4.origin.frommrkt`)
+    )
+
+
+```
+
+# Clean Data:
+
+```{r clean}
+mrktc_allv2
+
+# # market activities:
+mrktc_allv3 <- mrktc_allv2 %>%
+  mutate(
+    `1.mrkt.activity` = gsub("1", "sell", `1.mrkt.activity`),
+    `1.mrkt.activity` = gsub("2", "middleman", `1.mrkt.activity`),
+    `1.mrkt.activity` = gsub("3", "trade", `1.mrkt.activity`),
+    `1.mrkt.activity` = gsub("4", "buy", `1.mrkt.activity`),
+    `1.mrkt.activity` = if_else(!is.na(`1.mrkt.activity.other.code`),`1.mrkt.activity.other.code`,`1.mrkt.activity`),
+    `1.mrkt.activity` = gsub(",", ";", `1.mrkt.activity`)
+  ) %>%
+  select(-c(`1.mrkt.activity.other`, `1.mrkt.activity.other.code`)) %>%
+  
+  # placetype:
+  mutate(
+    `2.origin.placetype.code` = gsub("1", "village", `2.origin.placetype.code`),
+    `2.origin.placetype.code` = gsub("2", "town", `2.origin.placetype.code`),
+    `2.origin.placetype.code` = gsub("3", "market", `2.origin.placetype.code`),
+    `2.origin.placetype.code` = gsub("4", "abattoir", `2.origin.placetype.code`),
+    `2.origin.placetype.code` = if_else(!is.na(`2.origin.placetype.other.code`),`2.origin.placetype.other.code`,`2.origin.placetype.code`)
+  ) %>%
+  select(-c(`2.origin.placetype.other`, `2.origin.placetype.other.code`)) %>%
+  
+  
+  mutate(
+    `6.dest.placetype.code` = gsub("1", "village", `6.dest.placetype.code`),
+    `6.dest.placetype.code` = gsub("2", "town", `6.dest.placetype.code`),
+    `6.dest.placetype.code` = gsub("3", "market", `6.dest.placetype.code`),
+    `6.dest.placetype.code` = gsub("4", "abattoir", `6.dest.placetype.code`),
+    `6.dest.placetype.code` = if_else(!is.na(`6.dest.placetype.other.code`),`6.dest.placetype.other.code`,`6.dest.placetype.code`)
+    ) %>%
+  select(-c(`6.dest.placetype.other`, `6.dest.placetype.other.code`)) %>%
+  
+  mutate(
+    `4.origin.transport.type` = gsub("1", "foot", `4.origin.transport.type`),
+    `4.origin.transport.type` = gsub("2", "vehicle", `4.origin.transport.type`),
+    `4.origin.transport.type` = gsub("3", "cart", `4.origin.transport.type`),
+    `4.origin.transport.type` = if_else(!is.na(`4.origin.transport.other.code`),`4.origin.transport.other.code`,`4.origin.transport.type`)
+  ) %>% 
+    select(-c(`4.origin.transport.other`, `4.origin.transport.other.code`)) %>%
+  
+  mutate(
+    `8.dest.transport.type` = gsub("1", "foot", `8.dest.transport.type`),
+    `8.dest.transport.type` = gsub("2", "vehicle", `8.dest.transport.type`),
+    `8.dest.transport.type` = gsub("3", "cart", `8.dest.transport.type`),
+    `8.dest.transport.type` = if_else( !is.na(`8.dest.transport.other.code`),`8.dest.transport.other.code`,`8.dest.transport.type`)) %>% 
+    select(-c(`8.dest.transport.other`, `8.dest.transport.other.code`))
+
+# 
+# mrktc_allv3 %>% filter(mrkttrader ==1) %>% select(ward, district20,respondent.role.code, `1.mrkt.activity`, `2.origin.ward`, `2.origin.district`, `2.origin.placetype.code`, `2.origin.market`, `2.origin.thismrkt`, `4.origin.transport.type`,  `6.dest.ward`, `6.dest.district`, `6.dest.placetype.code`, `6.dest.market`, `6.dest.thismrkt`, `8.dest.slaughter`, `8.dest.transport.type`) %>% 
+#   View()
+
+```
+
+
+
+```{r trader}
+
+  
+mrktc_allfinal <- mrktc_allv3 %>%
+  select(
+    fid,				
+    date,				
+    country,				
+    region,				
+    district,				
+    district20,				
+    ward,				
+    village,			
+    market,				
+    gps.coordinates.of.the.market,	
+    mrkttrader,
+    visits.othermrkt,	
+    respondent.role.code, 
+    `1.mrkt.activity`,				
+    `1.activity.sell`,			
+    `1.activity.middleman`,				
+    `1.activity.trade`,				
+    `1.activity.buy`,				
+    `1.activity.slaughter`,				
+    # `1.activity.other`,				
+
+    # Origin: 
+    `2.origin.ward`,			
+    `2.origin.district`,			
+    `2.origin.region`,			
+    
+    `2.origin.placetype.code`,
+    `2.origin.holding`,	# town or village
+    `2.origin.market`,	# keep 
+    `2.origin.thismrkt`,
+    `2.origin.abattoir`, # keep 		
+    
+    # sell transport:
+    `4.origin.transport.type`,				
+    `4.origin.foot`,				
+    `4.origin.vehicle`,				
+    `4.origin.cart`,			
+    # `4.origin.frommrkt` = `4.sell.frommrkt`,	# use to define origin placetype, location			
+    
+    
+    # destination place:
+    `6.dest.ward`,			
+    `6.dest.district`,			
+    `6.dest.region`,
+    
+    # destination placetype
+    `6.dest.placetype.code`,
+    `6.dest.holding`,
+    `6.dest.market`,
+    `6.dest.thismrkt`,
+    `6.dest.abattoir`,			
+    
+    `8.dest.transport.type`,
+    `8.dest.foot`,		
+    `8.dest.vehicle`,	
+    `8.dest.cart`,		
+    # `8.dest.slaughter`
+    # `8.dest.atmrkt` 
+  )
+
+# write.csv(mrktc_allfinal, file = here("data/data-cleaning_data/mrktc_infoactvty_tanzania.csv"))
+write.csv(mrktc_allfinal, file = here("data/data-cleaning_data/mrktc_infoactvty_tanzania.csv"))
+```
