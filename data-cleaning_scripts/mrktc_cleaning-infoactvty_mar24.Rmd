@@ -55,6 +55,8 @@ mrktc_origdest <- read_csv(here("data/tanzania_data/mrktc_origdest_tanzania_fina
 
 # include market location info, market activity info and cleaned market origdest data
 mrktc_all <- mrktc_info %>%
+  select(-c(date, country, region, district, district20, ward, village, market, gps.coordinates.of.the.market)) %>%
+  left_join(mrktc_gps %>% select(-unique.row.identifier.uuid.), by = "fid") %>%
   left_join(mrktc_activities_clean %>% select(-unique.row.identifier.uuid.), 
             by = "fid") %>%
   left_join(mrktc_origdest %>% select(fid, ends_with(".final"))) %>% 
