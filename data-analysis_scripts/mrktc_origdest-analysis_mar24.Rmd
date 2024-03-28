@@ -138,8 +138,8 @@ mrktc_wards <- mrktc_unique_gps %>%
   
 mrktc_ward_gps <- mrktc_wards %>%
   st_drop_geometry() %>%
-  mutate(mrktlong = st_coordinates(mrktc_ward_sf)[,1],
-         mrktlat = st_coordinates(mrktc_ward_sf)[,2]) %>%
+  mutate(mrktlong = st_coordinates(mrktc_wards)[,1],
+         mrktlat = st_coordinates(mrktc_wards)[,2]) %>%
   group_by(mrkt.region, mrkt.district, mrkt.ward, mrktlong, mrktlat) %>%
   summarise(nmrkts = n(),
             totsrvy = sum(nsrvy)) %>%
@@ -480,8 +480,10 @@ ggarrange(full_moves, orig_moves, dest_moves, nrow = 1)
 
 ```{r distorigchloro}
 
-dist_exchange_df <- mrktOD_df %>% 
-  mutate(distexchange = if_else(origin.district == mrkt.district, "within", "other")) %>%
+dist_exchange_df <- fullnet %>%
+  # filter flow == origmrkt
+  # filter flow == mrktdest
+  mutate(distexchange = if_else(od.district == mrkt.district, "within", "other")) %>%
   group_by(mrkt.district, distexchange) %>%
   count() %>%
   ungroup()
@@ -503,6 +505,8 @@ dist_outside <- ggplot() +
   labs(title = "Outside-District")
 
 origin_districts <- ggarrange(dist_within, dist_outside, ncol = 1)
+
+ggarrange(dist_within, dist_outside, ncol = 1)
 ```
 
 
